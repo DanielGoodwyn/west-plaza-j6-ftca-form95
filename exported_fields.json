@@ -1,0 +1,370 @@
+{
+	"header": {
+		"source": "sf95-illustrator-acrobat.pdf",
+		"version": "pdfcpu v0.10.2 dev",
+		"creation": "2025-05-09 00:04:27 CDT",
+		"title": "sf95-illustrator",
+		"creator": "Adobe Illustrator 29.5 (Macintosh)",
+		"producer": "Adobe PDF library 17.00"
+	},
+	"forms": [
+		{
+			"textfield": [
+				{
+					"pages": [
+						1
+					],
+					"id": "131",
+					"name": "6 DATE AND DAY OF ACCIDENT",
+					"altname": "6. DATE AND DAY OF ACCIDENT",
+					"value": "",
+					"multiline": false,
+					"locked": false
+				},
+				{
+					"pages": [
+						1
+					],
+					"id": "132",
+					"name": "7 TIME AM OR PM",
+					"altname": "7. TIME (A.M. OR P.M.)",
+					"value": "",
+					"multiline": false,
+					"locked": false
+				},
+				{
+					"pages": [
+						1
+					],
+					"id": "133",
+					"name": "8 BASIS OF CLAIM State in detail the known facts and circumstances attending the damage injury or death identifying persons and property involved the place of occurrence and the cause thereof Use additional pages if necessary",
+					"altname": "8. BASIS OF CLAIM (State in detail the known facts and circumstances attending the damage, injury, or death, identifying persons and property involved, the place of occurrence and the cause thereof. Use additional pages if necessary).",
+					"value": "",
+					"multiline": true,
+					"locked": false
+				},
+				{
+					"pages": [
+						1
+					],
+					"id": "135",
+					"name": "NAME AND ADDRESS OF OWNER IF OTHER THAN CLAIMANT Number Street City State and Zip Code",
+					"altname": "NAME AND ADDRESS OF OWNER, IF OTHER THAN CLAIMANT (Number, Street, City, State, and Zip Code).",
+					"value": "",
+					"multiline": false,
+					"locked": false
+				},
+				{
+					"pages": [
+						1
+					],
+					"id": "138",
+					"name": "STATE THE NATURE AND EXTENT OF EACH INJURY OR CAUSE OF DEATH WHICH FORMS THE BASIS OF THE CLAIM  IF OTHER THAN CLAIMANT STATE THE NAME OF THE INJURED PERSON OR DECEDENT",
+					"altname": "STATE THE NATURE AND EXTENT OF EACH INJURY OR CAUSE OF DEATH, WHICH FORMS THE BASIS OF THE CLAIM.  IF OTHER THAN CLAIMANT, STATE THE NAME OF THE INJURED PERSON OR DECEDENT.",
+					"value": "",
+					"multiline": true,
+					"locked": false
+				},
+				{
+					"pages": [
+						1
+					],
+					"id": "125",
+					"name": "1 Submit to Appropriate Federal Agency",
+					"altname": "1. Submit to Appropriate Federal Agency:",
+					"value": "",
+					"multiline": true,
+					"locked": false
+				},
+				{
+					"pages": [
+						1
+					],
+					"id": "129",
+					"name": "4 DATE OF BIRTH",
+					"altname": "4. DATE OF BIRTH",
+					"value": "",
+					"multiline": false,
+					"locked": false
+				},
+				{
+					"pages": [
+						1
+					],
+					"id": "140",
+					"name": "NAMERow1",
+					"altname": "NAME_Row_1",
+					"value": "",
+					"multiline": true,
+					"locked": false
+				},
+				{
+					"pages": [
+						1
+					],
+					"id": "141",
+					"name": "ADDRESS Number Street City State and Zip CodeRow1",
+					"altname": "ADDRESS (Number, Street, City, State, and Zip Code)_Row_1",
+					"value": "",
+					"multiline": true,
+					"locked": false
+				},
+				{
+					"pages": [
+						1
+					],
+					"id": "145",
+					"name": "12c WRONGFUL DEATH",
+					"altname": "12c. WRONGFUL DEATH",
+					"value": "",
+					"multiline": false,
+					"locked": false
+				},
+				{
+					"pages": [
+						1
+					],
+					"id": "149",
+					"name": "14 DATE OF SIGNATURE",
+					"altname": "14. DATE OF SIGNATURE",
+					"value": "",
+					"multiline": false,
+					"locked": false
+				},
+				{
+					"pages": [
+						1
+					],
+					"id": "150",
+					"name": "CRIMINAL PENALTY FOR PRESENTING FRAUDULENT CLAIM OR MAKING FALSE STATEMENTS Fine imprisonment or both See 18 USC 287 1001",
+					"altname": "CRIMINAL PENALTY FOR PRESENTING FRAUDULENT CLAIM OR MAKING FALSE STATEMENTS Fine, imprisonment, or both. (See 18 U.S.C. 287, 1001.)",
+					"value": "",
+					"multiline": false,
+					"locked": false
+				},
+				{
+					"pages": [
+						1
+					],
+					"id": "136",
+					"name": "BRIEFLY DESCRIBE THE PROPERTY NATURE AND EXTENT OF THE DAMAGE AND THE LOCATION OF WHERE THE PROPERTY MAY BE INSPECTED See instructions on reverse side",
+					"altname": "BRIEFLY DESCRIBE THE PROPERTY, NATURE AND EXTENT OF THE DAMAGE AND THE LOCATION OF WHERE THE PROPERTY MAY BE INSPECTED. (See instructions on reverse side).",
+					"value": "",
+					"multiline": false,
+					"locked": false
+				},
+				{
+					"pages": [
+						1
+					],
+					"id": "144",
+					"name": "12b PERSONAL INJURY",
+					"altname": "12b. PERSONAL INJURY",
+					"value": "",
+					"multiline": false,
+					"locked": false
+				},
+				{
+					"pages": [
+						1
+					],
+					"id": "147",
+					"name": "13a SIGNATURE OF CLAIMANT See instructions on reverse side",
+					"altname": "13a. SIGNATURE OF CLAIMANT (See instructions on reverse side).",
+					"value": "",
+					"multiline": false,
+					"locked": false
+				},
+				{
+					"pages": [
+						1
+					],
+					"id": "148",
+					"name": "13b PHONE NUMBER OF PERSON SIGNING FORM",
+					"altname": "13b. PHONE NUMBER OF PERSON SIGNING FORM",
+					"value": "",
+					"multiline": false,
+					"locked": false
+				},
+				{
+					"pages": [
+						1
+					],
+					"id": "143",
+					"name": "12a PROPERTY DAMAGE",
+					"altname": "12a. PROPERTY DAMAGE",
+					"value": "",
+					"multiline": false,
+					"locked": false
+				},
+				{
+					"pages": [
+						1
+					],
+					"id": "146",
+					"name": "12d TOTAL Failure to specify may cause forfeiture of your rights",
+					"altname": "12d. TOTAL (Failure to specify may cause forfeiture of your rights).",
+					"value": "",
+					"multiline": false,
+					"locked": false
+				},
+				{
+					"pages": [
+						1
+					],
+					"id": "124",
+					"name": "FORM APPROVED OMB NO 11050008",
+					"altname": "FORM APPROVED OMB NO. 1105-0008",
+					"value": "",
+					"multiline": false,
+					"locked": false
+				},
+				{
+					"pages": [
+						1
+					],
+					"id": "126",
+					"name": "2 Name address of claimant and claimants personal representative if any See instructions on reverse Number Street City State and Zip code",
+					"altname": "2. Name, address of claimant, and claimant's personal representative if any. (See instructions on reverse). Number, Street, City, State and Zip code.",
+					"value": "",
+					"multiline": true,
+					"locked": false
+				},
+				{
+					"pages": [
+						1
+					],
+					"id": "130",
+					"name": "5 MARITAL STATUS",
+					"altname": "5. MARITAL STATUS",
+					"value": "",
+					"multiline": false,
+					"locked": false
+				},
+				{
+					"pages": [
+						2
+					],
+					"id": "55",
+					"name": "17 If deductible state amount",
+					"altname": "17. If deductible, state amount.",
+					"value": "",
+					"multiline": true,
+					"locked": false
+				},
+				{
+					"pages": [
+						2
+					],
+					"id": "52",
+					"name": "18 If a claim has been filed with your carrier what action has your insurer taken or proposed to take with reference to your claim It is necessary that you ascertain these facts",
+					"altname": "18. If a claim has been filed with your carrier, what action has your insurer taken or proposed to take with reference to your claim? (It is necessary that you ascertain these facts).",
+					"value": "",
+					"multiline": true,
+					"locked": false
+				},
+				{
+					"pages": [
+						2
+					],
+					"id": "54",
+					"name": "19 Do you carry public liability and property damage insurance Yes If yes give name and address of insurance carrier Number Street City State and Zip Code No",
+					"altname": "19. Do you carry public liability and property damage insurance? Yes If yes, give name and address of insurance carrier (Number, Street, City, State, and Zip Code). No",
+					"value": "",
+					"multiline": true,
+					"locked": false
+				},
+				{
+					"pages": [
+						2
+					],
+					"id": "57",
+					"name": "15 Do you carry accident Insurance Yes If yes give name and address of insurance company Number Street City State and Zip Code and policy number No",
+					"altname": "15. Do you carry accident Insurance? Yes If yes, give name and address of insurance company (Number, Street, City, State, and Zip Code) and policy number. No",
+					"value": "",
+					"multiline": true,
+					"locked": false
+				},
+				{
+					"pages": [
+						2
+					],
+					"id": "60",
+					"name": "Yes No 16 Have you filed a claim with your insurance carrier in this instance and if so is it full coverage or deductible",
+					"altname": "Yes No 16. Have you filed a claim with your insurance carrier in this instance, and if so, is it full coverage or deductible?",
+					"value": "",
+					"multiline": true,
+					"locked": false
+				}
+			],
+			"checkbox": [
+				{
+					"pages": [
+						1
+					],
+					"id": "128",
+					"name": "CIVILIAN",
+					"altname": "CIVILIAN",
+					"default": false,
+					"value": false,
+					"locked": false
+				},
+				{
+					"pages": [
+						1
+					],
+					"id": "127",
+					"name": "MILITARY",
+					"altname": "MILITARY",
+					"default": false,
+					"value": false,
+					"locked": false
+				}
+			],
+			"radiobuttongroup": [
+				{
+					"pages": [
+						2
+					],
+					"id": "63",
+					"name": "16 Have you filed a claim with your insurance carrier in this instance and if so is it full coverage or deductible",
+					"altname": "16. Have you filed a claim with your insurance carrier in this instance, and if so, is it full coverage or deductible",
+					"options": [
+						"Yes_2",
+						"No_2"
+					],
+					"value": "",
+					"locked": false
+				},
+				{
+					"pages": [
+						2
+					],
+					"id": "64",
+					"name": "19 Do you carry public liability and property damage insurance",
+					"altname": "19. Do you carry public liability and property damage insurance",
+					"options": [
+						"Yes_3",
+						"No_3"
+					],
+					"value": "",
+					"locked": false
+				},
+				{
+					"pages": [
+						2
+					],
+					"id": "62",
+					"name": "15 Do you carry accident Insurance",
+					"altname": "15. Do you carry accident Insurance",
+					"options": [
+						"Yes",
+						"No"
+					],
+					"value": "",
+					"locked": false
+				}
+			]
+		}
+	]
+}

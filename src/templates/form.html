@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SF-95 Claim Form</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Federal Tort Claims Act, Form 95</h1>
+            <h2>Claim for Damage, Injury, and Death</h2>
+        </header>
+
+        <form action="{{ url_for('submit_form') }}" method="POST">
+            
+            <fieldset class="mb-3 d-none">
+                <legend>1. Submit To Appropriate Federal Agency:</legend>
+                <input type="text" id="field1_agency" name="field1_agency" class="form-control">
+            </fieldset>
+
+            <fieldset class="mb-3">
+                <legend>2. Name, address of claimant, and claimant's personal representative, if any.</legend>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="field2_name" class="form-label">Full Name</label>
+                        <input type="text" id="field2_name" name="field2_name" class="form-control" value="{{ default_values.field2_name | default('', True) }}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="field2_address" class="form-label">Street Address</label>
+                        <textarea id="field2_address" name="field2_address" rows="3" required>{{ default_values.field2_address | default('', True) }}</textarea>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="field2_city" class="form-label">City</label>
+                        <input type="text" id="field2_city" name="field2_city" class="form-control" value="{{ default_values.field2_city | default('', True) }}" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="field2_state" class="form-label">State</label>
+                        <input type="text" id="field2_state" name="field2_state" class="form-control" value="{{ default_values.field2_state | default('', True) }}" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="field2_zip" class="form-label">Zip Code</label>
+                        <input type="text" id="field2_zip" name="field2_zip" class="form-control" value="{{ default_values.field2_zip | default('', True) }}" pattern="\d{5}(-\d{4})?" title="Enter a 5 or 9 digit ZIP code" required>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>3. Type of Employment</legend>
+                <input type="radio" id="field3_military" name="field3_type_employment" value="Military" {% if default_values.field3_type_employment == 'Military' %}checked{% endif %} required>
+                <label for="field3_military">Military</label><br>
+                <input type="radio" id="field3_civilian" name="field3_type_employment" value="Civilian" {% if default_values.field3_type_employment == 'Civilian' %}checked{% endif %}>
+                <label for="field3_civilian">Civilian</label><br>
+                <input type="radio" id="field3_other" name="field3_type_employment" value="Other">
+                <label for="field3_other">Other</label>
+                <input type="text" id="field3_other_specify" name="field3_other_specify" placeholder="Specify if Other">
+            </fieldset>
+
+            <fieldset class="mb-3">
+                <legend>4. Date of Birth</legend>
+                <input type="date" id="field_pdf_4_dob" name="field_pdf_4_dob" class="form-control" value="1991-01-06" required>
+            </fieldset>
+
+            <fieldset class="mb-3">
+                <legend>5. Marital Status</legend>
+                <select id="field_pdf_5_marital_status" name="field_pdf_5_marital_status" class="form-select" required>
+                    <option value="" disabled {% if not default_values.field_pdf_5_marital_status %}selected{% endif %}>Select...</option>
+                    <option value="Single" {% if default_values.field_pdf_5_marital_status == 'Single' %}selected{% endif %}>Single</option>
+                    <option value="Married" {% if default_values.field_pdf_5_marital_status == 'Married' %}selected{% endif %}>Married</option>
+                    <option value="Divorced" {% if default_values.field_pdf_5_marital_status == 'Divorced' %}selected{% endif %}>Divorced</option>
+                    <option value="Widowed" {% if default_values.field_pdf_5_marital_status == 'Widowed' %}selected{% endif %}>Widowed</option>
+                </select>
+            </fieldset>
+
+            <fieldset class="mb-3 d-none">
+                <legend>6. Date and Day of Accident</legend>
+                <div class="d-none">
+                    <input type="date" id="field6_date_of_incident" name="field6_date_of_incident" class="form-control">
+                </div>
+            </fieldset>
+
+            <fieldset class="mb-3 d-none">
+                <legend>7. Time (A.M. or P.M.)</legend>
+                <div class="d-none">
+                    <input type="time" id="field7_time_of_incident" name="field7_time_of_incident" class="form-control">
+                </div>
+            </fieldset>
+
+            <fieldset class="mb-3">
+                <legend>8. Basis of Claim</legend>
+                <p class="form-text">State in detail the known facts and circumstances attending the damage, injury, or death, identifying persons and property involved, the place of occurrence and the cause thereof. Use additional pages if necessary.</p>
+                <textarea id="field8_basis_of_claim" name="field8_basis_of_claim" class="form-control" rows="10" required>{{ default_values.field8_basis_of_claim | default("While the claimant was protesting on January 6, 2021 at the West side of the U.S. Capitol, the Capitol Police and D.C. Metropolitan Police acting on behalf of the Capitol Police used excessive force against the claimant causing claimant physical injuries. The excessive force took the form of various munitions launched against the protesters including but not limited to: pepper balls, rubber balls or bullets some filled with Oleoresin Capsicum (“OC”), FM 303 projectiles, sting balls, flash bang, sting bomb and tear gas grenades, tripple chasers,pepper spray, CS Gas and physical strikes with firsts or batons.", True) }}</textarea>
+            </fieldset>
+
+            <fieldset class="mb-3 d-none">
+                <legend>9. Property Damage</legend>
+                <p class="form-text">Name and address of owner, if other than claimant (Number, Street, City, State, and Zip Code).</p>
+                <div class="d-none">
+                    <textarea id="field9_property_damage_description_vehicle" name="field9_property_damage_description_vehicle" class="form-control" rows="3" placeholder="Vehicle Description (Year, Make, Model, VIN)"></textarea>
+                </div>
+                <p class="form-text">Briefly describe the property, nature and extent of the damage and the location of where the property may be inspected. (See instructions on reverse side).</p>
+                <div class="d-none">
+                    <textarea id="field9_property_damage_description_other" name="field9_property_damage_description_other" class="form-control" rows="3" placeholder="Other Property Description"></textarea>
+                </div>
+            </fieldset>
+
+            <fieldset class="mb-3">
+                <legend>10. Personal Injury/Wrongful Death</legend>
+                <p class="form-text">State the nature and extent of each injury or cause of death, which forms the basis of the claim. If other than claimant, state the name of the injured person or decedent.</p>
+                <textarea id="field10_nature_of_injury" name="field10_nature_of_injury" class="form-control" rows="5" required>{{ default_values.field10_nature_of_injury | default("The claimant went to the U.S. Capitol to peacefully protest the presidential election. While the claimant was in the area of the West Side of the U.S. Capitol building police launched weapons referenced above and used excessive force. The claimant was struck and or exposed to the launched munitions and/or OC or CS Gas and suffered injuries as a result. The legal ramifications of these actions are currently under review and form part of the ongoing damages being claimed.", True) }}</textarea>
+            </fieldset>
+
+            <fieldset class="mb-3 d-none">
+                <legend>11. Witnesses</legend>
+                <div class="row">
+                    <div class="col-md-6 mb-3 d-none">
+                        <label for="field11_witness_name" class="form-label">Name</label>
+                        <input type="text" id="field11_witness_name" name="field11_witness_name" class="form-control">
+                    </div>
+                    <div class="col-md-6 mb-3 d-none">
+                        <label for="field11_witness_address" class="form-label">Address (Number, Street, City, State, and Zip Code)</label>
+                        <input type="text" id="field11_witness_address" name="field11_witness_address" class="form-control">
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="mb-3">
+                <legend>12. Amount of Claim (in dollars)</legend>
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label for="field12a_property_damage_amount" class="form-label">12a. Property Damage</label>
+                        <input type="number" step="0.01" id="field12a_property_damage_amount" name="field12a_property_damage_amount" class="form-control" value="{{ default_values.field12a_property_damage_amount | default('0.00', True) }}" required>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="field12b_personal_injury_amount" class="form-label">12b. Personal Injury</label>
+                        <input type="number" step="0.01" id="field12b_personal_injury_amount" name="field12b_personal_injury_amount" class="form-control" value="{{ default_values.field12b_personal_injury_amount | default('0.00', True) }}" required>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="field12c_wrongful_death_amount" class="form-label">12c. Wrongful Death</label>
+                        <input type="number" step="0.01" id="field12c_wrongful_death_amount" name="field12c_wrongful_death_amount" class="form-control" value="{{ default_values.field12c_wrongful_death_amount | default('0.00', True) }}" required>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="field12d_total_amount" class="form-label">12d. Total</label>
+                        <input type="number" step="0.01" id="field12d_total_amount" name="field12d_total_amount" class="form-control" readonly value="{{ default_values.field12d_total_amount | default('0.00', True) }}" required>
+                        <small class="form-text text-muted">Failure to specify may cause forfeiture of your rights.</small>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset class="mb-3">
+                <legend>I CERTIFY THAT THE AMOUNT OF CLAIM COVERS ONLY DAMAGES AND INJURIES CAUSED BY THE INCIDENT ABOVE AND AGREE TO ACCEPT SAID AMOUNT IN FULL SATISFACTION AND FINAL SETTLEMENT OF THIS CLAIM.</legend>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="field13a_signature" class="form-label">13a. Signature of Claimant</label>
+                        <input type="text" id="field13a_signature" name="field13a_signature" class="form-control" value="{{ default_values.field13a_signature | default('', True) }}" required>
+                        <small class="form-text text-muted">(See instructions on reverse side)</small>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="field_pdf_13b_phone" class="form-label">13b. Phone Number of Person Signing Form</label>
+                        <input type="tel" id="field_pdf_13b_phone" name="field_pdf_13b_phone" class="form-control" value="{{ default_values.field_pdf_13b_phone | default('', True) }}">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label for="field14_date_signed" class="form-label">14. Date of Signature</label>
+                        <input type="date" id="field14_date_signed" name="field14_date_signed" class="form-control" value="{{ default_values.field14_date_signed | default('', True) }}" required>
+                    </div>
+                </div>
+            </fieldset>
+
+            <button type="submit">Submit Claim</button>
+        </form>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+        // Set default date for field14_date_signed to today
+        document.addEventListener('DOMContentLoaded', function() {
+            const dateSignedInput = document.getElementById('field14_date_signed');
+            if (dateSignedInput) {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = ('0' + (today.getMonth() + 1)).slice(-2); // Months are zero-based
+                const day = ('0' + today.getDate()).slice(-2);
+                dateSignedInput.value = `${year}-${month}-${day}`;
+            }
+        });
+    </script>
+</body>
+</html>

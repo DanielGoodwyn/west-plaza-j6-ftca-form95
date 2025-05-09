@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+ENV/
+.env
+
+# Database file
+*.db
+*.sqlite3
+
+# Instance Folder (Flask)
+instance/
+
+# IDE / Editor specific
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# macOS
+.DS_Store
+
+# Filled PDFs (if you don't want to commit them)
+data/filled_forms/
+
+# Uploads
+data/uploads/
+
+# Logs
+*.log
+debugging-logs.txt
+
+# Secrets / Sensitive Config (if any, though .env is preferred for local dev)
+secrets.py
+config.local.py
