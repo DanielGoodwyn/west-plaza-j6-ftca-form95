@@ -32,8 +32,10 @@ data/uploads/
 
 # Logs
 *.log
-debugging-logs.txt
 
 # Secrets / Sensitive Config (if any, though .env is preferred for local dev)
 secrets.py
 config.local.py
+
+debugging-logs.txt
+src/debugging-logs.txt

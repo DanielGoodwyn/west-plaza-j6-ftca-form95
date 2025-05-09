@@ -2,10 +2,11 @@ import sqlite3
 import os
 import logging
 from datetime import datetime
+from flask import Flask, request, jsonify, render_template, redirect, url_for, flash, current_app, g # Added g
 from fillpdf import fillpdfs # Added import for get_form_fields
 
 # Import utility functions
-from utils.pdf_filler import fill_sf95_pdf # Corrected import name
+from utils.pdf_filler import fill_sf95_pdf, DEFAULT_VALUES as PDF_FILLER_DEFAULTS # Renamed for clarity
 import utils.pdf_filler # Import the module itself to check its path
 # from utils.notifier import send_notification_email # To be created
 
@@ -15,7 +16,7 @@ app.secret_key = os.urandom(24) # For session management, CSRF protection later
 
 # --- Configuration ---
 DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'form_data.db')
-PDF_TEMPLATE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'sf95-illustrator-acrobat.pdf') # Updated PDF name
+PDF_TEMPLATE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'sf95.pdf') # Updated PDF name
 FILLED_PDF_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'filled_forms')
 
 # Ensure data directories exist
@@ -169,28 +170,29 @@ with app.app_context():
 @app.route('/')
 def form():
     today_date = datetime.today().strftime('%Y-%m-%d')
-    default_values = {
-        'field1_agency': "DEPARTMENT OF JUSTICE",
-        'field2_name': 'AJ Fish',
-        'field2_address': '123 Main Street',
-        'field2_city': 'Lakeland',
+    # This dictionary provides rich default values for HTML form fields for easy debugging
+    html_form_defaults = {
+        'field1_agency': PDF_FILLER_DEFAULTS.get('field1_agency', "DEPARTMENT OF JUSTICE"), # Agency is special, might be from PDF_FILLER_DEFAULTS or a hardcoded app default
+        'field2_name': 'AJ Fish Debug',
+        'field2_address': '123 Debugger Lane',
+        'field2_city': 'Testville',
         'field2_state': 'FL',
-        'field2_zip': '33801',
+        'field2_zip': '33800',
         'field3_type_employment': 'Civilian',
-        'field_pdf_4_dob': '1991-01-06', # Set default DOB
+        'field_pdf_4_dob': '1990-01-01',
         'field_pdf_5_marital_status': 'Single',
-        'field8_basis_of_claim': "While the claimant was protesting on January 6, 2021 at the West side of the U.S. Capitol, the Capitol Police and D.C. Metropolitan Police acting on behalf of the Capitol Police used excessive force against the claimant causing claimant physical injuries. The excessive force took the form of various munitions launched against the protesters including but not limited to: pepper balls, rubber balls or bullets some filled with Oleoresin Capsicum (“OC”), FM 303 projectiles, sting balls, flash bang, sting bomb and tear gas grenades, tripple chasers,pepper spray, CS Gas and physical strikes with firsts or batons.",
-        'field10_nature_of_injury': "The claimant went to the U.S. Capitol to peacefully protest the presidential election. While the claimant was in the area of the West Side of the U.S. Capitol building police launched weapons referenced above and used excessive force. The claimant was struck and or exposed to the launched munitions and/or OC or CS Gas and suffered injuries as a result. The legal ramifications of these actions are currently under review and form part of the ongoing damages being claimed.",
-        'field12a_property_damage_amount': '0.00',
-        'field12b_personal_injury_amount': '90000.00',
+        'field8_basis_of_claim': PDF_FILLER_DEFAULTS.get('field8_basis_of_claim', "Basis of claim debug text: Specific incident involving negligence by federal employees."),
+        'field10_nature_of_injury': PDF_FILLER_DEFAULTS.get('field10_nature_of_injury', "Nature of injury debug text: Resulting physical and emotional distress."),
+        'field12a_property_damage_amount': '10.00',
+        'field12b_personal_injury_amount': '90000.00', # Changed back to 90000.00
         'field12c_wrongful_death_amount': '0.00',
-        'field12d_total_amount': '90000.00', # Sum of 12a, 12b, 12c for consistency
-        'field_pdf_13b_phone': '555-0100',
+        # Total is usually calculated, but can have a default for display if needed
+        'field12d_total_amount': '90010.00', # Adjusted total to reflect 90000+10
+        'field_pdf_13b_phone': '555-123-4567',
         'field14_date_signed': today_date,
-        # Add default values for signature image data if needed, e.g., a placeholder text for the hidden field
-        'field_pdf_13b_signature_data': '' # Or some placeholder if the JS expects it
+        'field13a_signature': '' # Empty for typed signature or placeholder
     }
-    return render_template('form.html', default_values=default_values)
+    return render_template('form.html', default_values=html_form_defaults, title="SF-95 Claim Form")
 
 @app.route('/list_pdf_fields', methods=['GET'])
 def list_pdf_fields_route():
@@ -209,29 +211,189 @@ def list_pdf_fields_route():
 def submit_form():
     db = None  # Initialize db to None at the top of the function scope
     form_data = request.form
+    
+    # Server-side validation
+    validation_errors = {}
+    required_fields = {
+        'field2_name': "Claimant's Name",
+        'field2_address': "Claimant's Address",
+        'field2_city': "Claimant's City",
+        'field2_state': "Claimant's State",
+        'field2_zip': "Claimant's ZIP Code",
+        'field_pdf_4_dob': "Claimant's Date of Birth",
+        'field3_type_employment': "Claimant's Type of Employment",
+        'field_pdf_5_marital_status': "Claimant's Marital Status",
+        'field8_basis_of_claim': "Basis of Claim",
+        'field10_nature_of_injury': "Nature and Extent of Personal Injury",
+        # Amount fields (12a, 12b, 12c, 12d) are numeric, validation for format handled below
+        # Signature and Date Signed are crucial
+        'field13a_signature': "Signature", # Assuming this holds the signature data
+        'field14_date_signed': "Date Signed"
+    }
+
+    for field, name in required_fields.items():
+        if not form_data.get(field):
+            validation_errors[field] = f"{name} is required."
+
+    # Date validation (format YYYY-MM-DD)
+    date_fields_to_validate = {
+        'field_pdf_4_dob': "Claimant's Date of Birth",
+        'field14_date_signed': "Date Signed"
+    }
+    for field, name in date_fields_to_validate.items():
+        date_value = form_data.get(field)
+        if date_value:
+            try:
+                datetime.strptime(date_value, '%Y-%m-%d')
+            except ValueError:
+                validation_errors[field] = f"{name} must be in YYYY-MM-DD format."
+        elif field in required_fields: # Ensure required date fields aren't just empty
+             validation_errors.setdefault(field, f"{name} is required and must be in YYYY-MM-DD format.")
+
+
+    if validation_errors:
+        current_app.logger.warning(f"Validation errors: {validation_errors} for form data: {form_data}")
+        # When validation fails, re-render the form with errors, existing form_data, and HTML_FORM_DEFAULTS
+        today_date = datetime.today().strftime('%Y-%m-%d')
+        html_form_defaults_for_error = {
+            'field1_agency': PDF_FILLER_DEFAULTS.get('field1_agency', "DEPARTMENT OF JUSTICE"),
+            'field2_name': 'AJ Fish Debug',
+            'field2_address': '123 Debugger Lane',
+            'field2_city': 'Testville',
+            'field2_state': 'FL',
+            'field2_zip': '33800',
+            'field3_type_employment': 'Civilian',
+            'field_pdf_4_dob': '1990-01-01',
+            'field_pdf_5_marital_status': 'Single',
+            'field8_basis_of_claim': PDF_FILLER_DEFAULTS.get('field8_basis_of_claim', "Basis of claim debug text: Specific incident involving negligence by federal employees."),
+            'field10_nature_of_injury': PDF_FILLER_DEFAULTS.get('field10_nature_of_injury', "Nature of injury debug text: Resulting physical and emotional distress."),
+            'field12a_property_damage_amount': '10.00',
+            'field12b_personal_injury_amount': '90000.00', # Changed back to 90000.00
+            'field12c_wrongful_death_amount': '0.00',
+            'field12d_total_amount': '90010.00', # Adjusted total to reflect 90000+10
+            'field_pdf_13b_phone': '555-123-4567',
+            'field14_date_signed': today_date,
+            'field13a_signature': ''
+        }
+        # User's submitted form_data should take precedence for fields they've filled
+        # The template should handle this by checking form_data first, then default_values
+        return render_template('form.html', form_data=form_data, title="SF-95 Claim Form", validation_errors=validation_errors, default_values=html_form_defaults_for_error), 400
+
     try:
-        # Prepare data for database insertion, matching new schema and HTML names
+        # --- Prepare data for PDF --- 
         data_to_save = {
             'FIELD2_NAME': form_data.get('field2_name'),
             'FIELD2_ADDRESS': form_data.get('field2_address'),
             'FIELD2_CITY': form_data.get('field2_city'),
             'FIELD2_STATE': form_data.get('field2_state'),
             'FIELD2_ZIP': form_data.get('field2_zip'),
-            'FIELD_PDF_4_DOB': form_data.get('field_pdf_4_dob'), # New HTML name
-            'FIELD3_TYPE_EMPLOYMENT': form_data.get('field3_type_employment'), # New HTML name
-            'FIELD_PDF_5_MARITAL_STATUS': form_data.get('field_pdf_5_marital_status'), # New HTML name
+            'FIELD_PDF_4_DOB': form_data.get('field_pdf_4_dob'),
+            'FIELD3_TYPE_EMPLOYMENT': form_data.get('field3_type_employment'),
+            'FIELD_PDF_5_MARITAL_STATUS': form_data.get('field_pdf_5_marital_status'),
             'FIELD8_BASIS_OF_CLAIM': form_data.get('field8_basis_of_claim'),
             'FIELD10_NATURE_OF_INJURY': form_data.get('field10_nature_of_injury'),
             'FIELD12A_PROPERTY_DAMAGE_AMOUNT': form_data.get('field12a_property_damage_amount', type=float, default=0.0),
-            'FIELD12B_PERSONAL_INJURY_AMOUNT': form_data.get('field12b_personal_injury_amount', type=float, default=0.0), # Added default
+            'FIELD12B_PERSONAL_INJURY_AMOUNT': form_data.get('field12b_personal_injury_amount', type=float, default=0.0),
             'FIELD12C_WRONGFUL_DEATH_AMOUNT': form_data.get('field12c_wrongful_death_amount', type=float, default=0.0),
-            'FIELD12D_TOTAL_AMOUNT': form_data.get('field12d_total_amount', type=float, default=0.0), # Added default
-            'FIELD_PDF_13B_PHONE': form_data.get('field_pdf_13b_phone'), # New HTML name
-            'FIELD_PDF_13B_SIGNATURE_DATA': form_data.get('field_pdf_13b_signature_data'), # New HTML name for signature data
-            'FIELD14_DATE_SIGNED': form_data.get('field14_date_signed')
+            'FIELD12D_TOTAL_AMOUNT': form_data.get('field12d_total_amount', type=float, default=0.0),
+            'FIELD_PDF_13B_PHONE': form_data.get('field_pdf_13b_phone'),
+            # Map the typed signature from field13a_signature to the database column
+            'FIELD_PDF_13B_SIGNATURE_DATA': form_data.get('field13a_signature'), 
+            'FIELD14_DATE_SIGNED': form_data.get('field14_date_signed'),
+            'FILLED_PDF_FILENAME': None  # Placeholder, will be updated after PDF generation
         }
 
-        # Generate filled PDF
+        # Prepare the dictionary to be passed to the PDF filler
+        pdf_data_for_filling = {
+            # Field 1 (Agency) - Handled by DEFAULT_VALUES in pdf_filler.py if not overridden
+            'field1_agency': form_data.get('field1_agency'), 
+
+            # Field 2 (Claimant Info) - We will address this specifically later with 'field2_claimant_info_combined'
+            # For now, pass individual components if they exist in form_data, though pdf_filler might not use them directly yet
+            'field2_name': form_data.get('field2_name'),
+            'field2_address': form_data.get('field2_address'),
+            'field2_city': form_data.get('field2_city'),
+            'field2_state': form_data.get('field2_state'),
+            'field2_zip': form_data.get('field2_zip'),
+
+            # Field 3 (Employment)
+            'field3_type_employment': form_data.get('field3_type_employment'), # Keep sending the text value
+            'field3_other_specify': form_data.get('field3_other_specify'),
+            # Checkbox-specific keys will be added below
+
+            # Field 4 & 5 (DOB, Marital Status)
+            'field_pdf_4_dob': form_data.get('field_pdf_4_dob'),
+            'field_pdf_5_marital_status': form_data.get('field_pdf_5_marital_status'),
+
+            # Field 6 & 7 (Incident Date/Time) - Handled by DEFAULT_VALUES in pdf_filler.py if not overridden
+            'field6_date_of_incident': form_data.get('field6_date_of_incident'),
+            'field7_time_of_incident': form_data.get('field7_time_of_incident'),
+
+            # Field 8 (Basis of Claim)
+            'field8_basis_of_claim': form_data.get('field8_basis_of_claim'),
+
+            # Field 9 (Property Damage - Owner & Description)
+            'field9_owner_name_address': form_data.get('field9_owner_name_address'),
+            'field9_property_damage_description': form_data.get('field9_property_damage_description'), # Matches HTML input
+            # Note: The HTML form uses 'field9_property_damage_description_vehicle' and 'field9_property_damage_description_other'.
+            # We might need to combine these or decide which one maps to PDF's 'field9_property_damage_description'.
+            # For now, assuming a direct field or that defaults in pdf_filler are desired if these are empty.
+
+            # Field 10 (Nature of Injury)
+            'field10_nature_of_injury': form_data.get('field10_nature_of_injury'),
+
+            # Field 11 (Witnesses)
+            'field11_witness_name': form_data.get('field11_witness_name'),
+            'field11_witness_address': form_data.get('field11_witness_address'),
+
+            # Field 12 (Amounts)
+            'field12a_property_damage': form_data.get('field12a_property_damage_amount'), # Map from _amount key
+            'field12b_personal_injury': form_data.get('field12b_personal_injury_amount'), # Map from _amount key
+            'field12c_wrongful_death': form_data.get('field12c_wrongful_death_amount'), # Map from _amount key
+            'field12d_total': form_data.get('field12d_total_amount'), # Map from _amount key
+
+            # Field 13 (Signature & Phone)
+            'field13a_signature': form_data.get('field13a_signature'), # This is the key PDF_FIELD_MAP uses for the signature box
+            'field_pdf_13b_phone': form_data.get('field_pdf_13b_phone'),
+            # Also ensure the DB key for signature is populated if 'field13a_signature' is what we are using for PDF
+            'field_pdf_13b_signature_data': form_data.get('field13a_signature'), 
+
+            # Field 14 (Date Signed)
+            'field14_date_signed': form_data.get('field14_date_signed'),
+
+            # Fields 15-19 (Insurance) - Pass them through if submitted
+            'field15_accident_insurance': form_data.get('field15_accident_insurance'),
+            'field15_insurer_name_address_policy': form_data.get('field15_insurer_name_address_policy'),
+            'field16_filed_claim': form_data.get('field16_filed_claim'),
+            'field16_claim_details': form_data.get('field16_claim_details'),
+            'field17_deductible_amount': form_data.get('field17_deductible_amount'),
+            'field18_insurer_action': form_data.get('field18_insurer_action'),
+            'field19_insurer_name_address': form_data.get('field19_insurer_name_address')
+        }
+
+        # Handle Field 3 (Employment) checkboxes
+        employment_type = form_data.get('field3_type_employment')
+        if employment_type == 'Civilian':
+            pdf_data_for_filling['field3_checkbox_civilian'] = True
+        elif employment_type == 'Military':
+            pdf_data_for_filling['field3_checkbox_military'] = True
+
+        # Special handling for field2_claimant_info_combined (will be addressed more thoroughly next)
+        # For now, let's ensure it's constructed if individual parts are present
+        name = pdf_data_for_filling.get('field2_name', '')
+        address = pdf_data_for_filling.get('field2_address', '')
+        city = pdf_data_for_filling.get('field2_city', '')
+        state_val = pdf_data_for_filling.get('field2_state', '') # Renamed to avoid conflict with 'state' module
+        zip_code = pdf_data_for_filling.get('field2_zip', '')
+        if name or address or city or state_val or zip_code: # only construct if there's something to combine
+            pdf_data_for_filling['field2_claimant_info_combined'] = f"{name}\n{address}\n{city}, {state_val} {zip_code}".strip()
+        else:
+            # If all parts are empty, we don't want to send an empty 'field2_claimant_info_combined'
+            # Let pdf_filler handle it (it will skip if not in form_data and no default)
+            if 'field2_claimant_info_combined' in pdf_data_for_filling:
+                 del pdf_data_for_filling['field2_claimant_info_combined']
+
+        # Call the PDF filling utility with the prepared data
         timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
         output_pdf_filename = f"SF95_filled_{timestamp_str}.pdf"
         # Ensure FILLED_PDF_DIR exists (it should be created by initialize_app_state, but good practice to check)
@@ -240,12 +402,10 @@ def submit_form():
             current_app.logger.info(f"Created FILLED_PDF_DIR during submit at: {FILLED_PDF_DIR}")
         output_pdf_path = os.path.join(FILLED_PDF_DIR, output_pdf_filename)
         
-        # Pass the current pdf_data_map, template path, and output path to the filler function
-        # Ensure fill_sf95_pdf expects a dict for form_data if it does complex operations on it.
-        actual_pdf_path = fill_sf95_pdf(form_data.to_dict(), PDF_TEMPLATE_PATH, output_pdf_path)
+        actual_pdf_path = fill_sf95_pdf(pdf_data_for_filling, PDF_TEMPLATE_PATH, output_pdf_path)
 
         if not actual_pdf_path:
-            current_app.logger.error(f"Error filling PDF. Form data: {form_data.to_dict()}")
+            current_app.logger.error(f"Error filling PDF. PDF filler data: {pdf_data_for_filling}")
             flash("There was an error generating the PDF. Please check the server logs and try again.", 'danger')
             return redirect(url_for('form'))
 
@@ -286,21 +446,11 @@ def submit_form():
         current_app.logger.info(f"Submission {submission_id} successfully saved with PDF: {output_pdf_filename}")
         flash(f"Form submitted successfully! Submission ID: {submission_id}", 'success')
         return redirect(url_for('success_page', submission_id=submission_id))
-
-    except sqlite3.Error as e:
-        if db:  # Check if db connection was established
-            db.rollback()
-        # Log the detailed error and the form data that caused it
-        current_app.logger.error(f"Database error during submission: {e}. Form data: {form_data.to_dict()}", exc_info=True)
-        flash(f'A database error occurred: {str(e)}. Please try again.', 'danger')
-        return redirect(url_for('form'))
     except Exception as e:
-        if db:  # If an error occurred after db connection was made
-            db.rollback()
-        # Log the detailed error and the form data
-        current_app.logger.error(f"Unexpected error during submission: {e}. Form data: {form_data.to_dict()}", exc_info=True)
-        flash('An unexpected error occurred. Please check server logs and try again.', 'danger')
-        return redirect(url_for('form')) # Corrected endpoint
+        current_app.logger.error(f"Error during PDF generation or database saving: {str(e)}", exc_info=True)
+        current_app.logger.error(f"Data that caused error: {pdf_data_for_filling}")
+        flash('An unexpected error occurred while processing your form. Please try again or contact support.', 'danger')
+        return redirect(url_for('form'))
 
 @app.route('/success/<int:submission_id>')
 def success_page(submission_id):
@@ -316,6 +466,7 @@ if __name__ == '__main__':
     try:
         os.makedirs(app.instance_path, exist_ok=True)
     except OSError as e:
-        print(f"Error creating instance folder: {e}")
-    
-    app.run(debug=True, host=app.config.get('FLASK_RUN_HOST'), port=5003) # Explicitly set port to 5003
+        app.logger.error(f"Error creating instance folder: {e}")
+        # Handle error appropriately, e.g., exit or log
+    app.logger.info("Starting Flask development server.")
+    app.run(debug=True, port=61662) # No port specified, Flask default is 5000

@@ -14,6 +14,19 @@ logger = logging.getLogger(__name__)
 # Corrected path: three levels up from src/utils/pdf_filler.py to reach project root
 project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 debug_log_path = os.path.join(project_root, 'debugging-logs.txt')
+# Path to the new PDF field map
+PDF_FIELD_MAP_PATH = os.path.join(project_root, 'data', 'pdf_field_map.json')
+
+# Load the PDF field map from JSON
+try:
+    with open(PDF_FIELD_MAP_PATH, 'r') as f:
+        PDF_FIELD_MAP = json.load(f)
+except FileNotFoundError:
+    logger.error(f"Critical: PDF field map file not found at {PDF_FIELD_MAP_PATH}")
+    PDF_FIELD_MAP = {} # Fallback to empty map to prevent crash, but filling will fail
+except json.JSONDecodeError:
+    logger.error(f"Critical: Error decoding JSON from PDF field map file at {PDF_FIELD_MAP_PATH}")
+    PDF_FIELD_MAP = {} # Fallback
 
 # Remove any existing handlers from this specific logger to prevent duplicate logs
 # or interference from other configurations (like basicConfig if it affected this logger).
@@ -27,82 +40,24 @@ logger.addHandler(debug_file_handler)
 logger.setLevel(logging.DEBUG) # Ensure this logger captures DEBUG level messages
 # --- End explicit logger configuration ---
 
-# Maps HTML form field names to their corresponding PDF internal field names (XFA paths).
-# This is the primary map used by the fill_sf95_pdf function.
-# pdf_data_map = {
-#     # Page 1 - Reduced to test only field1_agency
-#     'field1_agency': '1 Submit to Appropriate Federal Agency',
-# }
-
-PDF_FIELD_METADATA = {
-    # 1. Agency
-    'field1_agency': {'pdf_field_name': '1 Submit to Appropriate Federal Agency', 'type': 'textfield_multiline', 'default_value': 'United States Capitol Police\n119 D Street, NE\nWashington, DC 20510'},
-    
-    # 2. Claimant Info (Name, Address, City, State, Zip) - Combined into one PDF field
-    'field2_claimant_info_combined': {'pdf_field_name': '2 Name address of claimant and claimants personal representative if any See instructions on reverse Number Street City State and Zip code', 'type': 'textfield_multiline'},
-
-    # 3. Employment Type (Radio Buttons) & Other Specify (Text Field) - Placeholders for now
-    'field3_type_employment_military': {'pdf_field_name': 'PLACEHOLDER Military', 'type': 'radio', 'group': 'employment_type'},
-    'field3_type_employment_civilian': {'pdf_field_name': 'PLACEHOLDER Civilian', 'type': 'radio', 'group': 'employment_type'},
-    'field3_type_employment_other': {'pdf_field_name': 'PLACEHOLDER Other', 'type': 'radio', 'group': 'employment_type'},
-    'field3_other_specify': {'pdf_field_name': 'PLACEHOLDER 3. Other Employment - Specify', 'type': 'textfield'},
-
-    # 4. Date of Birth
-    'field_pdf_4_dob': {'pdf_field_name': '4 DATE OF BIRTH', 'type': 'textfield'},
-
-    # 5. Marital Status (Radio Buttons) - Placeholders for now
-    'field_pdf_5_marital_status_single': {'pdf_field_name': 'PLACEHOLDER Single', 'type': 'radio', 'group': 'marital_status'},
-    'field_pdf_5_marital_status_married': {'pdf_field_name': 'PLACEHOLDER Married', 'type': 'radio', 'group': 'marital_status'},
-    # ... (add other marital status options if they exist, with placeholder pdf_field_names)
-    'field_pdf_5_marital_status_divorced': {'pdf_field_name': 'PLACEHOLDER Divorced', 'type': 'radio', 'group': 'marital_status'},
-    'field_pdf_5_marital_status_widowed': {'pdf_field_name': 'PLACEHOLDER Widowed', 'type': 'radio', 'group': 'marital_status'},
-    'field_pdf_5_marital_status_separated': {'pdf_field_name': 'PLACEHOLDER Separated', 'type': 'radio', 'group': 'marital_status'},
-
-    # 6. Date of Incident
-    'field6_date_of_incident': {'pdf_field_name': '6 DATE AND DAY OF ACCIDENT', 'type': 'textfield', 'default_value': '01/06/2021'},
-
-    # 7. Time of Incident
-    'field7_time_of_incident': {'pdf_field_name': '7 TIME AM OR PM', 'type': 'textfield', 'default_value': '1:06 P.M.'},
-
-    # 8. Basis of Claim
-    'field8_basis_of_claim': {'pdf_field_name': '8 BASIS OF CLAIM State in detail the known facts and circumstances attending the damage injury or death identifying persons and property involved the place of occurrence and the cause thereof Use additional pages if necessary', 'type': 'textfield'},
-
-    # 9. Property Damage & Owner Info
-    'field9_owner_name_address': {'pdf_field_name': 'NAME AND ADDRESS OF OWNER IF OTHER THAN CLAIMANT Number Street City State and Zip Code', 'type': 'textfield', 'default_value': 'N/A'},
-    'field9_property_damage_description_vehicle': {'pdf_field_name': 'BRIEFLY DESCRIBE THE PROPERTY NATURE AND EXTENT OF THE DAMAGE AND THE LOCATION OF WHERE THE PROPERTY MAY BE INSPECTED See instructions on reverse side', 'type': 'textfield', 'default_value': 'N/A'},
-    'field9_property_damage_description_other': {'pdf_field_name': 'PLACEHOLDER 9. Description of Property Damage - Other', 'type': 'textfield'},
-
-    # 10. Nature of Injury
-    'field10_nature_of_injury': {'pdf_field_name': 'STATE THE NATURE AND EXTENT OF EACH INJURY OR CAUSE OF DEATH WHICH FORMS THE BASIS OF THE CLAIM  IF OTHER THAN CLAIMANT STATE THE NAME OF THE INJURED PERSON OR DECEDENT', 'type': 'textfield'},
-
-    # 11. Witnesses - Updated XFA paths
-    'field11_witness_name': {'pdf_field_name': 'NAMERow1', 'type': 'textfield', 'default_value': 'See FBI and Capitol Police database'},
-    'field11_witness_address': {'pdf_field_name': 'ADDRESS Number Street City State and Zip CodeRow1', 'type': 'textfield', 'default_value': 'The FBI and Capitol Police already maintain a database of 1,000+ witnesses'},
-
-    # 12. Amount of Claim
-    'field12a_property_damage_amount': {'pdf_field_name': 'a PROPERTY DAMAGE[0]', 'type': 'textfield', 'default_value': '0.00'},
-    'field12b_personal_injury_amount': {'pdf_field_name': 'b PERSONAL INJURY[0]', 'type': 'textfield', 'default_value': '90000.00'},
-    'field12c_wrongful_death_amount': {'pdf_field_name': 'c WRONGFUL DEATH[0]', 'type': 'textfield', 'default_value': '0.00'},
-    'field12d_total_amount': {'pdf_field_name': 'd TOTAL Failure to specify may cause forfeiture of your rights[0]', 'type': 'textfield', 'default_value': '90000.00'},
-    
-    # 13. Signature & Phone
-    'field13a_signature': {'pdf_field_name': '13a SIGNATURE OF CLAIMANT See instructions on reverse side[0]', 'type': 'textfield'}, # For typed name
-    'field_pdf_13b_phone': {'pdf_field_name': '13b PHONE NUMBER OF PERSON SIGNING FORM', 'type': 'textfield'},
-
-    # 14. Date Signed
-    'field14_date_signed': {'pdf_field_name': '14 DATE OF SIGNATURE', 'type': 'textfield'},
-    
-    # Page 2 Insurance Questions (Checkboxes) - Placeholders for now
-    'insurance_yes': {'pdf_field_name': 'PLACEHOLDER Insurance_Yes', 'type': 'checkbox', 'value_on': 'Yes', 'value_off': 'Off'},
-    'insurance_no': {'pdf_field_name': 'PLACEHOLDER Insurance_No', 'type': 'checkbox', 'value_on': 'Yes', 'value_off': 'Off'},
-    'field15_insurer_name': {'pdf_field_name': 'PLACEHOLDER 15. Name of Insurer', 'type': 'textfield'},
-    'field15_policy_number': {'pdf_field_name': 'PLACEHOLDER 15. Policy Number', 'type': 'textfield'},
-    # ... add other insurance related fields if necessary
+# Default values for fields that are pre-filled or have fallbacks
+# These keys should match the application-side keys used in PDF_FIELD_MAP
+DEFAULT_VALUES = {
+    'field1_agency': 'United States Capitol Police\n119 D Street, NE\nWashington, DC 20510',
+    'field6_date_of_incident': '01/06/2021',
+    'field7_time_of_incident': '1:06 P.M.', # Corrected as per your previous form defaults
+    'field8_basis_of_claim': "While the claimant was protesting on January 6, 2021 at the West side of the U.S. Capitol, the Capitol Police and D.C. Metropolitan Police acting on behalf of the Capitol Police used excessive force against the claimant causing claimant physical injuries. The excessive force took the form of various munitions launched against the protesters including but not limited to: pepper balls, rubber balls or bullets some filled with Oleoresin Capsicum (\"OC\"), FM 303 projectiles, sting balls, flash bang, sting bomb and tear gas grenades, tripple chasers,pepper spray, CS Gas and physical strikes with firsts or batons.",
+    'field9_owner_name_address': 'N/A',
+    'field9_property_damage_description': 'N/A', # Corresponds to 'BRIEFLY DESCRIBE THE PROPERTY, NATURE AN'
+    'field10_nature_of_injury': "The claimant went to the U.S. Capitol to peacefully protest the presidential election. While the claimant was in the area of the West Side of the U.S. Capitol building police launched weapons referenced above and used excessive force. The claimant was struck and or exposed to the launched munitions and/or OC or CS Gas and suffered injuries as a result. The legal ramifications of these actions are currently under review and form part of the ongoing damages being claimed.",
+    'field11_witness_name': 'See FBI and Capitol Police database',
+    'field11_witness_address': 'The FBI and Capitol Police already maintain a database of 1,000+ witnesses',
+    'field12a_property_damage': '0.00',
+    'field12b_personal_injury': '90000.00',
+    'field12c_wrongful_death': '0.00'
+    # field12d_total is calculated in app.py, not a direct default here
+    # field13a_signature, field_pdf_13b_phone, field14_date_signed are user-input
 }
-
-def add_to_pdfcpu_data(pdfcpu_data, xfa_path, value):
-    logger.debug(f"add_to_pdfcpu_data called with: xfa_path='{xfa_path}', value='{value}'")
-    pdfcpu_data[xfa_path] = str(value)
 
 def fill_sf95_pdf(form_data, pdf_template_path_param, output_pdf_full_path_param):
     logger.info(f"-------------------- Entering fill_sf95_pdf --------------------")
@@ -120,40 +75,69 @@ def fill_sf95_pdf(form_data, pdf_template_path_param, output_pdf_full_path_param
     }
     logger.debug(f'Initial pdfcpu_data structure: {json.dumps(pdfcpu_data, indent=2)}')
 
-    logger.info("Starting general field processing loop based on PDF_FIELD_METADATA.")
+    logger.info("Starting general field processing loop based on PDF_FIELD_MAP.")
     form_fields_dict = pdfcpu_data["forms"][0] # Get a reference to the dictionary holding field type lists
 
-    for html_field_name, field_meta in PDF_FIELD_METADATA.items():
-        pdf_field_name = field_meta['pdf_field_name']
-
-        # Get value from form_data first
-        submitted_value = form_data.get(html_field_name)
+    for app_field_key, pdf_field_name_from_map in PDF_FIELD_MAP.items():
+        # Get value from form_data first (data submitted by user)
+        submitted_value = form_data.get(app_field_key)
 
         # If submitted_value is None (key not in form) or an empty string, try to use default
-        if submitted_value is None or submitted_value == '':
-            field_value = field_meta.get('default_value')
+        if submitted_value is None or str(submitted_value).strip() == '':
+            field_value = DEFAULT_VALUES.get(app_field_key)
         else:
             field_value = submitted_value
 
         if field_value is not None: # Only add if there's a value (from form or default)
-            logger.info(f"Processing '{html_field_name}' (type: {field_meta.get('type', 'textfield')}): XFA Path='{pdf_field_name}', Value='{field_value}'")
-            
-            # Determine the pdfcpu field type
-            pdfcpu_field_type = field_meta.get('type', 'textfield') # Default to 'textfield'
-            # TODO: Add specific handling or mapping if pdfcpu expects different type names, e.g., 'checkboxfield'
-            # if field_meta.get('type') == 'checkbox': 
-            #     pdfcpu_field_type = 'checkboxfield' # Example, confirm actual pdfcpu name
+            final_json_value = field_value # Value that will actually be put into the JSON
+
+            # Monetary field formatting for section 12
+            monetary_fields = [
+                'field12a_property_damage',
+                'field12b_personal_injury',
+                'field12c_wrongful_death',
+                'field12d_total'
+            ]
+            if app_field_key in monetary_fields:
+                try:
+                    # Convert to float first to handle potential string inputs and ensure numeric format
+                    numeric_value = float(field_value)
+                    final_json_value = f"${numeric_value:,.2f}" # Format as $xxx,xxx.xx
+                except ValueError:
+                    logger.warning(f"Could not convert monetary field '{app_field_key}' value '{field_value}' to float. Using original value: {final_json_value}")
+                    # If conversion fails, final_json_value remains the original field_value
+
+            # Determine pdfcpu_field_type based on the app_field_key
+            if app_field_key in ['field3_checkbox_civilian', 'field3_checkbox_military']:
+                pdfcpu_field_type = 'checkbox'
+                # Ensure the final_json_value is a Python boolean for checkboxes
+                if isinstance(field_value, str):
+                    if field_value.lower() == 'true':
+                        final_json_value = True
+                    elif field_value.lower() == 'false':
+                        final_json_value = False
+                    else:
+                        logger.warning(f"Checkbox '{app_field_key}' received ambiguous string '{field_value}'. Interpreting as False.")
+                        final_json_value = False
+                elif not isinstance(field_value, bool):
+                    # If it's not a string and not a bool (e.g., int 1), convert to bool
+                    final_json_value = bool(field_value)
+                # If it's already a bool, final_json_value is already correct (as field_value)
+            else:
+                pdfcpu_field_type = 'textfield' 
+
+            # Log processed value (original field_value for context, final_json_value for what's used)
+            logger.info(f"Processing '{app_field_key}': PDF Target='{pdf_field_name_from_map}', Original Value='{field_value}', JSON Value='{final_json_value}'")
 
             if pdfcpu_field_type not in form_fields_dict:
                 form_fields_dict[pdfcpu_field_type] = []
-            
             form_fields_dict[pdfcpu_field_type].append({
-                "name": pdf_field_name,
-                "value": str(field_value)
-                # "locked": False # Optional, defaults to false
+                "name": pdf_field_name_from_map,
+                "value": final_json_value # Use the explicitly typed boolean for checkboxes
             })
+            logger.debug(f"Added to pdfcpu_data: {{'name': '{pdf_field_name_from_map}', 'value': {final_json_value}, 'type': '{pdfcpu_field_type}'}}")
         else:
-            logger.debug(f"Skipping '{html_field_name}': No value in form_data and no default_value specified.")
+            logger.debug(f"Skipping '{app_field_key}': No value in form_data and no default_value specified in DEFAULT_VALUES.")
 
     logger.info(f"Final pdfcpu_data before conversion to JSON:\n{json.dumps(pdfcpu_data, indent=2)}")
 

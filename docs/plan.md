@@ -17,7 +17,7 @@ This document outlines a step-by-step plan for building the FTCA Form 95 Intake 
 2.  **Step 2: PDF Field Name Discovery (Crucial - Day 2-3)**
     *   Objective: Identify all fillable field names in `sf95.pdf`.
     *   Task: Use Adobe Acrobat Pro, `pdfminer.six`, or other PDF analysis tools to list field names and their types (text, checkbox, etc.).
-    *   Deliverable: A mapping document (e.g., a simple text file or spreadsheet) correlating PDF box numbers/descriptions to actual PDF field names.
+    *   Deliverable: An externalized, machine-readable mapping file (e.g., `data/pdf_field_map.json`). This file will explicitly link HTML form field names (or consistent intermediate data keys from `DB_SCHEMA`) to the precise internal field names required by the PDF filling tool (`pdfcpu`). The `utils/pdf_filler.py` script will be updated to load and use this external map for improved maintainability and clarity.
 
 3.  **Step 3: Basic HTML Form (Day 3-4)**
     *   Objective: Create the frontend HTML form in `templates/form.html`.
@@ -29,6 +29,11 @@ This document outlines a step-by-step plan for building the FTCA Form 95 Intake 
     *   Objective: Receive form data, validate, and store it.
     *   Task: Create a Flask route (`/submit`) in `app.py` to handle POST requests from the form.
     *   Task: Implement basic server-side validation for submitted data.
+        *   This validation should be more explicit and include:
+            *   Verification that all user-required fields (as defined in `project.md`) are present and not empty.
+            *   Checks for correct data formats where applicable (e.g., dates for 'DateOfBirth' and 'DateSigned', numeric types for monetary amounts).
+            *   Potentially, checks for reasonable string lengths for text areas like Fields 8 and 10.
+            *   If validation fails, the system should re-render the form, display user-friendly error messages (e.g., using Flask's `flash` mechanism), and repopulate the form with the user's previously entered data to avoid data loss.
     *   Task: Set up SQLite database (`data/form_data.db`). Define a table schema to store all relevant fields (user-input, pre-filled, calculated).
     *   Task: Write Python code (potentially in `utils/database_handler.py`) to insert validated form data into the SQLite table.
     *   Add `sqlite3` to `requirements.txt` (it's built-in, but good to note; `SQLAlchemy` might be added later for ORM).
@@ -39,6 +44,7 @@ This document outlines a step-by-step plan for building the FTCA Form 95 Intake 
     *   Task: Create `utils/pdf_filler.py`. Write a function that takes the form data (and the PDF field name mapping from Step 2) and fills `sf95.pdf`.
     *   Task: Save the filled PDF to a designated output directory (e.g., `data/filled_forms/`). Name files uniquely (e.g., `submission_id_timestamp.pdf`).
     *   Integrate this into the `/submit` route in `app.py` after data storage.
+    *   Crucially, this step includes thorough verification that all data (user-input, pre-filled, and calculated values) is accurately transferred from the web form submission, through backend processing, and correctly placed into the designated fields within the generated PDF. This confirms the integrity of the PDF field mapping (Step 2) and data handling (Step 4).
 
 6.  **Step 6: Basic Notification (Day 8-9)**
     *   Objective: Send a simple notification upon successful PDF generation.

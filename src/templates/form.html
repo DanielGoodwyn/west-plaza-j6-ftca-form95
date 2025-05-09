@@ -133,19 +133,31 @@
                 <div class="row">
                     <div class="col-md-3 mb-3">
                         <label for="field12a_property_damage_amount" class="form-label">12a. Property Damage</label>
-                        <input type="number" step="0.01" id="field12a_property_damage_amount" name="field12a_property_damage_amount" class="form-control" value="{{ default_values.field12a_property_damage_amount | default('0.00', True) }}" required>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" step="0.01" id="field12a_property_damage_amount" name="field12a_property_damage_amount" class="form-control" value="{{ default_values.field12a_property_damage_amount | default('0.00', True) }}" required>
+                        </div>
                     </div>
                     <div class="col-md-3 mb-3">
                         <label for="field12b_personal_injury_amount" class="form-label">12b. Personal Injury</label>
-                        <input type="number" step="0.01" id="field12b_personal_injury_amount" name="field12b_personal_injury_amount" class="form-control" value="{{ default_values.field12b_personal_injury_amount | default('0.00', True) }}" required>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" step="0.01" id="field12b_personal_injury_amount" name="field12b_personal_injury_amount" class="form-control" value="{{ default_values.field12b_personal_injury_amount | default('0.00', True) }}" required>
+                        </div>
                     </div>
                     <div class="col-md-3 mb-3">
                         <label for="field12c_wrongful_death_amount" class="form-label">12c. Wrongful Death</label>
-                        <input type="number" step="0.01" id="field12c_wrongful_death_amount" name="field12c_wrongful_death_amount" class="form-control" value="{{ default_values.field12c_wrongful_death_amount | default('0.00', True) }}" required>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" step="0.01" id="field12c_wrongful_death_amount" name="field12c_wrongful_death_amount" class="form-control" value="{{ default_values.field12c_wrongful_death_amount | default('0.00', True) }}" required>
+                        </div>
                     </div>
                     <div class="col-md-3 mb-3">
                         <label for="field12d_total_amount" class="form-label">12d. Total</label>
-                        <input type="number" step="0.01" id="field12d_total_amount" name="field12d_total_amount" class="form-control" readonly value="{{ default_values.field12d_total_amount | default('0.00', True) }}" required>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" step="0.01" id="field12d_total_amount" name="field12d_total_amount" class="form-control" readonly value="{{ default_values.field12d_total_amount | default('0.00', True) }}" required>
+                        </div>
                         <small class="form-text text-muted">Failure to specify may cause forfeiture of your rights.</small>
                     </div>
                 </div>
