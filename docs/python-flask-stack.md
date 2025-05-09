@@ -41,7 +41,7 @@ This document details how the chosen Python-Flask stack will be used to implemen
 
 ## 3. PDF Generator
 
-*   **Technology:** Python library like `fillpdf` or `pdfrw`.
+*   **Technology:** `pdfcpu` (Go command-line tool), invoked via Python's `subprocess` module.
 *   **Implementation:**
     *   **PDF Template (`data/sf95.pdf`):**
         *   The official, fillable SF-95 PDF downloaded from GSA.

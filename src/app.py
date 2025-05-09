@@ -191,7 +191,7 @@ def form():
         'field12b_personal_injury_amount': '90000.00',
         'field12c_wrongful_death_amount': '0.00',
         'field12d_total_amount': '90000.00', # Sum of 12a, 12b, 12c for consistency
-        'field_pdf_13b_phone': '8138381299',
+        'field_pdf_13b_phone': '555-0100',
         'field14_date_signed': today_date,
         # Add default values for signature image data if needed, e.g., a placeholder text for the hidden field
         'field_pdf_13b_signature_data': '' # Or some placeholder if the JS expects it
