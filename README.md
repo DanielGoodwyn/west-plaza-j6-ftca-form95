@@ -16,7 +16,7 @@ This application is built with a focus on self-hosting and data control, avoidin
 - **Frontend:** HTML, CSS, JavaScript
 - **Backend:** Python (Flask)
 - **Database:** SQLite
-- **PDF Filling:** Python (`fillpdf` or similar library)
+- **PDF Filling:** pdfcpu (Go command-line tool)
 - **Notifications:** Python (`smtplib` for email)
 - **Containerization:** Docker
 
@@ -86,7 +86,6 @@ west-plaza-j6-ftca-form95/
 │   └── sf95.pdf            # Template PDF (to be downloaded)
 │   └── form_data.db        # SQLite database (will be created)
 ├── docs/
-│   ├── README.md           # This file (will be moved here)
 │   ├── project.md
 │   ├── plan.md
 │   └── python-flask-stack.md
@@ -107,4 +106,3 @@ west-plaza-j6-ftca-form95/
 ├── venv/                   # Python virtual environment (ignored by Git)
 ├── Dockerfile
 └── .gitignore
-```

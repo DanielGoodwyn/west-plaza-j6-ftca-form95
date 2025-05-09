@@ -1,18 +1,12 @@
-import logging
-logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(name)s:%(message)s') # Force basic logging
-
-from flask import Flask, render_template, request, redirect, url_for, g, current_app, flash
 import sqlite3
 import os
 import logging
-from logging import FileHandler
 from datetime import datetime
 from fillpdf import fillpdfs # Added import for get_form_fields
 
 # Import utility functions
 from utils.pdf_filler import fill_sf95_pdf # Corrected import name
 import utils.pdf_filler # Import the module itself to check its path
-logging.info(f"***** PY LOGGING: IMPORTED pdf_filler FROM: {utils.pdf_filler.__file__} *****") # DEBUG PATH with Python logging
 # from utils.notifier import send_notification_email # To be created
 
 app = Flask(__name__)
@@ -140,14 +134,14 @@ def close_connection(exception):
 def initialize_app_state():
     # Configure file logging
     log_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'app.log') # Project root
-    file_handler = FileHandler(log_file_path, mode='w')
+    file_handler = logging.FileHandler(log_file_path, mode='w')
     file_handler.setLevel(logging.INFO)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s [in %(pathname)s:%(lineno)d]')
     file_handler.setFormatter(formatter)
     
     # Add handler to current_app.logger if it's not already there
     # and also to Flask's root logger to catch more general Flask logs if desired
-    if not any(isinstance(h, FileHandler) and h.baseFilename == file_handler.baseFilename for h in current_app.logger.handlers):
+    if not any(isinstance(h, logging.FileHandler) and h.baseFilename == file_handler.baseFilename for h in current_app.logger.handlers):
         current_app.logger.addHandler(file_handler)
     
     current_app.logger.setLevel(logging.INFO) # Ensure app logger processes INFO level

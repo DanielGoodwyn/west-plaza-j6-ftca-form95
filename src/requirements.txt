@@ -1,4 +1,2 @@
-Flask
 Flask>=2.0
 fillpdf>=0.2.0
-# Add PDF library later e.g. fillpdf or pdfrw
