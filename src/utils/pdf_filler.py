@@ -8,14 +8,8 @@ import traceback
 
 logger = logging.getLogger(__name__)
 
-# --- Explicit logger configuration for debugging-logs.txt ---
-# Construct path to debugging-logs.txt in the project root directory
-# (one level up from 'src', then into project root)
-# Corrected path: three levels up from src/utils/pdf_filler.py to reach project root
-project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-debug_log_path = os.path.join(project_root, 'debugging-logs.txt')
 # Path to the new PDF field map
-PDF_FIELD_MAP_PATH = os.path.join(project_root, 'data', 'pdf_field_map.json')
+PDF_FIELD_MAP_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'data', 'pdf_field_map.json')
 
 # Load the PDF field map from JSON
 try:
@@ -27,18 +21,6 @@ except FileNotFoundError:
 except json.JSONDecodeError:
     logger.error(f"Critical: Error decoding JSON from PDF field map file at {PDF_FIELD_MAP_PATH}")
     PDF_FIELD_MAP = {} # Fallback
-
-# Remove any existing handlers from this specific logger to prevent duplicate logs
-# or interference from other configurations (like basicConfig if it affected this logger).
-if logger.hasHandlers():
-    logger.handlers.clear()
-
-debug_file_handler = logging.FileHandler(debug_log_path, mode='w') # 'w' for overwrite
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(module)s:%(lineno)d - %(message)s')
-debug_file_handler.setFormatter(formatter)
-logger.addHandler(debug_file_handler)
-logger.setLevel(logging.DEBUG) # Ensure this logger captures DEBUG level messages
-# --- End explicit logger configuration ---
 
 # Default values for fields that are pre-filled or have fallbacks
 # These keys should match the application-side keys used in PDF_FIELD_MAP
@@ -96,7 +78,7 @@ def fill_sf95_pdf(form_data, pdf_template_path_param, output_pdf_full_path_param
                 'field12a_property_damage',
                 'field12b_personal_injury',
                 'field12c_wrongful_death',
-                'field12d_total'
+                'field12d_total_claim_amount'
             ]
             if app_field_key in monetary_fields:
                 try:
@@ -219,7 +201,7 @@ if __name__ == '__main__':
     from werkzeug.datastructures import ImmutableMultiDict
     sample_form_data_imm = ImmutableMultiDict(sample_form_data)
 
-    pdf_template_path = 'path_to_your_pdf_template.pdf' # Replace with actual path
+    pdf_template_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'data', 'sf95.pdf') # Corrected filename
     output_pdf_full_path = 'path_to_your_output_pdf.pdf' # Replace with actual path
 
     filled_pdf_path = fill_sf95_pdf(sample_form_data_imm, pdf_template_path, output_pdf_full_path)

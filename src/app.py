@@ -1,130 +1,97 @@
 import sqlite3
 import os
 import logging
-from datetime import datetime
-from flask import Flask, request, jsonify, render_template, redirect, url_for, flash, current_app, g # Added g
-from fillpdf import fillpdfs # Added import for get_form_fields
+from datetime import datetime, timezone
+from flask import Flask, request, jsonify, render_template, redirect, url_for, flash, current_app, g, Response, session, send_from_directory
+from flask_session import Session
+from fillpdf import fillpdfs
+import re
+import io
+import csv
+from unicodedata import normalize
+from werkzeug.utils import secure_filename
+import pytz # Added for timezone conversion
 
 # Import utility functions
-from utils.pdf_filler import fill_sf95_pdf, DEFAULT_VALUES as PDF_FILLER_DEFAULTS # Renamed for clarity
-import utils.pdf_filler # Import the module itself to check its path
-# from utils.notifier import send_notification_email # To be created
+from utils.pdf_filler import fill_sf95_pdf, DEFAULT_VALUES as PDF_FILLER_DEFAULTS
+import utils.pdf_filler
+# from utils.notifier import send_notification_email
 
 app = Flask(__name__)
-app.logger.setLevel(logging.INFO) # Set logger level to INFO to see detailed logs
-app.secret_key = os.urandom(24) # For session management, CSRF protection later
+app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'your_default_secret_key') # Use environment variable or default
+app.config['SESSION_TYPE'] = 'filesystem'
+app.config['SESSION_FILE_DIR'] = './flask_session/' # Ensure this directory exists and is writable
+app.config['FILLED_FORMS_DIR'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'filled_forms')
 
-# --- Configuration ---
+# Ensure session directory exists
+if not os.path.exists(app.config['SESSION_FILE_DIR']):
+    try:
+        os.makedirs(app.config['SESSION_FILE_DIR'])
+        app.logger.info(f"Created session directory: {app.config['SESSION_FILE_DIR']}")
+    except Exception as e:
+        app.logger.error(f"Error creating session directory {app.config['SESSION_FILE_DIR']}: {e}")
+        # Decide if this error is critical enough to raise
+
+# Ensure filled forms directory exists
+if not os.path.exists(app.config['FILLED_FORMS_DIR']):
+    try:
+        os.makedirs(app.config['FILLED_FORMS_DIR'])
+        app.logger.info(f"Created filled forms directory: {app.config['FILLED_FORMS_DIR']}")
+    except Exception as e:
+        app.logger.error(f"Error creating filled forms directory {app.config['FILLED_FORMS_DIR']}: {e}")
+        # Decide if this error is critical enough to raise
+
+Session(app) # Initialize Flask-Session
+
+# --- Configuration (Constants needed before initialization logic) ---
 DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'form_data.db')
-PDF_TEMPLATE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'sf95.pdf') # Updated PDF name
-FILLED_PDF_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'filled_forms')
+PDF_TEMPLATE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'sf95.pdf') # Corrected template filename
 
-# Ensure data directories exist
-os.makedirs(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data'), exist_ok=True)
-os.makedirs(FILLED_PDF_DIR, exist_ok=True)
+# --- Database Schema (needed by create_tables_if_not_exist) ---
+DB_SCHEMA = [
+    'field1_agency TEXT',
+    'field2_name TEXT',
+    'field2_address TEXT',
+    'field2_city TEXT',
+    'field2_state TEXT',
+    'field2_zip TEXT',
+    'field3_type_employment TEXT',
+    'field_pdf_4_dob TEXT',
+    'field_pdf_5_marital_status TEXT',
+    'field6_checkbox_military TEXT',
+    'field7_checkbox_civilian TEXT',
+    'field8_basis_of_claim TEXT',
+    'field9_property_damage_description TEXT',
+    'field10_nature_of_injury TEXT',
+    'field11_witness_name_1 TEXT',
+    'field11_witness_address_1 TEXT',
+    'field11_witness_name_2 TEXT',
+    'field11_witness_address_2 TEXT',
+    'field12a_property_damage_amount TEXT',
+    'field12b_personal_injury_amount TEXT',
+    'field12c_wrongful_death_amount TEXT',
+    'field12d_total_claim_amount TEXT',
+    'field13a_signature TEXT',
+    'field_pdf_13b_phone TEXT',
+    'field14_date_signed TEXT',
+    'user_email_address TEXT',
+    'supplemental_question_1_capitol_experience TEXT',
+    'supplemental_question_2_injuries_damages TEXT',
+    'supplemental_question_3_entry_exit_time TEXT',
+    'supplemental_question_4_inside_capitol_details TEXT',
+    'filled_pdf_filename TEXT',
+    'field17_signature_of_claimant TEXT',
+    'field18_date_of_signature TEXT',
+    'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+    'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP'
+]
 
-# --- Database Setup ---
+# --- Database Helper Functions (defined before use in initialization) ---
 def get_db():
     if 'db' not in g:
-        # Ensure data directory exists before trying to connect/create DB file
-        data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
-        if not os.path.exists(data_dir):
-            try:
-                os.makedirs(data_dir)
-                current_app.logger.info(f"Created data directory: {data_dir} from get_db")
-            except Exception as e_mkdir:
-                current_app.logger.error(f"Failed to create data directory {data_dir} from get_db: {e_mkdir}")
-                # Decide if to raise or handle, for now log and continue, connect may fail
-
         g.db = sqlite3.connect(DATABASE, detect_types=sqlite3.PARSE_DECLTYPES)
         g.db.row_factory = sqlite3.Row
     return g.db
-
-def create_tables_if_not_exist():
-    current_app.logger.info("Entered create_tables_if_not_exist function.")
-    db = get_db()
-    cursor = db.cursor()
-    current_app.logger.info("Successfully obtained DB cursor.")
-
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='submissions';")
-    table_exists_row = cursor.fetchone()
-    table_exists = table_exists_row is not None
-    current_app.logger.info(f"Checking 'submissions' table. Exists: {table_exists}")
-
-    DB_SCHEMA = [
-        'field2_name TEXT',
-        'field2_address TEXT',
-        'field2_city TEXT',
-        'field2_state TEXT',
-        'field2_zip TEXT',
-        'field_pdf_4_dob TEXT',              # Renamed from field2_dob
-        'field3_type_employment TEXT',       # Replaces field3_military, civilian, other, other_specify
-        'field_pdf_5_marital_status TEXT',   # Renamed from field4_marital_status
-        'field8_basis_of_claim TEXT',
-        'field10_nature_of_injury TEXT',
-        'field12a_property_damage REAL DEFAULT 0.00',
-        'field12b_personal_injury REAL',
-        'field12c_wrongful_death REAL',
-        'field12d_total REAL',
-        'field_pdf_13b_phone TEXT',          # New phone field from signature block
-        'field_pdf_13b_signature_data TEXT', # For signature data URL (was field13b_signature)
-        'field14_date_signed TEXT',
-        'filled_pdf_filename TEXT'
-    ]
-
-    if not table_exists:
-        current_app.logger.info(f"'submissions' table does not exist. Creating it based on DB_SCHEMA: {DB_SCHEMA}")
-        columns_with_types = ", ".join(DB_SCHEMA)
-        create_table_sql = f"CREATE TABLE submissions (id INTEGER PRIMARY KEY AUTOINCREMENT, {columns_with_types}, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)"
-        current_app.logger.info(f"Executing CREATE TABLE SQL: {create_table_sql}")
-        try:
-            cursor.execute(create_table_sql)
-            db.commit()
-            current_app.logger.info("Database table 'submissions' created successfully.")
-        except sqlite3.Error as e_create:
-            current_app.logger.error(f"Failed to create 'submissions' table: {e_create}")
-            # If table creation fails, it's a critical error, re-raise or handle appropriately
-            raise
-    else:
-        current_app.logger.info("'submissions' table exists. Checking for missing columns based on DB_SCHEMA.")
-        cursor.execute("PRAGMA table_info(submissions)")
-        existing_columns_rows = cursor.fetchall()
-        existing_columns = [row[1] for row in existing_columns_rows]
-        current_app.logger.info(f"Existing columns in 'submissions': {existing_columns}")
-        current_app.logger.info(f"DB_SCHEMA to check against: {DB_SCHEMA}")
-        
-        schema_column_definitions = {}
-        for entry in DB_SCHEMA:
-            parts = entry.strip().split(maxsplit=1)
-            col_name = parts[0]
-            col_type = parts[1] if len(parts) > 1 else "TEXT"
-            schema_column_definitions[col_name] = f"{col_name} {col_type}"
-
-        current_app.logger.info(f"Parsed schema column definitions from DB_SCHEMA: {schema_column_definitions}")
-
-        missing_cols_added_count = 0
-        for col_name, col_definition in schema_column_definitions.items():
-            if col_name not in existing_columns:
-                current_app.logger.info(f"Column '{col_name}' is missing from 'submissions' table. Attempting to add with definition: '{col_definition}'")
-                try:
-                    alter_sql = f"ALTER TABLE submissions ADD COLUMN {col_definition}"
-                    current_app.logger.info(f"Executing ALTER TABLE SQL: {alter_sql}")
-                    cursor.execute(alter_sql)
-                    db.commit()
-                    current_app.logger.info(f"Successfully added column: {col_definition} to 'submissions' table.") # Fixed typo: definition -> col_definition
-                    missing_cols_added_count += 1
-                except sqlite3.Error as e_alter:
-                    current_app.logger.error(f"Error adding column {col_definition} to 'submissions' table: {e_alter}. Existing columns were: {existing_columns}")
-                    # Optionally, re-raise or handle. For now, log and continue checking other columns.
-            else:
-                current_app.logger.info(f"Column '{col_name}' already exists in 'submissions' table.")
-        
-        if missing_cols_added_count > 0:
-            current_app.logger.info(f"Finished schema update. Added {missing_cols_added_count} missing columns to 'submissions' table.")
-        else:
-            current_app.logger.info("'submissions' table schema appears up to date with DB_SCHEMA. No columns were added.")
-    current_app.logger.info("Exiting create_tables_if_not_exist function.")
-    # The connection g.db is managed by teardown_appcontext, no conn.close() here.
 
 @app.teardown_appcontext
 def close_connection(exception):
@@ -132,341 +99,956 @@ def close_connection(exception):
     if db is not None:
         db.close()
 
-def initialize_app_state():
-    # Configure file logging
-    log_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'app.log') # Project root
-    file_handler = logging.FileHandler(log_file_path, mode='w')
-    file_handler.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s [in %(pathname)s:%(lineno)d]')
-    file_handler.setFormatter(formatter)
-    
-    # Add handler to current_app.logger if it's not already there
-    # and also to Flask's root logger to catch more general Flask logs if desired
-    if not any(isinstance(h, logging.FileHandler) and h.baseFilename == file_handler.baseFilename for h in current_app.logger.handlers):
-        current_app.logger.addHandler(file_handler)
-    
-    current_app.logger.setLevel(logging.INFO) # Ensure app logger processes INFO level
+def table_exists(cursor, table_name, logger):
+    logger.debug(f"Checking if table '{table_name}' exists.")
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
+    exists = cursor.fetchone() is not None
+    logger.debug(f"Table '{table_name}' exists: {exists}")
+    return exists
 
-    current_app.logger.info("Running initialize_app_state during app setup. File logging configured.")
-    # Ensure data directory exists
-    data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
-    if not os.path.exists(data_dir):
-        os.makedirs(data_dir)
-        current_app.logger.info(f"Created data directory: {data_dir}")
-    
+def create_tables_if_not_exist(logger): # Accept logger
+    logger.info("Entered create_tables_if_not_exist function.")
+    db = get_db()
+    cursor = db.cursor()
+    logger.info("Successfully obtained DB cursor.")
+
+    table_name = 'claims'
+    logger.info(f"Checking '{table_name}' table. Exists: {table_exists(cursor, table_name, logger)}")
+
+    if not table_exists(cursor, table_name, logger):
+        columns_sql_parts = ["id INTEGER PRIMARY KEY AUTOINCREMENT"] + DB_SCHEMA
+        columns_sql = ', '.join(columns_sql_parts)
+        create_table_sql = f"CREATE TABLE {table_name} ({columns_sql})"
+        logger.info(f"Creating '{table_name}' table with SQL: {create_table_sql}")
+        cursor.execute(create_table_sql)
+        db.commit()
+        logger.info(f"'{table_name}' table created successfully.")
+    else:
+        logger.info(f"'{table_name}' table exists. Checking for missing columns based on DB_SCHEMA.")
+        cursor.execute(f"PRAGMA table_info({table_name})")
+        existing_columns_info = cursor.fetchall()
+        existing_column_names = [col_info['name'] for col_info in existing_columns_info]
+        logger.info(f"Existing columns in '{table_name}': {existing_column_names}")
+        logger.info(f"DB_SCHEMA to check against: {DB_SCHEMA}")
+
+        schema_column_definitions = {}
+        for col_def_str in DB_SCHEMA:
+            col_name = col_def_str.strip().split(' ')[0]
+            schema_column_definitions[col_name] = col_def_str.strip()
+        logger.info(f"Parsed schema column definitions from DB_SCHEMA: {schema_column_definitions}")
+
+        columns_added_count = 0
+        for schema_col_name, full_col_definition in schema_column_definitions.items():
+            if schema_col_name not in existing_column_names:
+                col_definition_for_alter = full_col_definition
+                if schema_col_name in ['created_at', 'updated_at'] and 'DEFAULT CURRENT_TIMESTAMP' in full_col_definition.upper():
+                    col_definition_for_alter = f"{schema_col_name} TIMESTAMP"
+                    logger.info(f"Column '{schema_col_name}' is missing. Will be added with simplified definition for ALTER: '{col_definition_for_alter}'")
+                else:
+                    logger.info(f"Column '{schema_col_name}' is missing. Attempting to add with definition: '{full_col_definition}'")
+                
+                try:
+                    alter_sql = f"ALTER TABLE {table_name} ADD COLUMN {col_definition_for_alter}"
+                    logger.info(f"Executing ALTER TABLE SQL: {alter_sql}")
+                    cursor.execute(alter_sql)
+                    db.commit()
+                    logger.info(f"Successfully added column '{schema_col_name}' to '{table_name}'.")
+                    columns_added_count += 1
+                except sqlite3.Error as e:
+                    logger.error(f"Error adding column {full_col_definition} to '{table_name}' table: {e}. Existing columns were: {existing_column_names}")
+        
+        if columns_added_count > 0:
+            logger.info(f"Added {columns_added_count} missing column(s) to '{table_name}'.")
+        else:
+            logger.info(f"'{table_name}' table schema appears up to date with DB_SCHEMA. No columns were added.")
+
+    logger.info("Exiting create_tables_if_not_exist function.")
+
+
+# Centralized app initialization function
+def initialize_application_internals(flask_app_object):
+    if flask_app_object:
+        # 0. Setup logging (File and Console)
+        log_file_path = '/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/debugging-logs.txt'
+        # Ensure log directory exists (though in this case, it's the project root)
+        log_dir = os.path.dirname(log_file_path)
+        if not os.path.exists(log_dir) and log_dir: # Create dir if it's not project root and doesn't exist
+            os.makedirs(log_dir, exist_ok=True)
+
+        # Configure file handler
+        file_handler = logging.FileHandler(log_file_path)
+        file_handler.setLevel(logging.INFO) # Log INFO and above to file
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        file_handler.setFormatter(formatter)
+        flask_app_object.logger.addHandler(file_handler)
+
+        # Configure console handler (to still see logs in terminal)
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.DEBUG) # Show DEBUG and above in console
+        console_handler.setFormatter(formatter) # Can use the same or different formatter
+        flask_app_object.logger.addHandler(console_handler)
+
+        # Set the app logger's level (if not set by default)
+        # This ensures that messages of this level and above are processed by handlers.
+        flask_app_object.logger.setLevel(logging.DEBUG) # Process all messages from DEBUG upwards
+        
+        flask_app_object.logger.info("Custom logging initialized for file and console.")
+
+    # 1. Ensure necessary directories exist (e.g., for SQLite DB, filled forms)
+    data_dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data')
+    if not os.path.exists(data_dir_path):
+        try:
+            os.makedirs(data_dir_path)
+            if flask_app_object:
+                flask_app_object.logger.info(f"Created data directory: {data_dir_path}")
+            else:
+                print(f"Created data directory: {data_dir_path}") # Fallback if no app object
+        except Exception as e:
+            if flask_app_object:
+                flask_app_object.logger.error(f"Error creating data directory {data_dir_path}: {e}")
+            else:
+                print(f"Error creating data directory {data_dir_path}: {e}") # Fallback
+            # Decide if this error is critical enough to raise
+
+    # 2. Database schema check/initialization (needs application context)
+    if flask_app_object:
+        with flask_app_object.app_context():
+            try:
+                # Pass the Flask app's logger to the database function
+                create_tables_if_not_exist(flask_app_object.logger) # This logger will now use the handlers we set up
+                flask_app_object.logger.info("Database schema checked/initialized successfully (within app context).")
+            except Exception as e:
+                flask_app_object.logger.error(f"Error during database setup in app context: {e}")
+                # Depending on the app's needs, you might want to raise this error
+                # to prevent the app from starting with a non-functional database.
+                # raise # Uncomment if startup should fail on DB error
+    else:
+        # Handle case where flask_app_object is None, if that's possible in your flow
+        print("initialize_application_internals: flask_app_object is None, skipping DB and advanced logging setup.")
+
+# Call the centralized initialization function AFTER all helpers and constants are defined
+initialize_application_internals(app)
+
+# --- Utility Functions (like slugify, PDF field mapping, etc. - can be here or imported) ---
+# (Ensuring these are also defined before routes if routes use them directly at import time)
+
+# Helper function for slugifying text
+def slugify(text):
+    """
+    Generate a slug from a string.
+    Example: "Héllo World!" -> "hello-world"
+    """
+    if not text:
+        return "default-claimant" # Fallback for empty text
+    text = str(text)
+    # Normalize to decompose combined characters, then encode to ASCII ignoring errors, then decode back to string.
+    # This effectively removes accents and other non-ASCII characters.
+    text = normalize('NFKD', text).encode('ascii', 'ignore').decode('ascii')
+    text = re.sub(r'[^\w\s-]', '', text).strip().lower()  # Remove non-alphanumeric (except hyphens and spaces)
+    text = re.sub(r'[-\s]+', '-', text)  # Replace spaces and consecutive hyphens with a single hyphen
+    if not text: # If text becomes empty after sanitization (e.g. was just "!!!")
+        return "default-claimant"
+    return text
+
+# --- Constants for Admin View and CSV Export --- 
+DESIRED_COLUMNS_ORDER_AND_HEADERS = [
+    ('filled_pdf_filename', 'ID'),
+    ('field2_name', 'Claimant Name'),
+    ('user_email_address', 'Email Address'),
+    ('field_pdf_13b_phone', 'Phone Number'),
+    ('field8_basis_of_claim', 'Basis of Claim'),
+    ('field10_nature_of_injury', 'Nature of Injury'),
+    ('supplemental_question_1_capitol_experience', 'Capitol Experience'),
+    ('supplemental_question_2_injuries_damages', 'Injuries/Damages'),
+    ('supplemental_question_3_entry_exit_time', 'Entry/Exit Time'),
+    ('supplemental_question_4_inside_capitol_details', 'Inside Capitol Details'),
+    ('field12a_property_damage_amount', 'Property Damage Amount'),
+    ('field12b_personal_injury_amount', 'Personal Injury Amount'),
+    ('field12c_wrongful_death_amount', 'Wrongful Death Amount'),
+    ('field12d_total_claim_amount', 'Total Claim Amount'),
+    ('field13a_signature', 'Signature'),
+    ('field3_type_employment', 'Type of Employment'),
+    ('field_pdf_5_marital_status', 'Marital Status'),
+    ('field2_address', 'Street Address'),
+    ('field2_city', 'City'),
+    ('field2_state', 'State'),
+    ('field2_zip', 'Zip Code'),
+    ('created_at', 'Date and Time Created'),
+    ('field18_date_of_signature', 'Date and Time Signed'), # Added for date signed
+]
+
+# --- Timezone Helper --- 
+def format_datetime_for_display(utc_datetime_input, target_tz_str='America/New_York'):
+    """Formats a UTC datetime string or object for display in a target timezone.
+    Handles 'YYYY-MM-DDTHH:MM' and 'YYYY-MM-DD HH:MM:SS' formats, and datetime objects.
+    Returns 'MM/DD/YYYY hh:mm AM/PM' or 'Pending' if input is invalid/None.
+    """
+    if not utc_datetime_input: # Handles None, empty string
+        return "Pending"
+
+    current_app.logger.info(f"format_datetime_for_display: Received input '{utc_datetime_input}' of type {type(utc_datetime_input)}")
+
     try:
-        create_tables_if_not_exist()
-        current_app.logger.info("Database schema checked/initialized successfully during app setup.")
-    except Exception as e:
-        current_app.logger.error(f"Error during initialize_app_state: {e}")
-        # Depending on severity, you might want to re-raise to stop app startup
-        raise # If DB init fails, it's critical
+        parsed_dt = None
+        if isinstance(utc_datetime_input, datetime): # Check if input is already a datetime object
+            current_app.logger.info(f"format_datetime_for_display: Input is already a datetime object: {utc_datetime_input}. Assuming naive UTC.")
+            parsed_dt = utc_datetime_input # Use it directly
+        elif isinstance(utc_datetime_input, str):
+            utc_datetime_str = utc_datetime_input # It's a string, proceed with parsing
+            if 'T' in utc_datetime_str:
+                current_app.logger.info(f"format_datetime_for_display: Detected 'T' in '{utc_datetime_str}', attempting T-specific parsing.")
+                try:
+                    parsed_dt = datetime.strptime(utc_datetime_str, '%Y-%m-%dT%H:%M:%S')
+                    current_app.logger.info(f"format_datetime_for_display: Parsed with 'T' and seconds: {parsed_dt}")
+                except ValueError:
+                    current_app.logger.info(f"format_datetime_for_display: Failed 'T' with seconds, trying 'T' without seconds for '{utc_datetime_str}'.")
+                    parsed_dt = datetime.strptime(utc_datetime_str, '%Y-%m-%dT%H:%M')
+                    current_app.logger.info(f"format_datetime_for_display: Parsed with 'T' without seconds: {parsed_dt}")
+            else:
+                current_app.logger.info(f"format_datetime_for_display: No 'T' in '{utc_datetime_str}', attempting non-T parsing.")
+                try:
+                    current_app.logger.info(f"format_datetime_for_display: Trying to parse '{utc_datetime_str}' with milliseconds...")
+                    parsed_dt = datetime.strptime(utc_datetime_str, '%Y-%m-%d %H:%M:%S.%f')
+                    current_app.logger.info(f"format_datetime_for_display: Parsed non-T with milliseconds: {parsed_dt}")
+                except ValueError as e_ms:
+                    current_app.logger.info(f"format_datetime_for_display: Failed non-T with milliseconds for '{utc_datetime_str}': {e_ms}. Trying without milliseconds...")
+                    try:
+                        parsed_dt = datetime.strptime(utc_datetime_str, '%Y-%m-%d %H:%M:%S')
+                        current_app.logger.info(f"format_datetime_for_display: Parsed non-T without milliseconds: {parsed_dt}")
+                    except ValueError as e_no_ms:
+                        current_app.logger.error(f"format_datetime_for_display: Failed to parse non-T ('{utc_datetime_str}') without milliseconds either: {e_no_ms}")
+                        raise # Re-raise to hit the outer exception handler
+        else:
+            current_app.logger.error(f"format_datetime_for_display: Input '{utc_datetime_input}' is neither a string nor a datetime object. Type: {type(utc_datetime_input)}")
+            return str(utc_datetime_input) # Fallback for unexpected types
 
-# Run initialization logic after app is created and configured
-with app.app_context():
-    initialize_app_state()
+        if parsed_dt is None:
+            current_app.logger.error(f"format_datetime_for_display: parsed_dt is None after attempting to process input '{utc_datetime_input}'. This should not happen.")
+            return str(utc_datetime_input) # Fallback
+            
+        current_app.logger.info(f"format_datetime_for_display: Successfully processed input. Parsed datetime: {parsed_dt}. Localizing to UTC.")
+        utc_dt_aware = pytz.utc.localize(parsed_dt)
+        current_app.logger.info(f"format_datetime_for_display: Localized to UTC: {utc_dt_aware}. Converting to target timezone '{target_tz_str}'.")
+        target_tz = pytz.timezone(target_tz_str)
+        target_dt_aware = utc_dt_aware.astimezone(target_tz)
+        formatted_output = target_dt_aware.strftime('%m/%d/%Y %I:%M %p')
+        current_app.logger.info(f"format_datetime_for_display: Converted to target timezone: {target_dt_aware}. Formatted output: {formatted_output}")
+        return formatted_output
+    except Exception as e:
+        current_app.logger.error(f"format_datetime_for_display: General error converting datetime input '{utc_datetime_input}': {e}")
+        return str(utc_datetime_input) # Return string representation of original on error
 
 # --- Routes ---
 @app.route('/')
 def form():
     today_date = datetime.today().strftime('%Y-%m-%d')
-    # This dictionary provides rich default values for HTML form fields for easy debugging
-    html_form_defaults = {
-        'field1_agency': PDF_FILLER_DEFAULTS.get('field1_agency', "DEPARTMENT OF JUSTICE"), # Agency is special, might be from PDF_FILLER_DEFAULTS or a hardcoded app default
-        'field2_name': 'AJ Fish Debug',
-        'field2_address': '123 Debugger Lane',
-        'field2_city': 'Testville',
-        'field2_state': 'FL',
-        'field2_zip': '33800',
-        'field3_type_employment': 'Civilian',
-        'field_pdf_4_dob': '1990-01-01',
-        'field_pdf_5_marital_status': 'Single',
-        'field8_basis_of_claim': PDF_FILLER_DEFAULTS.get('field8_basis_of_claim', "Basis of claim debug text: Specific incident involving negligence by federal employees."),
-        'field10_nature_of_injury': PDF_FILLER_DEFAULTS.get('field10_nature_of_injury', "Nature of injury debug text: Resulting physical and emotional distress."),
-        'field12a_property_damage_amount': '10.00',
-        'field12b_personal_injury_amount': '90000.00', # Changed back to 90000.00
-        'field12c_wrongful_death_amount': '0.00',
-        # Total is usually calculated, but can have a default for display if needed
-        'field12d_total_amount': '90010.00', # Adjusted total to reflect 90000+10
-        'field_pdf_13b_phone': '555-123-4567',
-        'field14_date_signed': today_date,
-        'field13a_signature': '' # Empty for typed signature or placeholder
-    }
-    return render_template('form.html', default_values=html_form_defaults, title="SF-95 Claim Form")
+    form_data = session.get('form_data', {})
+    html_form_defaults = session.get('html_form_defaults', {
+        'field1_agency': '', # Let user type, PDF_FILLER_DEFAULTS will handle if empty at PDF gen
+        'field2_name': '',
+        'field2_address': '',
+        'field2_city': '',
+        'field2_state': '',
+        'field2_zip': '',
+        'field3_type_employment': 'Civilian', # Default to Civilian
+        'field_pdf_4_dob': '',
+        'field_pdf_5_marital_status': '', # Assuming it's a dropdown/radio
+        'field_pdf_13b_phone': '',
+        'field8_basis_of_claim': PDF_FILLER_DEFAULTS.get('field8_basis_of_claim', "On January 6, 2021, at the U.S. Capitol, claimant was subjected to excessive force by federal officers, including tear gas and rubber bullets, leading to physical injury and emotional distress."),
+        'field9_property_damage_description': '',
+        'field10_nature_of_injury': PDF_FILLER_DEFAULTS.get('field10_nature_of_injury', "Respiratory distress from tear gas, contusions from rubber bullets, and severe emotional distress."),
+        'field11_witness_name_1': '',
+        'field11_witness_address_1': '',
+        'field11_witness_name_2': '',
+        'field11_witness_address_2': '',
+        'field12a_property_damage_amount': '0',
+        'field12b_personal_injury_amount': '90000',
+        'field12c_wrongful_death_amount': '0',
+        'field12d_total_claim_amount': '0',
+        'user_email_address': '',
+        'supplemental_question_1_capitol_experience': '',
+        'supplemental_question_2_injuries_damages': '',
+        'supplemental_question_3_entry_exit_time': '',
+        'supplemental_question_4_inside_capitol_details': ''
+    })
+    session['html_form_defaults'] = html_form_defaults
+    
+    # Ensure all expected keys from defaults are in form_data for initial load or if new fields were added
+    for key, value in html_form_defaults.items():
+        form_data.setdefault(key, value)
+    
+    # Persist updated form_data (with any newly added default keys) back to session for consistency
+    # This helps if new default fields are added and user already had a session.
+    session['form_data'] = form_data
 
-@app.route('/list_pdf_fields', methods=['GET'])
-def list_pdf_fields_route():
+    states_and_territories = [
+        'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
+        'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
+        'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
+        'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
+        'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY',
+        'DC', 'AS', 'GU', 'MP', 'PR', 'VI'
+    ]
+    validation_errors = session.pop('validation_errors_step1', {})
+    return render_template('form.html', form_data=form_data, title="SF-95 Claim Form - Step 1", validation_errors=validation_errors, states_list=states_and_territories)
+
+@app.route('/form')
+def redirect_form_to_root():
+    return redirect(url_for('form'))
+
+@app.route('/process_step1', methods=['POST'])
+def process_step1():
+    current_app.logger.info("--- process_step1 --- Received POST request.")
+    form_data_step1 = dict(request.form)
+    current_app.logger.info(f"--- process_step1 --- Form data: {form_data_step1}")
+
+    # Server-side validation for Step 1
+    validation_errors_step1 = {}
+    required_fields_step1 = ['field2_name', 'field2_address', 'field2_city', 'field2_state', 'field2_zip', 'user_email_address']
+    for field in required_fields_step1:
+        if not form_data_step1.get(field):
+            validation_errors_step1[field] = "This field is required."
+    
+    email = form_data_step1.get('user_email_address')
+    if email and (not re.match(r"[^@]+@[^@]+\.[^@]+", email)):
+        validation_errors_step1['user_email_address'] = "Invalid email format."
+
+    if validation_errors_step1:
+        current_app.logger.warning(f"--- process_step1 --- Validation errors: {validation_errors_step1}")
+        session['form_step1_data'] = form_data_step1 # Preserve submitted data for re-display
+        session['validation_errors_step1'] = validation_errors_step1
+        return redirect(url_for('form'))
+
+    # --- Stage 1 Save: Upsert with PENDING signature details ---
+    db = get_db()
+    cursor = db.cursor()
+
+    claimant_name = form_data_step1.get('field2_name', 'UnknownClaimant')
+    if not claimant_name.strip(): claimant_name = 'UnknownClaimant'
+    slug = slugify(claimant_name)
+    # PDF filename determined by claimant name, consistent for draft and final
+    output_pdf_filename_with_ext = f"{slug}_SF95.pdf"
+    output_pdf_path = os.path.join(current_app.config['FILLED_FORMS_DIR'], output_pdf_filename_with_ext)
+
+    # Prepare data for DRAFT PDF (signature/date blank initially)
+    # Start with a fresh dictionary for clarity
+    pdf_data_for_filling_draft = {}
+
+    # Populate with defaults from pdf_filler.py, which uses app-side keys
+    # .copy() is important to avoid modifying the original DEFAULT_VALUES
+    pdf_data_for_filling_draft.update(utils.pdf_filler.DEFAULT_VALUES.copy())
+
+    # --- Explicitly map form data (from form_data_step1 which uses HTML names) ---
+    # --- to application-side keys (expected by PDF_FIELD_MAP and pdf_filler.py) ---
+
+    # Box 1: Agency - usually handled by DEFAULT_VALUES
+    # Example if it needed to be form-driven: 
+    # pdf_data_for_filling_draft['field1_agency'] = form_data_step1.get('html_form_name_for_agency', pdf_data_for_filling_draft.get('field1_agency'))
+
+    # Box 2: Claimant Info (Name, Address, City, State, Zip)
+    name = form_data_step1.get('field2_name', '')
+    address = form_data_step1.get('field2_address', '')
+    city = form_data_step1.get('field2_city', '')
+    state = form_data_step1.get('field2_state', '')
+    zip_code = form_data_step1.get('field2_zip', '')
+    # 'field2_claimant_info_combined' is the app-key for the combined PDF block.
+    pdf_data_for_filling_draft['field2_claimant_info_combined'] = f"{name}\n{address}\n{city}, {state} {zip_code}".strip()
+    # Store individual components as well, as they might be used by DB or other logic directly.
+    pdf_data_for_filling_draft['field2_name'] = name
+    pdf_data_for_filling_draft['field2_address'] = address
+    pdf_data_for_filling_draft['field2_city'] = city
+    pdf_data_for_filling_draft['field2_state'] = state
+    pdf_data_for_filling_draft['field2_zip'] = zip_code
+
+    # Box 3: Type of Employment
+    employment_type_from_form = form_data_step1.get('field3_type_employment', '') # Radio: 'Military', 'Civilian', or 'Other'
+    employment_text_for_pdf = ''
+    if employment_type_from_form == 'Other':
+        employment_text_for_pdf = form_data_step1.get('field3_other_specify', '')
+    elif employment_type_from_form: # Military or Civilian
+        employment_text_for_pdf = employment_type_from_form
+    
+    pdf_data_for_filling_draft['field3_type_employment'] = employment_text_for_pdf
+    pdf_data_for_filling_draft['field3_checkbox_civilian'] = True if employment_type_from_form == 'Civilian' else False
+    pdf_data_for_filling_draft['field3_checkbox_military'] = True if employment_type_from_form == 'Military' else False
+
+    # Box 4: Date of Birth (HTML name: 'field_pdf_4_dob', App key: 'field_pdf_4_dob')
+    pdf_data_for_filling_draft['field_pdf_4_dob'] = form_data_step1.get('field_pdf_4_dob', '')
+
+    # Box 5: Marital Status (HTML name: 'field_pdf_5_marital_status', App key: 'field_pdf_5_marital_status')
+    pdf_data_for_filling_draft['field_pdf_5_marital_status'] = form_data_step1.get('field_pdf_5_marital_status', '')
+
+    # Box 6 & 7: Date and Time of Incident - Handled by DEFAULT_VALUES if not overridden by specific form fields
+    # If HTML form had e.g. 'form_field_for_date_of_incident', it would be:
+    # pdf_data_for_filling_draft['field6_date_of_incident'] = form_data_step1.get('form_field_for_date_of_incident', pdf_data_for_filling_draft.get('field6_date_of_incident'))
+
+    # Box 8: Basis of Claim - Text area, override default if provided
+    pdf_data_for_filling_draft['field8_basis_of_claim'] = form_data_step1.get('field8_basis_of_claim', pdf_data_for_filling_draft.get('field8_basis_of_claim'))
+
+    # Box 9: Property Damage (Description)
+    # HTML form might have 'field9_property_damage_description_vehicle' and 'field9_property_damage_description_other'
+    prop_damage_vehicle = form_data_step1.get('field9_property_damage_description_vehicle', '')
+    prop_damage_other = form_data_step1.get('field9_property_damage_description_other', '')
+    combined_prop_desc = f"{prop_damage_vehicle}\n{prop_damage_other}".strip()
+    # App key 'field9_property_damage_description'
+    pdf_data_for_filling_draft['field9_property_damage_description'] = combined_prop_desc if combined_prop_desc else pdf_data_for_filling_draft.get('field9_property_damage_description')
+    # 'field9_owner_name_address' is usually defaulted to N/A for this form's typical use
+    pdf_data_for_filling_draft['field9_owner_name_address'] = form_data_step1.get('field9_owner_name_address', pdf_data_for_filling_draft.get('field9_owner_name_address'))
+
+    # Box 10: Nature of Injury - Text area, override default if provided
+    pdf_data_for_filling_draft['field10_nature_of_injury'] = form_data_step1.get('field10_nature_of_injury', pdf_data_for_filling_draft.get('field10_nature_of_injury'))
+
+    # Box 11: Witnesses (Name, Address) - Assuming single witness entry in HTML form
+    # App keys: 'field11_witness_name', 'field11_witness_address'
+    pdf_data_for_filling_draft['field11_witness_name'] = form_data_step1.get('field11_witness_name', pdf_data_for_filling_draft.get('field11_witness_name'))
+    pdf_data_for_filling_draft['field11_witness_address'] = form_data_step1.get('field11_witness_address', pdf_data_for_filling_draft.get('field11_witness_address'))
+
+    # Box 12: Amount of Claim (Property, Personal, Wrongful Death, Total)
+    # HTML names: 'field12a_property_damage_amount', 'field12b_personal_injury_amount', etc.
+    # App keys: 'field12a_property_damage', 'field12b_personal_injury', etc.
+    pdf_data_for_filling_draft['field12a_property_damage'] = form_data_step1.get('field12a_property_damage_amount', '')
+    pdf_data_for_filling_draft['field12b_personal_injury'] = form_data_step1.get('field12b_personal_injury_amount', '')
+    pdf_data_for_filling_draft['field12c_wrongful_death'] = form_data_step1.get('field12c_wrongful_death_amount', '')
+    # App key for Total: 'field12d_total_claim_amount', HTML form name: 'field12d_total_amount'
+    pdf_data_for_filling_draft['field12d_total_claim_amount'] = form_data_step1.get('field12d_total_amount', '')
+
+    # Box 13b: Phone Number of Person Signing Form
+    # HTML name: 'field_pdf_13b_phone', App key: 'field_pdf_13b_phone'
+    pdf_data_for_filling_draft['field_pdf_13b_phone'] = form_data_step1.get('field_pdf_13b_phone', '')
+
+    # Box 14: Date of Signature (for DRAFT PDF, this should be blank)
+    # HTML name: 'field14_date_signed', App key: 'field14_date_signed'
+    pdf_data_for_filling_draft['field14_date_signed'] = "" # Explicitly BLANK for draft PDF Box 14
+
+    # Ensure signature field itself shows 'Pending Signature' for the draft PDF
+    pdf_data_for_filling_draft['field13a_signature'] = "Pending Signature" # Box 13a: Signature - Text for draft
+    
+    # User Email and Supplemental Questions (not standard SF-95 fields, but stored in session/DB)
+    # These don't typically go into pdf_data_for_filling_draft unless specifically mapped in PDF_FIELD_MAP
+    # and intended for the PDF. If they are for DB only, this section is fine.
+    # For example, if supplemental_question_1 was for the PDF, it would be:
+    # pdf_data_for_filling_draft['app_key_for_supp_q1'] = form_data_step1.get('supplemental_question_1_capitol_experience', '')
+
+    current_app.logger.info(f"--- process_step1 --- Data for DRAFT PDF after mapping: {pdf_data_for_filling_draft}")
+
+    db_filled_pdf_filename_draft = None
     try:
-        fields = fillpdfs.get_form_fields(PDF_TEMPLATE_PATH)
-        print("\n--- Detected PDF Form Fields ---")
-        for field_name, field_value in fields.items():
-            print(f"Field Name: '{field_name}', Current Value: '{field_value}'")
-        print("--- End of PDF Form Fields ---\n")
-        return "PDF fields printed to Flask console. Please check your terminal.", 200
+        fill_sf95_pdf(pdf_data_for_filling_draft, PDF_TEMPLATE_PATH, output_pdf_path)
+        current_app.logger.info(f"--- process_step1 --- Draft PDF generated: {output_pdf_path}")
+        db_filled_pdf_filename_draft = os.path.basename(output_pdf_path)
     except Exception as e:
-        print(f"Error getting PDF fields: {e}")
-        return f"Error getting PDF fields: {e}", 500
+        current_app.logger.error(f"--- process_step1 --- Error filling DRAFT PDF: {e}")
+        flash(f"Error generating draft PDF: {e}. Please proceed to signature, the PDF can be regenerated.", "warning")
+        # Non-fatal for draft, allow proceeding to signature. Final PDF generation is key.
+        db_filled_pdf_filename_draft = output_pdf_filename_with_ext # Store expected name even if generation failed
+
+    # Prepare data for DB (Stage 1 - signature/date are None)
+    data_to_save_for_db_stage1 = {}
+    # Get all column names from DB_SCHEMA, excluding 'id' for inserts/updates handled by DB
+    schema_column_names_for_data = [col.split(' ')[0] for col in DB_SCHEMA if col.split(' ')[0] != 'id']
+
+    for key in schema_column_names_for_data:
+        if key == 'filled_pdf_filename':
+            data_to_save_for_db_stage1[key] = db_filled_pdf_filename_draft
+        # Ensure specific fields for actual signature text and full signature date are empty at Stage 1 for DB
+        elif key == 'field17_signature_of_claimant':
+            data_to_save_for_db_stage1[key] = "" # Store empty for actual signature text
+        elif key == 'field18_date_of_signature':
+            data_to_save_for_db_stage1[key] = "" # Store empty for signature timestamp
+        # For other fields, including 'field13a_signature' and 'field14_date_signed' which are now set
+        # for the draft PDF, get them from pdf_data_for_filling_draft.
+        # If a key is a DB column but not in pdf_data_for_filling_draft (e.g. new supplemental question not yet mapped),
+        # try form_data_step1 as a fallback, then empty string.
+        else:
+            data_to_save_for_db_stage1[key] = pdf_data_for_filling_draft.get(key, form_data_step1.get(key, ''))
+
+    current_app.logger.info(f"--- process_step1 --- Data for DB (Stage 1): {data_to_save_for_db_stage1}")
+
+    submission_id_in_progress = None
+
+    try:
+        cursor.execute("SELECT id FROM claims WHERE field2_name = ?", (claimant_name,))
+        existing_record = cursor.fetchone()
+        current_time_utc = datetime.now(timezone.utc)
+
+        if existing_record:
+            existing_id = existing_record['id']
+            current_app.logger.info(f"--- process_step1 --- Claimant '{claimant_name}' found (ID: {existing_id}). Updating with Stage 1 data.")
+            update_fields_sql_parts = []
+            update_values_list = []
+            # Construct SET clause for existing columns in data_to_save_for_db_stage1
+            for col_key, col_value in data_to_save_for_db_stage1.items():
+                 if col_key in schema_column_names_for_data and col_key not in ['created_at']:
+                    update_fields_sql_parts.append(f"{col_key} = ?")
+                    update_values_list.append(col_value)
+            
+            if update_fields_sql_parts:
+                update_fields_sql_parts.append("updated_at = ?")
+                update_values_list.append(current_time_utc)
+                update_values_list.append(existing_id) # For the WHERE clause
+
+                update_sql = f"UPDATE claims SET {', '.join(update_fields_sql_parts)} WHERE id = ?"
+                cursor.execute(update_sql, tuple(update_values_list))
+                db.commit()
+                submission_id_in_progress = existing_id
+                current_app.logger.info(f"--- process_step1 --- Record for '{claimant_name}' (ID: {existing_id}) updated with Stage 1 data.")
+            else:
+                 current_app.logger.warning(f"--- process_step1 --- No fields to update for existing claimant '{claimant_name}' at Stage 1.")
+                 submission_id_in_progress = existing_id # Still use existing ID if no data changed
+        else:
+            current_app.logger.info(f"--- process_step1 --- New claimant '{claimant_name}'. Inserting Stage 1 data.")
+            data_to_save_for_db_stage1['created_at'] = current_time_utc
+            data_to_save_for_db_stage1['updated_at'] = current_time_utc
+            
+            cols_for_insert_sql = []
+            vals_for_insert_list = []
+            placeholders_for_insert_sql = []
+            
+            # Ensure all keys in data_to_save_for_db_stage1 are valid columns
+            for col_name in schema_column_names_for_data + ['created_at', 'updated_at']:
+                if col_name in data_to_save_for_db_stage1: # only include if value was prepared
+                    cols_for_insert_sql.append(col_name)
+                    vals_for_insert_list.append(data_to_save_for_db_stage1[col_name])
+                    placeholders_for_insert_sql.append('?')
+            
+            if cols_for_insert_sql:
+                insert_sql = f"INSERT INTO claims ({', '.join(cols_for_insert_sql)}) VALUES ({', '.join(placeholders_for_insert_sql)})"
+                cursor.execute(insert_sql, tuple(vals_for_insert_list))
+                db.commit()
+                submission_id_in_progress = cursor.lastrowid
+                current_app.logger.info(f"--- process_step1 --- New record for '{claimant_name}' inserted with Stage 1 data (ID: {submission_id_in_progress}).")
+            else:
+                current_app.logger.error(f"--- process_step1 --- No columns to insert for Stage 1 for '{claimant_name}'.")
+                flash("Error saving initial form data. No data to insert.", "danger")
+                session['form_step1_data'] = form_data_step1 # Preserve submitted data
+                return redirect(url_for('form'))
+
+        # Store necessary info in session for Step 2 (signature)
+        session['submission_id_in_progress'] = submission_id_in_progress
+        # Storing the ALREADY MAPPED data from step 1, which uses app-side keys
+        session['pdf_data_for_filling_draft'] = pdf_data_for_filling_draft 
+        session['claimant_name_for_signature'] = pdf_data_for_filling_draft.get('field2_name', '') # Get name from mapped data
+        
+        current_app.logger.info(f"--- process_step1 --- Stored submission_id_in_progress: {submission_id_in_progress}, claimant_name: {session['claimant_name_for_signature']} in session. Redirecting to signature page.")
+        # Clear any previous step 1 validation errors as we are proceeding
+        session.pop('validation_errors_step1', None)
+        return redirect(url_for('signature_route'))
+
+    except sqlite3.Error as e:
+        current_app.logger.error(f"--- process_step1 --- Database error during Stage 1 save for '{claimant_name}': {e}")
+        db.rollback()
+        flash(f"Database error while saving initial data: {e}. Please try again.", "danger")
+        session['form_step1_data'] = form_data_step1 # Preserve data on error
+        return redirect(url_for('form'))
+    except Exception as e:
+        current_app.logger.error(f"--- process_step1 --- Unexpected error during Stage 1 for '{claimant_name}': {e}", exc_info=True)
+        db.rollback()
+        flash("An unexpected error occurred while saving initial data. Please try again.", "danger")
+        session['form_step1_data'] = form_data_step1
+        return redirect(url_for('form'))
+
+@app.route('/signature', methods=['GET'])
+def signature_route():
+    current_app.logger.info(f"SIGNATURE_ROUTE: Entered. Current session: {dict(session)}")
+    current_app.logger.info(f"SIGNATURE_ROUTE: Attempting to get 'pdf_data_for_filling_draft'. Session: {dict(session)}")
+    pdf_data_for_filling_draft = session.get('pdf_data_for_filling_draft')
+    if not pdf_data_for_filling_draft:
+        current_app.logger.warning(f"SIGNATURE_ROUTE: 'pdf_data_for_filling_draft' NOT FOUND in session. Session: {dict(session)}. Redirecting to form.")
+        flash('No data from step 1 found. Please start from the beginning.', 'error')
+        return redirect(url_for('form'))
+    today_date = datetime.today().strftime('%Y-%m-%d') # Still useful for other contexts or if re-adding a date to sig page
+    
+    # Attempt to get previously submitted (and failed validation) data for step 2
+    signature_defaults_from_error = session.pop('form_data_step2_errors', None)
+
+    if signature_defaults_from_error:
+        # If there were errors, use the data that caused the error to repopulate
+        signature_defaults = signature_defaults_from_error
+        # Phone and Date are no longer on this page, so no need to handle them here for repopulation
+    else:
+        # If no prior errors, pre-fill from step 1 and defaults
+        signature_defaults = {
+            'field17_signature_of_claimant': session.get('claimant_name_for_signature', ''), # Pre-fill with claimant name from step 1
+            # Phone and date are not on this form anymore
+        }
+
+    validation_errors = session.pop('validation_errors_step2', {})
+    # Pass today_date in case it's needed by the template for any reason, though not for a field anymore
+    return render_template('signature.html', pdf_data_for_filling_draft=pdf_data_for_filling_draft, today_date=today_date, form_data=signature_defaults, validation_errors=validation_errors)
 
 @app.route('/submit', methods=['POST'])
 def submit_form():
-    db = None  # Initialize db to None at the top of the function scope
-    form_data = request.form
+    current_app.logger.info("--- submit_form (Stage 2) --- Received POST request for signature.")
     
-    # Server-side validation
-    validation_errors = {}
-    required_fields = {
-        'field2_name': "Claimant's Name",
-        'field2_address': "Claimant's Address",
-        'field2_city': "Claimant's City",
-        'field2_state': "Claimant's State",
-        'field2_zip': "Claimant's ZIP Code",
-        'field_pdf_4_dob': "Claimant's Date of Birth",
-        'field3_type_employment': "Claimant's Type of Employment",
-        'field_pdf_5_marital_status': "Claimant's Marital Status",
-        'field8_basis_of_claim': "Basis of Claim",
-        'field10_nature_of_injury': "Nature and Extent of Personal Injury",
-        # Amount fields (12a, 12b, 12c, 12d) are numeric, validation for format handled below
-        # Signature and Date Signed are crucial
-        'field13a_signature': "Signature", # Assuming this holds the signature data
-        'field14_date_signed': "Date Signed"
-    }
-
-    for field, name in required_fields.items():
-        if not form_data.get(field):
-            validation_errors[field] = f"{name} is required."
-
-    # Date validation (format YYYY-MM-DD)
-    date_fields_to_validate = {
-        'field_pdf_4_dob': "Claimant's Date of Birth",
-        'field14_date_signed': "Date Signed"
-    }
-    for field, name in date_fields_to_validate.items():
-        date_value = form_data.get(field)
-        if date_value:
-            try:
-                datetime.strptime(date_value, '%Y-%m-%d')
-            except ValueError:
-                validation_errors[field] = f"{name} must be in YYYY-MM-DD format."
-        elif field in required_fields: # Ensure required date fields aren't just empty
-             validation_errors.setdefault(field, f"{name} is required and must be in YYYY-MM-DD format.")
-
-
-    if validation_errors:
-        current_app.logger.warning(f"Validation errors: {validation_errors} for form data: {form_data}")
-        # When validation fails, re-render the form with errors, existing form_data, and HTML_FORM_DEFAULTS
-        today_date = datetime.today().strftime('%Y-%m-%d')
-        html_form_defaults_for_error = {
-            'field1_agency': PDF_FILLER_DEFAULTS.get('field1_agency', "DEPARTMENT OF JUSTICE"),
-            'field2_name': 'AJ Fish Debug',
-            'field2_address': '123 Debugger Lane',
-            'field2_city': 'Testville',
-            'field2_state': 'FL',
-            'field2_zip': '33800',
-            'field3_type_employment': 'Civilian',
-            'field_pdf_4_dob': '1990-01-01',
-            'field_pdf_5_marital_status': 'Single',
-            'field8_basis_of_claim': PDF_FILLER_DEFAULTS.get('field8_basis_of_claim', "Basis of claim debug text: Specific incident involving negligence by federal employees."),
-            'field10_nature_of_injury': PDF_FILLER_DEFAULTS.get('field10_nature_of_injury', "Nature of injury debug text: Resulting physical and emotional distress."),
-            'field12a_property_damage_amount': '10.00',
-            'field12b_personal_injury_amount': '90000.00', # Changed back to 90000.00
-            'field12c_wrongful_death_amount': '0.00',
-            'field12d_total_amount': '90010.00', # Adjusted total to reflect 90000+10
-            'field_pdf_13b_phone': '555-123-4567',
-            'field14_date_signed': today_date,
-            'field13a_signature': ''
-        }
-        # User's submitted form_data should take precedence for fields they've filled
-        # The template should handle this by checking form_data first, then default_values
-        return render_template('form.html', form_data=form_data, title="SF-95 Claim Form", validation_errors=validation_errors, default_values=html_form_defaults_for_error), 400
-
-    try:
-        # --- Prepare data for PDF --- 
-        data_to_save = {
-            'FIELD2_NAME': form_data.get('field2_name'),
-            'FIELD2_ADDRESS': form_data.get('field2_address'),
-            'FIELD2_CITY': form_data.get('field2_city'),
-            'FIELD2_STATE': form_data.get('field2_state'),
-            'FIELD2_ZIP': form_data.get('field2_zip'),
-            'FIELD_PDF_4_DOB': form_data.get('field_pdf_4_dob'),
-            'FIELD3_TYPE_EMPLOYMENT': form_data.get('field3_type_employment'),
-            'FIELD_PDF_5_MARITAL_STATUS': form_data.get('field_pdf_5_marital_status'),
-            'FIELD8_BASIS_OF_CLAIM': form_data.get('field8_basis_of_claim'),
-            'FIELD10_NATURE_OF_INJURY': form_data.get('field10_nature_of_injury'),
-            'FIELD12A_PROPERTY_DAMAGE_AMOUNT': form_data.get('field12a_property_damage_amount', type=float, default=0.0),
-            'FIELD12B_PERSONAL_INJURY_AMOUNT': form_data.get('field12b_personal_injury_amount', type=float, default=0.0),
-            'FIELD12C_WRONGFUL_DEATH_AMOUNT': form_data.get('field12c_wrongful_death_amount', type=float, default=0.0),
-            'FIELD12D_TOTAL_AMOUNT': form_data.get('field12d_total_amount', type=float, default=0.0),
-            'FIELD_PDF_13B_PHONE': form_data.get('field_pdf_13b_phone'),
-            # Map the typed signature from field13a_signature to the database column
-            'FIELD_PDF_13B_SIGNATURE_DATA': form_data.get('field13a_signature'), 
-            'FIELD14_DATE_SIGNED': form_data.get('field14_date_signed'),
-            'FILLED_PDF_FILENAME': None  # Placeholder, will be updated after PDF generation
-        }
-
-        # Prepare the dictionary to be passed to the PDF filler
-        pdf_data_for_filling = {
-            # Field 1 (Agency) - Handled by DEFAULT_VALUES in pdf_filler.py if not overridden
-            'field1_agency': form_data.get('field1_agency'), 
-
-            # Field 2 (Claimant Info) - We will address this specifically later with 'field2_claimant_info_combined'
-            # For now, pass individual components if they exist in form_data, though pdf_filler might not use them directly yet
-            'field2_name': form_data.get('field2_name'),
-            'field2_address': form_data.get('field2_address'),
-            'field2_city': form_data.get('field2_city'),
-            'field2_state': form_data.get('field2_state'),
-            'field2_zip': form_data.get('field2_zip'),
-
-            # Field 3 (Employment)
-            'field3_type_employment': form_data.get('field3_type_employment'), # Keep sending the text value
-            'field3_other_specify': form_data.get('field3_other_specify'),
-            # Checkbox-specific keys will be added below
-
-            # Field 4 & 5 (DOB, Marital Status)
-            'field_pdf_4_dob': form_data.get('field_pdf_4_dob'),
-            'field_pdf_5_marital_status': form_data.get('field_pdf_5_marital_status'),
-
-            # Field 6 & 7 (Incident Date/Time) - Handled by DEFAULT_VALUES in pdf_filler.py if not overridden
-            'field6_date_of_incident': form_data.get('field6_date_of_incident'),
-            'field7_time_of_incident': form_data.get('field7_time_of_incident'),
-
-            # Field 8 (Basis of Claim)
-            'field8_basis_of_claim': form_data.get('field8_basis_of_claim'),
-
-            # Field 9 (Property Damage - Owner & Description)
-            'field9_owner_name_address': form_data.get('field9_owner_name_address'),
-            'field9_property_damage_description': form_data.get('field9_property_damage_description'), # Matches HTML input
-            # Note: The HTML form uses 'field9_property_damage_description_vehicle' and 'field9_property_damage_description_other'.
-            # We might need to combine these or decide which one maps to PDF's 'field9_property_damage_description'.
-            # For now, assuming a direct field or that defaults in pdf_filler are desired if these are empty.
-
-            # Field 10 (Nature of Injury)
-            'field10_nature_of_injury': form_data.get('field10_nature_of_injury'),
-
-            # Field 11 (Witnesses)
-            'field11_witness_name': form_data.get('field11_witness_name'),
-            'field11_witness_address': form_data.get('field11_witness_address'),
-
-            # Field 12 (Amounts)
-            'field12a_property_damage': form_data.get('field12a_property_damage_amount'), # Map from _amount key
-            'field12b_personal_injury': form_data.get('field12b_personal_injury_amount'), # Map from _amount key
-            'field12c_wrongful_death': form_data.get('field12c_wrongful_death_amount'), # Map from _amount key
-            'field12d_total': form_data.get('field12d_total_amount'), # Map from _amount key
-
-            # Field 13 (Signature & Phone)
-            'field13a_signature': form_data.get('field13a_signature'), # This is the key PDF_FIELD_MAP uses for the signature box
-            'field_pdf_13b_phone': form_data.get('field_pdf_13b_phone'),
-            # Also ensure the DB key for signature is populated if 'field13a_signature' is what we are using for PDF
-            'field_pdf_13b_signature_data': form_data.get('field13a_signature'), 
-
-            # Field 14 (Date Signed)
-            'field14_date_signed': form_data.get('field14_date_signed'),
-
-            # Fields 15-19 (Insurance) - Pass them through if submitted
-            'field15_accident_insurance': form_data.get('field15_accident_insurance'),
-            'field15_insurer_name_address_policy': form_data.get('field15_insurer_name_address_policy'),
-            'field16_filed_claim': form_data.get('field16_filed_claim'),
-            'field16_claim_details': form_data.get('field16_claim_details'),
-            'field17_deductible_amount': form_data.get('field17_deductible_amount'),
-            'field18_insurer_action': form_data.get('field18_insurer_action'),
-            'field19_insurer_name_address': form_data.get('field19_insurer_name_address')
-        }
-
-        # Handle Field 3 (Employment) checkboxes
-        employment_type = form_data.get('field3_type_employment')
-        if employment_type == 'Civilian':
-            pdf_data_for_filling['field3_checkbox_civilian'] = True
-        elif employment_type == 'Military':
-            pdf_data_for_filling['field3_checkbox_military'] = True
-
-        # Special handling for field2_claimant_info_combined (will be addressed more thoroughly next)
-        # For now, let's ensure it's constructed if individual parts are present
-        name = pdf_data_for_filling.get('field2_name', '')
-        address = pdf_data_for_filling.get('field2_address', '')
-        city = pdf_data_for_filling.get('field2_city', '')
-        state_val = pdf_data_for_filling.get('field2_state', '') # Renamed to avoid conflict with 'state' module
-        zip_code = pdf_data_for_filling.get('field2_zip', '')
-        if name or address or city or state_val or zip_code: # only construct if there's something to combine
-            pdf_data_for_filling['field2_claimant_info_combined'] = f"{name}\n{address}\n{city}, {state_val} {zip_code}".strip()
-        else:
-            # If all parts are empty, we don't want to send an empty 'field2_claimant_info_combined'
-            # Let pdf_filler handle it (it will skip if not in form_data and no default)
-            if 'field2_claimant_info_combined' in pdf_data_for_filling:
-                 del pdf_data_for_filling['field2_claimant_info_combined']
-
-        # Call the PDF filling utility with the prepared data
-        timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_pdf_filename = f"SF95_filled_{timestamp_str}.pdf"
-        # Ensure FILLED_PDF_DIR exists (it should be created by initialize_app_state, but good practice to check)
-        if not os.path.exists(FILLED_PDF_DIR):
-            os.makedirs(FILLED_PDF_DIR)
-            current_app.logger.info(f"Created FILLED_PDF_DIR during submit at: {FILLED_PDF_DIR}")
-        output_pdf_path = os.path.join(FILLED_PDF_DIR, output_pdf_filename)
-        
-        actual_pdf_path = fill_sf95_pdf(pdf_data_for_filling, PDF_TEMPLATE_PATH, output_pdf_path)
-
-        if not actual_pdf_path:
-            current_app.logger.error(f"Error filling PDF. PDF filler data: {pdf_data_for_filling}")
-            flash("There was an error generating the PDF. Please check the server logs and try again.", 'danger')
-            return redirect(url_for('form'))
-
-        # Save to database
-        db = get_db() # Assign to the db variable scoped to the function
-        cursor = db.cursor()
-        
-        # SQL query uses lowercase column names as per DB_SCHEMA
-        sql_query = '''
-        INSERT INTO submissions (
-            field2_name, field2_address, field2_city, field2_state, field2_zip,
-            field_pdf_4_dob, field3_type_employment, field_pdf_5_marital_status,
-            field8_basis_of_claim, field10_nature_of_injury,
-            field12a_property_damage, field12b_personal_injury, field12c_wrongful_death, field12d_total,
-            field_pdf_13b_phone, field_pdf_13b_signature_data, field14_date_signed,
-            filled_pdf_filename
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        '''
-        
-        # values_tuple matches the order of columns in INSERT and uses data_to_save (UPPERCASE keys)
-        values_tuple = (
-            data_to_save['FIELD2_NAME'], data_to_save['FIELD2_ADDRESS'], data_to_save['FIELD2_CITY'], 
-            data_to_save['FIELD2_STATE'], data_to_save['FIELD2_ZIP'],
-            data_to_save['FIELD_PDF_4_DOB'], data_to_save['FIELD3_TYPE_EMPLOYMENT'], 
-            data_to_save['FIELD_PDF_5_MARITAL_STATUS'], data_to_save['FIELD8_BASIS_OF_CLAIM'], 
-            data_to_save['FIELD10_NATURE_OF_INJURY'],
-            data_to_save['FIELD12A_PROPERTY_DAMAGE_AMOUNT'], data_to_save['FIELD12B_PERSONAL_INJURY_AMOUNT'],
-            data_to_save['FIELD12C_WRONGFUL_DEATH_AMOUNT'], data_to_save['FIELD12D_TOTAL_AMOUNT'],
-            data_to_save['FIELD_PDF_13B_PHONE'], data_to_save['FIELD_PDF_13B_SIGNATURE_DATA'],
-            data_to_save['FIELD14_DATE_SIGNED'],
-            output_pdf_filename # Storing only the filename
-        )
-        
-        cursor.execute(sql_query, values_tuple)
-        submission_id = cursor.lastrowid
-        db.commit()
-        
-        current_app.logger.info(f"Submission {submission_id} successfully saved with PDF: {output_pdf_filename}")
-        flash(f"Form submitted successfully! Submission ID: {submission_id}", 'success')
-        return redirect(url_for('success_page', submission_id=submission_id))
-    except Exception as e:
-        current_app.logger.error(f"Error during PDF generation or database saving: {str(e)}", exc_info=True)
-        current_app.logger.error(f"Data that caused error: {pdf_data_for_filling}")
-        flash('An unexpected error occurred while processing your form. Please try again or contact support.', 'danger')
+    submission_id_in_progress = session.get('submission_id_in_progress') # Use .get to avoid KeyError if debugging/testing
+    pdf_data_for_filling_draft = session.get('pdf_data_for_filling_draft')
+    
+    if not submission_id_in_progress or not pdf_data_for_filling_draft:
+        current_app.logger.error("--- submit_form (Stage 2) --- Missing submission ID or Step 1 data in session. Redirecting to form.")
+        flash("Your session may have expired or there was an error processing step 1. Please start over.", "danger")
+        # Clear potentially problematic session keys if they exist
+        session.pop('submission_id_in_progress', None)
+        session.pop('pdf_data_for_filling_draft', None)
+        session.pop('claimant_name_for_signature', None)
         return redirect(url_for('form'))
 
-@app.route('/success/<int:submission_id>')
+    signature_page_data = dict(request.form) # Data from the signature page submission
+    current_app.logger.info(f"--- submit_form (Stage 2) --- Signature page data: {signature_page_data} for DB ID: {submission_id_in_progress}")
+    current_app.logger.info(f"--- submit_form (Stage 2) --- Step 1 data from session: {pdf_data_for_filling_draft}")
+
+    # Validation for signature page (Step 2)
+    claimant_name_from_step1 = pdf_data_for_filling_draft.get('field2_name', '')
+    signature_of_claimant_from_form = signature_page_data.get('field17_signature_of_claimant')
+    
+    validation_errors_step2 = {}
+    if not signature_of_claimant_from_form:
+        validation_errors_step2['field17_signature_of_claimant'] = "Signature is required."
+    elif signature_of_claimant_from_form.strip().lower() != claimant_name_from_step1.strip().lower():
+        validation_errors_step2['field17_signature_of_claimant'] = f"Signature must exactly match the claimant's name: '{claimant_name_from_step1}'."
+
+    if validation_errors_step2:
+        current_app.logger.warning(f"--- submit_form (Stage 2) --- Validation errors: {validation_errors_step2}")
+        # Session variables are already set from process_step1, just add errors and redirect back
+        session['form_data_step2_errors'] = signature_page_data # To prefill signature attempt on error
+        session['validation_errors_step2'] = validation_errors_step2
+        return redirect(url_for('signature_route'))
+
+    # --- Finalize Submission (Stage 2) ---
+    db = get_db()
+    cursor = db.cursor()
+
+    # PDF Filename (should be same as draft, using claimant name from Step 1 data)
+    slug = slugify(claimant_name_from_step1)
+    output_pdf_filename_with_ext = f"{slug}_SF95.pdf"
+    output_pdf_path = os.path.join(current_app.config['FILLED_FORMS_DIR'], output_pdf_filename_with_ext)
+
+    # Server-generated Date of Signature (UTC)
+    date_of_signature_utc_dt = datetime.now(timezone.utc)
+    date_of_signature_utc_str_for_db = date_of_signature_utc_dt.strftime('%Y-%m-%dT%H:%M:%S')
+    current_app.logger.info(f"--- submit_form (Stage 2) --- Server-generated signature datetime (UTC): {date_of_signature_utc_str_for_db}")
+
+    # Prepare data for FINAL PDF (combines Step 1 data with Step 2 signature details)
+    # Start with the already mapped data from Step 1 (retrieved from session)
+    pdf_data_for_filling_final = pdf_data_for_filling_draft.copy()
+    
+    # Add/Overwrite with signature and final server-generated signature date
+    pdf_data_for_filling_final['field13a_signature'] = signature_of_claimant_from_form # Actual signature for PDF Box 13a
+    pdf_data_for_filling_final['field14_date_signed'] = date_of_signature_utc_dt.strftime('%m/%d/%Y') # Format the date as MM/DD/YYYY for the PDF's Box 14
+    
+    # Ensure all default PDF filler keys are present if not already in step 1 data (should be, due to process_step1 logic)
+    for default_key, default_value in PDF_FILLER_DEFAULTS.items():
+        if default_key not in pdf_data_for_filling_final:
+            pdf_data_for_filling_final[default_key] = default_value
+            current_app.logger.info(f"--- submit_form (Stage 2) --- Added default '{default_key}':'{default_value}' to final PDF data as it was missing.")
+
+    # Recalculate total amount if necessary, or ensure it's correctly pulled from step 1.
+    # Current logic in process_step1 maps 'field12d_total_amount' (html name) to 'field12d_total_claim_amount' (app key)
+    # So, pdf_data_for_filling_final['field12d_total_claim_amount'] should have the value from step 1.
+    # If a calculation were needed here from 12a, 12b, 12c it would look like:
+    # try:
+    #     prop_dam = float(pdf_data_for_filling_final.get('field12a_property_damage', '0').replace('$', '').replace(',', '') or '0')
+    #     pers_inj = float(pdf_data_for_filling_final.get('field12b_personal_injury', '0').replace('$', '').replace(',', '') or '0')
+    #     wrong_death = float(pdf_data_for_filling_final.get('field12c_wrongful_death', '0').replace('$', '').replace(',', '') or '0')
+    #     total_claim = prop_dam + pers_inj + wrong_death
+    #     pdf_data_for_filling_final['field12d_total_claim_amount'] = f"{total_claim:,.2f}"
+    # except ValueError:
+    #     current_app.logger.error("--- submit_form (Stage 2) --- Error converting amount fields to float for total calculation.")
+    #     # Keep existing total or set to empty if conversion fails
+    #     pdf_data_for_filling_final['field12d_total_claim_amount'] = pdf_data_for_filling_final.get('field12d_total_claim_amount', '')
+
+    current_app.logger.info(f"--- submit_form (Stage 2) --- Final PDF data prepared: {pdf_data_for_filling_final}")
+
+    db_filled_pdf_filename_final = None
+    try:
+        fill_sf95_pdf(pdf_data_for_filling_final, PDF_TEMPLATE_PATH, output_pdf_path)
+        current_app.logger.info(f"--- submit_form (Stage 2) --- Final PDF generated: {output_pdf_path}")
+        db_filled_pdf_filename_final = os.path.basename(output_pdf_path)
+    except Exception as e:
+        current_app.logger.error(f"--- submit_form (Stage 2) --- Error filling FINAL PDF for ID {submission_id_in_progress}: {e}", exc_info=True)
+        flash(f"Critical Error: Could not generate the final PDF document. Please contact support with submission ID {submission_id_in_progress}.", "danger")
+        # Even if PDF fails, we should still try to save the signature data to DB
+        db_filled_pdf_filename_final = output_pdf_filename_with_ext # Save expected name
+
+    # Data to UPDATE in the database for the finalized submission
+    data_to_update_in_db = {
+        'field17_signature_of_claimant': signature_of_claimant_from_form,
+        'field18_date_of_signature': date_of_signature_utc_str_for_db, # Store raw UTC string in DB
+        'filled_pdf_filename': db_filled_pdf_filename_final,
+        'field13a_signature': signature_of_claimant_from_form, # Update DB column as well if it exists
+        'field14_date_signed': date_of_signature_utc_str_for_db, # Store raw UTC string in DB (or formatted if preferred for this specific PDF field column)
+        'updated_at': datetime.now(timezone.utc) # Update the 'updated_at' timestamp
+    }
+    current_app.logger.info(f"--- submit_form (Stage 2) --- Data to update in DB for ID {submission_id_in_progress}: {data_to_update_in_db}")
+
+    try:
+        update_fields_sql_parts = []
+        update_values_list = []
+        schema_column_names = [col.split(' ')[0] for col in DB_SCHEMA]
+
+        for col_key, col_value in data_to_update_in_db.items():
+            if col_key in schema_column_names: # Ensure we only try to update valid columns
+                update_fields_sql_parts.append(f"{col_key} = ?")
+                update_values_list.append(col_value)
+        
+        if not update_fields_sql_parts:
+            current_app.logger.error(f"--- submit_form (Stage 2) --- No valid fields to update in DB for ID {submission_id_in_progress}. This is unexpected.")
+            flash("Error finalizing submission: No data fields to update.", "danger")
+            # Keep session data for retry/debug if needed by redirecting back to signature page
+            session['submission_id_in_progress'] = submission_id_in_progress 
+            session['pdf_data_for_filling_draft'] = pdf_data_for_filling_draft
+            session['claimant_name_for_signature'] = claimant_name_from_step1
+            return redirect(url_for('signature_route'))
+
+        update_values_list.append(submission_id_in_progress) # For the WHERE id = ?
+        update_sql = f"UPDATE claims SET {', '.join(update_fields_sql_parts)} WHERE id = ?"
+        
+        current_app.logger.info(f"--- submit_form (Stage 2) --- Executing SQL: {update_sql} with values: {tuple(update_values_list)}")
+        cursor.execute(update_sql, tuple(update_values_list))
+        db.commit()
+        current_app.logger.info(f"--- submit_form (Stage 2) --- Successfully updated record ID {submission_id_in_progress} in database.")
+
+        # Clear session data after successful submission
+        session.pop('submission_id_in_progress', None)
+        session.pop('pdf_data_for_filling_draft', None)
+        session.pop('claimant_name_for_signature', None)
+        session.pop('form_data_step1', None) # Clean up old key if present
+        session.pop('validation_errors_step1', None)
+        session.pop('form_data_step2_errors', None)
+        session.pop('validation_errors_step2', None)
+        
+        flash('Form submitted successfully!', 'success')
+        return redirect(url_for('success_page', submission_id=submission_id_in_progress))
+
+    except sqlite3.Error as e:
+        current_app.logger.error(f"--- submit_form (Stage 2) --- Database error updating record ID {submission_id_in_progress}: {e}", exc_info=True)
+        db.rollback()
+        flash(f"Database error finalizing submission: {e}. Please try again or contact support with ID {submission_id_in_progress}.", "danger")
+        # Preserve session data for potential retry by redirecting back to signature page
+        session['submission_id_in_progress'] = submission_id_in_progress 
+        session['pdf_data_for_filling_draft'] = pdf_data_for_filling_draft
+        session['claimant_name_for_signature'] = claimant_name_from_step1
+        return redirect(url_for('signature_route'))
+    except Exception as e:
+        current_app.logger.error(f"--- submit_form (Stage 2) --- Unexpected error finalizing submission for ID {submission_id_in_progress}: {e}", exc_info=True)
+        db.rollback()
+        flash(f"An unexpected error occurred during final submission. Please contact support with ID {submission_id_in_progress}.", "danger")
+        session['submission_id_in_progress'] = submission_id_in_progress 
+        session['pdf_data_for_filling_draft'] = pdf_data_for_filling_draft
+        session['claimant_name_for_signature'] = claimant_name_from_step1
+        return redirect(url_for('signature_route'))
+
+@app.route('/success/<submission_id>')
 def success_page(submission_id):
-    return f"<h1>Form Submitted Successfully!</h1><p>Your Submission ID is: {submission_id}</p><p><a href='{url_for('form')}'>Submit another form</a></p>"
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT filled_pdf_filename FROM claims WHERE id = ?", (submission_id,))
+    claim_record = cursor.fetchone()
+    pdf_filename = None
+    if claim_record and claim_record['filled_pdf_filename']:
+        pdf_filename = claim_record['filled_pdf_filename']
+        current_app.logger.info(f"--- success_page --- Fetched PDF filename: {pdf_filename} for submission ID: {submission_id}")
+    else:
+        current_app.logger.warning(f"--- success_page --- Could not find PDF filename for submission ID: {submission_id}")
+
+    return render_template('success.html', submission_id=submission_id, pdf_filename=pdf_filename)
+
+@app.route('/download_filled_pdf/<filename>')
+def download_filled_pdf(filename):
+    current_app.logger.info(f"--- download_filled_pdf --- Attempting to send file: {filename}")
+    try:
+        return send_from_directory(current_app.config['FILLED_FORMS_DIR'], filename, as_attachment=True)
+    except FileNotFoundError:
+        current_app.logger.error(f"--- download_filled_pdf --- File not found: {filename} in directory {current_app.config['FILLED_FORMS_DIR']}")
+        flash(f"Error: Could not find the PDF file '{filename}'.", "danger")
+        # Redirect to admin or a generic error page, or back to where they came from if possible
+        # For simplicity, redirecting to admin view. Consider referrer if more context is needed.
+        return redirect(url_for('admin_view')) # Or perhaps 'form' or a dedicated error page
+    except Exception as e:
+        current_app.logger.error(f"--- download_filled_pdf --- Unexpected error sending file {filename}: {e}", exc_info=True)
+        flash(f"An unexpected error occurred while trying to download the PDF '{filename}'.", "danger")
+        return redirect(url_for('admin_view')) # Or 'form'
+
+@app.route('/admin', methods=['GET'])
+def admin_view():
+    db = get_db()
+    cursor = db.cursor()
+
+    # Get the list of database column names needed for display from DESIRED_COLUMNS_ORDER_AND_HEADERS
+    db_columns_for_display = [col_map[0] for col_map in DESIRED_COLUMNS_ORDER_AND_HEADERS]
+    display_header_names = [
+        'ID', 'Claimant Name', 'Email Address', 'Phone Number', 'Basis of Claim', 
+        'Nature of Injury', 'Capitol Experience', 'Injuries/Damages',
+        'Entry/Exit Time', 'Inside Capitol Details', 'Property Damage Amount',
+        'Personal Injury Amount', 'Wrongful Death Amount', 'Total Claim Amount',
+        'Signature', 'Type of Employment', 'Marital Status', 'Street Address',
+        'City', 'State', 'Zip Code', 'Date and Time Created', 'Date and Time Signed'
+    ]
+    
+    # Ensure 'id' (primary key) is selected for delete functionality,
+    # and avoid duplicates if 'id' were ever mapped in DESIRED_COLUMNS_ORDER_AND_HEADERS
+    select_columns_list = ['id'] + [col for col in db_columns_for_display if col != 'id']
+    select_columns_str = ', '.join(select_columns_list)
+
+    try:
+        # Select the actual 'id' column along with others
+        cursor.execute(f"SELECT {select_columns_str} FROM claims ORDER BY created_at DESC")
+        raw_claims_data = cursor.fetchall() # List of sqlite3.Row objects
+        
+        claims_list_for_template = []
+        for row in raw_claims_data:
+            processed_row = {}
+            processed_row['id'] = row['id'] # Explicitly add the database 'id' to the processed_row for use in the template
+            for db_col, display_header in zip(db_columns_for_display, display_header_names):
+                raw_value = row[db_col]
+                if db_col == 'field18_date_of_signature' or db_col == 'created_at' or db_col == 'updated_at':
+                    processed_row[display_header] = format_datetime_for_display(raw_value)
+                elif db_col == 'field17_signature_of_claimant':
+                    processed_row[display_header] = raw_value if raw_value else "Pending Signature"
+                elif db_col == 'filled_pdf_filename': # This is the 'ID' column in display
+                    processed_row[display_header] = raw_value if raw_value else "N/A"
+                else:
+                    processed_row[display_header] = raw_value if raw_value is not None else ''
+            claims_list_for_template.append(processed_row)
+
+        current_app.logger.info(f"Fetched {len(claims_list_for_template)} claims for admin view.")
+        # Pass display_header_names for the table headers in the template
+        return render_template('admin.html', claims=claims_list_for_template, column_names=display_header_names, title="Admin - Submissions")
+    except sqlite3.Error as e:
+        current_app.logger.error(f"Database error in admin_view: {e}")
+        flash(f"Error fetching claims: {e}", 'danger')
+        return render_template('admin.html', claims=[], column_names=display_header_names, title="Admin - Submissions", error="Could not retrieve claims.")
+
+# New route for deleting a claim
+@app.route('/admin/delete/<int:claim_id>', methods=['POST'])
+def delete_claim(claim_id):
+    pdf_filename_to_delete = None
+    db = get_db() # Initialize db here to ensure it's available for rollback if needed
+    try:
+        cursor = db.cursor()
+        
+        # Step 1: Get the PDF filename BEFORE deleting the record
+        cursor.execute("SELECT filled_pdf_filename FROM claims WHERE id = ?", (claim_id,))
+        record = cursor.fetchone()
+        if record and record['filled_pdf_filename']: # Check if record exists and has a filename
+            pdf_filename_to_delete = record['filled_pdf_filename']
+        elif not record:
+            flash(f'Error: Submission with ID {claim_id} not found.', 'danger')
+            current_app.logger.error(f"Attempted to delete non-existent claim with id {claim_id}.")
+            return redirect(url_for('admin_view'))
+
+
+        # Step 2: Delete the database record
+        cursor.execute("DELETE FROM claims WHERE id = ?", (claim_id,))
+        db.commit()
+        flash_message = 'Submission record deleted successfully.'
+        current_app.logger.info(f"Successfully deleted claim record with id: {claim_id}")
+
+        # Step 3: Attempt to delete the PDF file if a filename was found
+        if pdf_filename_to_delete:
+            pdf_path = os.path.join(current_app.config['FILLED_FORMS_DIR'], pdf_filename_to_delete)
+            try:
+                if os.path.exists(pdf_path):
+                    os.remove(pdf_path)
+                    flash_message += ' Associated PDF file also deleted.'
+                    current_app.logger.info(f"Successfully deleted PDF file: {pdf_path}")
+                else:
+                    # This case means filename was in DB, but file not on disk
+                    flash_message += ' Associated PDF file was not found on server.'
+                    current_app.logger.warning(f"PDF file not found on disk, cannot delete: {pdf_path}")
+            except OSError as e:
+                # This case means file existed but couldn't be deleted (e.g., permissions)
+                flash_message += f' Error deleting associated PDF file: {e}. Please check server logs and permissions.'
+                current_app.logger.error(f"Error deleting PDF file {pdf_path}: {e}")
+        else:
+            # This case means the record existed but had no PDF filename linked in the DB
+            flash_message += ' No associated PDF file was linked to this submission in the database.'
+            current_app.logger.info(f"No PDF filename associated in DB for claim id {claim_id}.")
+        
+        flash(flash_message, 'success' if 'Error' not in flash_message and 'not found on server' not in flash_message else 'warning')
+
+    except sqlite3.Error as e:
+        # This handles errors during DB operations (SELECT or DELETE)
+        if db: # Check if db was successfully initialized
+             db.rollback()
+        flash(f'Database error while deleting submission: {e}', 'danger')
+        current_app.logger.error(f"Database error for claim id {claim_id}: {e}")
+    # The 'finally' block for closing DB connection is handled by @app.teardown_appcontext
+    return redirect(url_for('admin_view'))
+
+@app.route('/download_csv')
+def download_csv():
+    db = get_db()
+    cursor = db.cursor()
+
+    db_column_names = [col_map[0] for col_map in DESIRED_COLUMNS_ORDER_AND_HEADERS]
+    csv_header_names = [
+        'ID', 'Claimant Name', 'Email Address', 'Phone Number', 'Basis of Claim', 
+        'Nature of Injury', 'Capitol Experience', 'Injuries/Damages',
+        'Entry/Exit Time', 'Inside Capitol Details', 'Property Damage Amount',
+        'Personal Injury Amount', 'Wrongful Death Amount', 'Total Claim Amount',
+        'Signature', 'Type of Employment', 'Marital Status', 'Street Address',
+        'City', 'State', 'Zip Code', 'Date and Time Created', 'Date and Time Signed'
+    ]
+    select_columns_str = ', '.join(db_column_names)
+
+    try:
+        cursor.execute(f"SELECT {select_columns_str} FROM claims ORDER BY created_at DESC")
+        claims_data_rows = cursor.fetchall() # List of sqlite3.Row objects
+
+        if not claims_data_rows:
+            flash('No data to export.', 'info')
+            return redirect(url_for('admin_view'))
+
+        csv_io = io.StringIO()
+        csv_writer = csv.writer(csv_io)
+        
+        # Write headers
+        headers = [col_header_pair[1] for col_header_pair in DESIRED_COLUMNS_ORDER_AND_HEADERS]
+        csv_writer.writerow(headers)
+        current_app.logger.info(f"--- download_csv --- CSV headers written: {headers}")
+
+        # Write data rows
+        for row in claims_data_rows:
+            row_data_for_csv = []
+            for db_col, _ in DESIRED_COLUMNS_ORDER_AND_HEADERS:
+                raw_value = row[db_col]
+                if db_col == 'field18_date_of_signature' or db_col == 'created_at' or db_col == 'updated_at':
+                    row_data_for_csv.append(format_datetime_for_display(raw_value))
+                elif db_col == 'field17_signature_of_claimant':
+                    row_data_for_csv.append(raw_value if raw_value else "Pending Signature")
+                elif db_col == 'filled_pdf_filename': # This is the 'ID' column in display
+                    row_data_for_csv.append(raw_value if raw_value else "N/A")
+                else:
+                    row_data_for_csv.append(raw_value if raw_value is not None else '')
+            csv_writer.writerow(row_data_for_csv)
+        current_app.logger.info(f"--- download_csv --- Successfully wrote {len(claims_data_rows)} rows to CSV.")
+
+        # Move to the beginning of the StringIO buffer
+        csv_io.seek(0)
+
+        return Response(
+            csv_io,
+            mimetype="text/csv",
+            headers={"Content-Disposition": "attachment;filename=claims_export.csv"}
+        )
+    except sqlite3.Error as e:
+        current_app.logger.error(f"Database error during CSV export: {e}")
+        flash(f"Error exporting data: {e}", 'danger')
+        return redirect(url_for('admin_view'))
 
 @app.cli.command('init-db')
 def init_db_command():
-    create_tables_if_not_exist()
-    print('Initialized the database.')
+    with app.app_context():
+        db = get_db()
+    print('Initialized the database defined in app.config[DATABASE].')
 
 if __name__ == '__main__':
-    # Create instance folder if it doesn't exist, for the SQLite DB
-    try:
-        os.makedirs(app.instance_path, exist_ok=True)
-    except OSError as e:
-        app.logger.error(f"Error creating instance folder: {e}")
-        # Handle error appropriately, e.g., exit or log
-    app.logger.info("Starting Flask development server.")
-    app.run(debug=True, port=61662) # No port specified, Flask default is 5000
+    # Ensure the session directory exists
+    if not os.path.exists(app.config['SESSION_FILE_DIR']):
+        os.makedirs(app.config['SESSION_FILE_DIR'])
+    # Ensure the filled forms directory exists
+    if not os.path.exists(app.config['FILLED_FORMS_DIR']):
+        os.makedirs(app.config['FILLED_FORMS_DIR'])
+    
+    app.logger.info("Starting Flask development server.") # Use app.logger here
+    app.run(debug=True, port=61663)

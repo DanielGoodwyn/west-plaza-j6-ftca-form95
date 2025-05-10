@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SF-95 Claim - Step 2: Signature</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-4 mb-3">SF-95 Claim - Step 2: Signature</h1>
+        <p class="mb-4">Please review your information and sign below.</p>
+
+        <!-- Placeholder for displaying summary of Step 1 data -->
+        <!-- We can populate this later if needed -->
+        <!-- 
+        {% if form_data_step1 %}
+            <h2>Review Your Information</h2>
+            <ul>
+            {% for key, value in form_data_step1.items() %}
+                <li><strong>{{ key.replace('_', ' ').title() }}:</strong> {{ value }}</li>
+            {% endfor %}
+            </ul>
+        {% endif %}
+        -->
+
+        <form action="{{ url_for('submit_form') }}" method="post" id="signatureForm">
+            <h2 class="mb-3">Claimant Signature</h2>
+            
+            <div class="form-group mb-3">
+                <label for="field17_signature_of_claimant">17. Signature of Claimant (Required)</label>
+                <input type="text" class="form-control {% if validation_errors and validation_errors.get('field17_signature_of_claimant') %}is-invalid{% endif %}" id="field17_signature_of_claimant" name="field17_signature_of_claimant" value="{{ form_data.get('field17_signature_of_claimant', '') }}" required>
+                {% if validation_errors and validation_errors.get('field17_signature_of_claimant') %}
+                    <div class="invalid-feedback">{{ validation_errors['field17_signature_of_claimant'] }}</div>
+                {% endif %}
+                <small class="form-text text-muted">Type your full name as your electronic signature.</small>
+            </div>
+
+            <button type="button" class="btn btn-primary" onclick="document.getElementById('signatureForm').submit();">Submit Claim</button>
+        </form>
+
+        <div class="mt-4">
+            <a href="{{ url_for('form') }}" class="btn btn-outline-secondary">Back to Edit Claim Information</a>
+        </div>
+    </div>
+</body>
+</html>

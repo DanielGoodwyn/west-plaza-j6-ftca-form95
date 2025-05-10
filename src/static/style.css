@@ -1,0 +1,121 @@
+/* General Body and Container Styles (from admin.html, potentially reusable) */
+body {
+    padding-top: 20px;
+    padding-bottom: 20px;
+    font-family: sans-serif; /* Adding a basic font */
+}
+
+/* General container styling, might conflict with Bootstrap's .container if not careful.
+   Bootstrap's .container sets max-width at different breakpoints.
+   This .container style from admin.html is more restrictive.
+   Consider if this should be specific to the admin page, e.g., .admin-container */
+.container {
+    max-width: 960px; /* Default from admin, can be overridden by Bootstrap if Bootstrap's .container class is also used */
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Flashed Messages Styling (from form.html) */
+.flashes {
+    padding: 1em 0;
+}
+
+/* Admin Page Table Styles (from admin.html) */
+.admin-page .table th, /* Scoping to admin page */
+.admin-page .table td {
+    vertical-align: top;
+}
+
+.admin-page .table td {
+    min-width: 200px;
+    max-width: 300px;
+    word-break: break-word;
+    padding: 0.25rem;
+}
+
+.admin-page .cell-content-wrapper { /* Scoping to admin page */
+    max-height: 50px;
+    overflow-y: auto;
+    text-align: left;
+}
+
+/* Form Specific Styles (can be expanded) */
+.form-group {
+    margin-bottom: 1rem; /* Consistent spacing for form groups */
+}
+
+.error-message {
+    color: #dc3545; /* Bootstrap danger color */
+    font-size: 0.875em;
+    margin-top: 0.25rem;
+}
+
+/* Button styling (can be adjusted or rely on Bootstrap) */
+.button, .btn { /* Targeting .button class from signature.html and .btn from Bootstrap */
+    display: inline-block;
+    padding: 0.5em 1em;
+    text-decoration: none;
+    border-radius: 0.25rem;
+    cursor: pointer;
+}
+/* If not using Bootstrap buttons everywhere, define primary/secondary styles */
+/*
+.button-primary, .btn-primary {
+    background-color: #007bff;
+    color: white;
+    border: 1px solid #007bff;
+}
+.button-secondary, .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+    border: 1px solid #6c757d;
+}
+*/
+
+/* Add some general styling for cards if used outside Bootstrap context explicitly */
+.card {
+    border: 1px solid rgba(0,0,0,.125);
+    border-radius: .25rem;
+    margin-bottom: 1rem; /* Consistent spacing */
+}
+.card-body {
+    padding: 1.25rem;
+}
+.card h2 { /* Example: styling for h2 within cards if needed */
+    margin-bottom: 0.75rem;
+}
+
+/* Ensure form elements in general have some basic styling if Bootstrap isn't fully applied or is overridden */
+input[type="text"],
+input[type="email"],
+input[type="date"],
+input[type="time"],
+input[type="number"],
+textarea,
+select {
+    width: 100%;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+input[type="radio"], input[type="checkbox"] {
+    width: auto; /* Radio and checkboxes should not be full width */
+    margin-right: 0.5em;
+}
+
+label {
+    display: inline-block;
+    margin-bottom: .5rem;
+}
+
+/* Specific styling for signature page elements if needed */
+/* .signature-container {} */

@@ -18,7 +18,7 @@
   "field12a_property_damage": "12a PROPERTY DAMAGE",
   "field12b_personal_injury": "12b PERSONAL INJURY",
   "field12c_wrongful_death": "12c WRONGFUL DEATH",
-  "field12d_total": "12d TOTAL Failure to specify may cause forfeiture of your rights",
+  "field12d_total_claim_amount": "12d TOTAL Failure to specify may cause forfeiture of your rights",
   "field13a_signature": "13a SIGNATURE OF CLAIMANT See instructions on reverse side",
   "field_pdf_13b_phone": "13b PHONE NUMBER OF PERSON SIGNING FORM",
   "field14_date_signed": "14 DATE OF SIGNATURE",

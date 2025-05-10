@@ -4,21 +4,21 @@ This project is a secure, self-hosted web application designed to facilitate the
 
 ## Project Overview
 
-- **Frontend User Form:** A responsive web form where users input data corresponding to fields on the SF-95 PDF.
+- **Multi-Step Frontend User Form:** A responsive web form guides users through data entry and a separate signature step, corresponding to fields on the SF-95 PDF.
 - **Data Storage:** Submitted data is stored securely in a local SQLite database.
 - **PDF Generator:** The backend uses the submitted data to automatically fill the SF-95 PDF template.
-- **Notifier:** An internal notification (email) is sent once a PDF is generated.
+- **Admin Interface:** A basic admin view to see submitted claims and download all data as a CSV file.
 
-This application is built with a focus on self-hosting and data control, avoiding external APIs and cloud services.
+This application is built with a focus on self-hosting and data control.
 
 ## Tech Stack
 
 - **Frontend:** HTML, CSS, JavaScript
 - **Backend:** Python (Flask)
+- **Session Management:** Flask-Session (Filesystem-based)
 - **Database:** SQLite
-- **PDF Filling:** pdfcpu (Go command-line tool)
-- **Notifications:** Python (`smtplib` for email)
-- **Containerization:** Docker
+- **PDF Filling:** `fillpdf` (Python library)
+- **Containerization:** Docker (optional)
 
 ## Development Setup
 
@@ -30,28 +30,29 @@ This application is built with a focus on self-hosting and data control, avoidin
 
 2.  **Clone the Repository:**
     ```bash
-    git clone <repository-url>
+    git clone <repository-url> # Replace <repository-url> with the actual URL
     cd west-plaza-j6-ftca-form95
     ```
 
 3.  **Create and Activate a Virtual Environment:**
     ```bash
-    python -m venv venv
+    python3 -m venv venv  # Or python -m venv venv
     source venv/bin/activate  # On Windows: venv\Scripts\activate
     ```
 
 4.  **Install Dependencies:**
     ```bash
-    pip install -r src/requirements.txt
+    pip install -r requirements.txt
     ```
 
-5.  **Download PDF Template:**
-    *   Download the SF-95 form from [GSA Forms Library](https://www.gsa.gov/reference/forms/claim-for-damage-injury-or-death).
-    *   Save it as `sf95.pdf` in the `data/` directory.
-    *   **Crucial Step:** Identify the exact field names within the fillable `sf95.pdf`. This may require Adobe Acrobat Pro or a PDF analysis tool. These names will be needed for mapping form inputs to PDF fields.
+5.  **PDF Template:**
+    *   The SF-95 PDF template (`sf95.pdf`) is included in the `data/` directory.
 
-6.  **Configure Environment (if necessary):**
-    *   Set up any environment variables, e.g., for email notifications (SMTP server details, recipient addresses). This might involve creating a `.env` file (ensure it's in `.gitignore`).
+6.  **Environment Variables (Optional):**
+    *   `FLASK_SECRET_KEY`: Set this for production or if you want to override the default development key. Create a `.env` file in the project root (add it to `.gitignore` if you haven't already):
+      ```
+      FLASK_SECRET_KEY='your_very_strong_random_secret_key'
+      ```
 
 ## Running the Application Locally
 
@@ -62,20 +63,19 @@ This application is built with a focus on self-hosting and data control, avoidin
     ```
 3.  **Run the Flask development server:**
     ```bash
-    flask run
-    # or python app.py
+    python3 app.py # Or python app.py
     ```
-4.  Open your web browser and go to `http://127.0.0.1:5000` (or the port specified by Flask).
+4.  Open your web browser and go to `http://127.0.0.1:61663` (or the port specified in `app.py`).
 
 ## Docker (Optional)
 
-1.  **Build the Docker image:**
+1.  **Build the Docker image (from the project root directory):**
     ```bash
     docker build -t west-plaza-form .
     ```
 2.  **Run the Docker container:**
     ```bash
-    docker run -p 5000:5000 west-plaza-form
+    docker run -p 61663:61663 west-plaza-form # Match the port used in app.py
     ```
 
 ## Project Structure
@@ -83,26 +83,27 @@ This application is built with a focus on self-hosting and data control, avoidin
 ```
 west-plaza-j6-ftca-form95/
 ├── data/
-│   └── sf95.pdf            # Template PDF (to be downloaded)
-│   └── form_data.db        # SQLite database (will be created)
+│   ├── sf95.pdf            # Template PDF
+│   ├── database/
+│   │   └── claims.db       # SQLite database (created on first run)
+│   ├── filled_forms/       # Stores generated PDFs (gitignored contents)
+│   └── csv/                # Stores CSV exports (gitignored contents)
 ├── docs/
 │   ├── project.md
 │   ├── plan.md
 │   └── python-flask-stack.md
 ├── src/
 │   ├── app.py              # Main Flask application
-│   ├── requirements.txt    # Python dependencies
-│   ├── static/
-│   │   ├── css/
-│   │   │   └── style.css
-│   │   └── js/
-│   │       └── script.js
-│   ├── templates/
-│   │   └── form.html         # HTML form template
-│   └── utils/
-│       ├── __init__.py
-│       ├── pdf_filler.py     # Logic for filling PDF
-│       └── notifier.py       # Logic for sending notifications
-├── venv/                   # Python virtual environment (ignored by Git)
-├── Dockerfile
-└── .gitignore
+│   ├── static/             # CSS, JavaScript, Images
+│   │   ├── css/style.css
+│   │   └── js/script.js    # (currently minimal)
+│   ├── templates/          # HTML templates (form.html, signature.html, etc.)
+│   └── utils/              # Utility scripts (currently minimal)
+│       └── __init__.py
+├── venv/                   # Python virtual environment (gitignored)
+├── flask_session/          # Flask session files (gitignored)
+├── requirements.txt        # Python dependencies
+├── Dockerfile              # Docker configuration
+├── .gitignore              # Specifies intentionally untracked files by Git
+└── README.md               # This file
+└── debugging-logs.txt      # Log file (gitignored)

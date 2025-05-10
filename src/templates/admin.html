@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title }} - SF-95 Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="admin-page">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1>{{ title }}</h1>
+            <div>
+                <a href="{{ url_for('form') }}" class="btn btn-primary me-2">Go to Form</a>
+                <a href="{{ url_for('download_csv') }}" class="btn btn-success">Download CSV</a>
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if error %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        {% if claims %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            {% if column_names %}
+                                {% for col_name in column_names %}
+                                    <th>{{ col_name }}</th>
+                                {% endfor %}
+                                <th>Actions</th>
+                            {% else %}
+                                {# Fallback or default headers if column_names is not available, though it should be #}
+                                <th>ID</th>
+                                <th>Claimant Name</th>
+                                <th>Email</th>
+                                <th>Date Signed</th>
+                                <th>Submission Time</th>
+                                <th>PDF Filename</th>
+                                <th>Actions</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for claim in claims %}
+                            <tr>
+                                {% if column_names %}
+                                    {% for col_name in column_names %}
+                                        <td>
+                                            <div class="cell-content-wrapper">
+                                                {{ claim[col_name] }}
+                                            </div>
+                                        </td>
+                                    {% endfor %}
+                                    <td>
+                                        <form method="POST" action="{{ url_for('delete_claim', claim_id=claim.id) }}" onsubmit="return confirm('Are you sure you want to delete this submission? This action cannot be undone.');" style="display: inline;">
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                    </td>
+                                {% else %}
+                                    {# Fallback for old structure if something goes wrong, unlikely needed with controller change #}
+                                    <td>
+                                        <div class="cell-content-wrapper">
+                                            {{ claim.id }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="cell-content-wrapper">
+                                            {{ claim.field2_name_of_claimant }}
+                                        </div>
+                                    </td> 
+                                    <td>
+                                        <div class="cell-content-wrapper">
+                                            {{ claim.user_email_address }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="cell-content-wrapper">
+                                            {{ claim.field14_date_signed }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="cell-content-wrapper">
+                                            {{ claim.created_at }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="cell-content-wrapper">
+                                            {{ claim.filled_pdf_filename }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if claim.id %}
+                                        <form method="POST" action="{{ url_for('delete_claim', claim_id=claim.id) }}" onsubmit="return confirm('Are you sure you want to delete this submission? This action cannot be undone.');" style="display: inline;">
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            {% if not error %}
+            <p class="text-center">No submissions found.</p>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

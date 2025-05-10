@@ -11,6 +11,7 @@ ENV/
 # Database file
 *.db
 *.sqlite3
+data/claims.db
 
 # Instance Folder (Flask)
 instance/
@@ -32,10 +33,14 @@ data/uploads/
 
 # Logs
 *.log
+debugging-logs.txt
+
+# Flask session files
+flask_session/
+
+# Application specific data files to ignore
+data/csv/claims_export.csv
 
 # Secrets / Sensitive Config (if any, though .env is preferred for local dev)
 secrets.py
 config.local.py
-
-debugging-logs.txt
-src/debugging-logs.txt

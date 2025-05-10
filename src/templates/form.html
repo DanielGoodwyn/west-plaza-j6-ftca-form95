@@ -5,185 +5,239 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SF-95 Claim Form</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flashes">
+            {% for category, message in messages %}
+                {# Assuming Bootstrap 5 for alert styling based on existing form structure #}
+                <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show container" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
     <div class="container">
         <header>
-            <h1>Federal Tort Claims Act, Form 95</h1>
-            <h2>Claim for Damage, Injury, and Death</h2>
+            <h1>J6 West Plaza Civil Action Form</h1>
         </header>
 
-        <form action="{{ url_for('submit_form') }}" method="POST">
-            
-            <fieldset class="mb-3 d-none">
-                <legend>1. Submit To Appropriate Federal Agency:</legend>
-                <input type="text" id="field1_agency" name="field1_agency" class="form-control">
-            </fieldset>
+        <form action="{{ url_for('process_step1') }}" method="POST">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <!-- Preliminary Information Section -->
+                    <h2 class="mb-3">Preliminary Information</h2>
+                    <p class="text-muted">The following information will be stored with your submission for our records but will NOT appear on the SF-95 PDF form.</p>
 
-            <fieldset class="mb-3">
-                <legend>2. Name, address of claimant, and claimant's personal representative, if any.</legend>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="field2_name" class="form-label">Full Name</label>
-                        <input type="text" id="field2_name" name="field2_name" class="form-control" value="{{ default_values.field2_name | default('', True) }}" required>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="field2_address" class="form-label">Street Address</label>
-                        <textarea id="field2_address" name="field2_address" rows="3" required>{{ default_values.field2_address | default('', True) }}</textarea>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label for="field2_city" class="form-label">City</label>
-                        <input type="text" id="field2_city" name="field2_city" class="form-control" value="{{ default_values.field2_city | default('', True) }}" required>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="field2_state" class="form-label">State</label>
-                        <input type="text" id="field2_state" name="field2_state" class="form-control" value="{{ default_values.field2_state | default('', True) }}" required>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label for="field2_zip" class="form-label">Zip Code</label>
-                        <input type="text" id="field2_zip" name="field2_zip" class="form-control" value="{{ default_values.field2_zip | default('', True) }}" pattern="\d{5}(-\d{4})?" title="Enter a 5 or 9 digit ZIP code" required>
-                    </div>
-                </div>
-            </fieldset>
-
-            <fieldset>
-                <legend>3. Type of Employment</legend>
-                <input type="radio" id="field3_military" name="field3_type_employment" value="Military" {% if default_values.field3_type_employment == 'Military' %}checked{% endif %} required>
-                <label for="field3_military">Military</label><br>
-                <input type="radio" id="field3_civilian" name="field3_type_employment" value="Civilian" {% if default_values.field3_type_employment == 'Civilian' %}checked{% endif %}>
-                <label for="field3_civilian">Civilian</label><br>
-                <input type="radio" id="field3_other" name="field3_type_employment" value="Other">
-                <label for="field3_other">Other</label>
-                <input type="text" id="field3_other_specify" name="field3_other_specify" placeholder="Specify if Other">
-            </fieldset>
-
-            <fieldset class="mb-3">
-                <legend>4. Date of Birth</legend>
-                <input type="date" id="field_pdf_4_dob" name="field_pdf_4_dob" class="form-control" value="1991-01-06" required>
-            </fieldset>
-
-            <fieldset class="mb-3">
-                <legend>5. Marital Status</legend>
-                <select id="field_pdf_5_marital_status" name="field_pdf_5_marital_status" class="form-select" required>
-                    <option value="" disabled {% if not default_values.field_pdf_5_marital_status %}selected{% endif %}>Select...</option>
-                    <option value="Single" {% if default_values.field_pdf_5_marital_status == 'Single' %}selected{% endif %}>Single</option>
-                    <option value="Married" {% if default_values.field_pdf_5_marital_status == 'Married' %}selected{% endif %}>Married</option>
-                    <option value="Divorced" {% if default_values.field_pdf_5_marital_status == 'Divorced' %}selected{% endif %}>Divorced</option>
-                    <option value="Widowed" {% if default_values.field_pdf_5_marital_status == 'Widowed' %}selected{% endif %}>Widowed</option>
-                </select>
-            </fieldset>
-
-            <fieldset class="mb-3 d-none">
-                <legend>6. Date and Day of Accident</legend>
-                <div class="d-none">
-                    <input type="date" id="field6_date_of_incident" name="field6_date_of_incident" class="form-control">
-                </div>
-            </fieldset>
-
-            <fieldset class="mb-3 d-none">
-                <legend>7. Time (A.M. or P.M.)</legend>
-                <div class="d-none">
-                    <input type="time" id="field7_time_of_incident" name="field7_time_of_incident" class="form-control">
-                </div>
-            </fieldset>
-
-            <fieldset class="mb-3">
-                <legend>8. Basis of Claim</legend>
-                <p class="form-text">State in detail the known facts and circumstances attending the damage, injury, or death, identifying persons and property involved, the place of occurrence and the cause thereof. Use additional pages if necessary.</p>
-                <textarea id="field8_basis_of_claim" name="field8_basis_of_claim" class="form-control" rows="10" required>{{ default_values.field8_basis_of_claim | default("While the claimant was protesting on January 6, 2021 at the West side of the U.S. Capitol, the Capitol Police and D.C. Metropolitan Police acting on behalf of the Capitol Police used excessive force against the claimant causing claimant physical injuries. The excessive force took the form of various munitions launched against the protesters including but not limited to: pepper balls, rubber balls or bullets some filled with Oleoresin Capsicum (“OC”), FM 303 projectiles, sting balls, flash bang, sting bomb and tear gas grenades, tripple chasers,pepper spray, CS Gas and physical strikes with firsts or batons.", True) }}</textarea>
-            </fieldset>
-
-            <fieldset class="mb-3 d-none">
-                <legend>9. Property Damage</legend>
-                <p class="form-text">Name and address of owner, if other than claimant (Number, Street, City, State, and Zip Code).</p>
-                <div class="d-none">
-                    <textarea id="field9_property_damage_description_vehicle" name="field9_property_damage_description_vehicle" class="form-control" rows="3" placeholder="Vehicle Description (Year, Make, Model, VIN)"></textarea>
-                </div>
-                <p class="form-text">Briefly describe the property, nature and extent of the damage and the location of where the property may be inspected. (See instructions on reverse side).</p>
-                <div class="d-none">
-                    <textarea id="field9_property_damage_description_other" name="field9_property_damage_description_other" class="form-control" rows="3" placeholder="Other Property Description"></textarea>
-                </div>
-            </fieldset>
-
-            <fieldset class="mb-3">
-                <legend>10. Personal Injury/Wrongful Death</legend>
-                <p class="form-text">State the nature and extent of each injury or cause of death, which forms the basis of the claim. If other than claimant, state the name of the injured person or decedent.</p>
-                <textarea id="field10_nature_of_injury" name="field10_nature_of_injury" class="form-control" rows="5" required>{{ default_values.field10_nature_of_injury | default("The claimant went to the U.S. Capitol to peacefully protest the presidential election. While the claimant was in the area of the West Side of the U.S. Capitol building police launched weapons referenced above and used excessive force. The claimant was struck and or exposed to the launched munitions and/or OC or CS Gas and suffered injuries as a result. The legal ramifications of these actions are currently under review and form part of the ongoing damages being claimed.", True) }}</textarea>
-            </fieldset>
-
-            <fieldset class="mb-3 d-none">
-                <legend>11. Witnesses</legend>
-                <div class="row">
-                    <div class="col-md-6 mb-3 d-none">
-                        <label for="field11_witness_name" class="form-label">Name</label>
-                        <input type="text" id="field11_witness_name" name="field11_witness_name" class="form-control">
-                    </div>
-                    <div class="col-md-6 mb-3 d-none">
-                        <label for="field11_witness_address" class="form-label">Address (Number, Street, City, State, and Zip Code)</label>
-                        <input type="text" id="field11_witness_address" name="field11_witness_address" class="form-control">
-                    </div>
-                </div>
-            </fieldset>
-
-            <fieldset class="mb-3">
-                <legend>12. Amount of Claim (in dollars)</legend>
-                <div class="row">
-                    <div class="col-md-3 mb-3">
-                        <label for="field12a_property_damage_amount" class="form-label">12a. Property Damage</label>
-                        <div class="input-group">
-                            <span class="input-group-text">$</span>
-                            <input type="number" step="0.01" id="field12a_property_damage_amount" name="field12a_property_damage_amount" class="form-control" value="{{ default_values.field12a_property_damage_amount | default('0.00', True) }}" required>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="user_email_address" class="form-label">Your Email Address</label>
+                            <input type="email" class="form-control {% if validation_errors and validation_errors.get('user_email_address') %}is-invalid{% endif %}" id="user_email_address" name="user_email_address" value="{{ form_data.get('user_email_address', '') }}" placeholder="you@example.com">
+                            {% if validation_errors and validation_errors.get('user_email_address') %}
+                                <div class="invalid-feedback">{{ validation_errors['user_email_address'] }}</div>
+                            {% endif %}
                         </div>
                     </div>
-                    <div class="col-md-3 mb-3">
-                        <label for="field12b_personal_injury_amount" class="form-label">12b. Personal Injury</label>
-                        <div class="input-group">
-                            <span class="input-group-text">$</span>
-                            <input type="number" step="0.01" id="field12b_personal_injury_amount" name="field12b_personal_injury_amount" class="form-control" value="{{ default_values.field12b_personal_injury_amount | default('0.00', True) }}" required>
-                        </div>
+
+                    <div class="mb-3">
+                        <label for="supplemental_question_1_capitol_experience" class="form-label">1. What happened to you on January 6, 2021 at the U.S. Capitol in your own words?</label>
+                        <textarea class="form-control" id="supplemental_question_1_capitol_experience" name="supplemental_question_1_capitol_experience" rows="5">{{ form_data.get('supplemental_question_1_capitol_experience', '') }}</textarea>
                     </div>
-                    <div class="col-md-3 mb-3">
-                        <label for="field12c_wrongful_death_amount" class="form-label">12c. Wrongful Death</label>
-                        <div class="input-group">
-                            <span class="input-group-text">$</span>
-                            <input type="number" step="0.01" id="field12c_wrongful_death_amount" name="field12c_wrongful_death_amount" class="form-control" value="{{ default_values.field12c_wrongful_death_amount | default('0.00', True) }}" required>
-                        </div>
+
+                    <div class="mb-3">
+                        <label for="supplemental_question_2_injuries_damages" class="form-label">2. What injuries or damages were sustained on January 6, 2021 at the U.S. Capitol?</label>
+                        <textarea class="form-control" id="supplemental_question_2_injuries_damages" name="supplemental_question_2_injuries_damages" rows="5">{{ form_data.get('supplemental_question_2_injuries_damages', '') }}</textarea>
                     </div>
-                    <div class="col-md-3 mb-3">
-                        <label for="field12d_total_amount" class="form-label">12d. Total</label>
-                        <div class="input-group">
-                            <span class="input-group-text">$</span>
-                            <input type="number" step="0.01" id="field12d_total_amount" name="field12d_total_amount" class="form-control" readonly value="{{ default_values.field12d_total_amount | default('0.00', True) }}" required>
-                        </div>
-                        <small class="form-text text-muted">Failure to specify may cause forfeiture of your rights.</small>
+
+                    <div class="mb-3">
+                        <label for="supplemental_question_3_entry_exit_time" class="form-label">3. What time approximately did you enter and exit US Capitol grounds?</label>
+                        <textarea class="form-control" id="supplemental_question_3_entry_exit_time" name="supplemental_question_3_entry_exit_time" rows="3">{{ form_data.get('supplemental_question_3_entry_exit_time', '') }}</textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="supplemental_question_4_inside_capitol_details" class="form-label">4. Did you go inside the U.S. Capitol Building? If so, approximately what time, and for how long.</label>
+                        <textarea class="form-control" id="supplemental_question_4_inside_capitol_details" name="supplemental_question_4_inside_capitol_details" rows="3">{{ form_data.get('supplemental_question_4_inside_capitol_details', '') }}</textarea>
                     </div>
                 </div>
-            </fieldset>
+            </div>
 
-            <fieldset class="mb-3">
-                <legend>I CERTIFY THAT THE AMOUNT OF CLAIM COVERS ONLY DAMAGES AND INJURIES CAUSED BY THE INCIDENT ABOVE AND AGREE TO ACCEPT SAID AMOUNT IN FULL SATISFACTION AND FINAL SETTLEMENT OF THIS CLAIM.</legend>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="field13a_signature" class="form-label">13a. Signature of Claimant</label>
-                        <input type="text" id="field13a_signature" name="field13a_signature" class="form-control" value="{{ default_values.field13a_signature | default('', True) }}" required>
-                        <small class="form-text text-muted">(See instructions on reverse side)</small>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label for="field_pdf_13b_phone" class="form-label">13b. Phone Number of Person Signing Form</label>
-                        <input type="tel" id="field_pdf_13b_phone" name="field_pdf_13b_phone" class="form-control" value="{{ default_values.field_pdf_13b_phone | default('', True) }}">
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <label for="field14_date_signed" class="form-label">14. Date of Signature</label>
-                        <input type="date" id="field14_date_signed" name="field14_date_signed" class="form-control" value="{{ default_values.field14_date_signed | default('', True) }}" required>
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="mt-4 mb-3">Federal Tort Claims Act, Form 95</h2>
+                    <h3 class="mb-3 text-muted">Claim for Damage, Injury, and Death</h3>
+                    <p class="form-text text-info">Briefly list any additional facts regarding your specific personal injuries or unique damages that are not covered in the general summary provided. Please state only key additional facts, not full event details or arguments on this form. Please utilize the "For Attorney Use" boxes above for this information.</p>
+
+                    <fieldset class="mb-3 d-none">
+                        <legend>1. Submit To Appropriate Federal Agency:</legend>
+                        <input type="text" id="field1_agency" name="field1_agency" class="form-control" value="{{ form_data.get('field1_agency', '') }}">
+                    </fieldset>
+
+                    <fieldset class="mb-3">
+                        <legend>2. Name, address of claimant, and claimant's personal representative, if any.</legend>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="field2_name" class="form-label">Full Name</label>
+                                <input type="text" id="field2_name" name="field2_name" class="form-control" value="{{ form_data.get('field2_name', '') }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="field2_address" class="form-label">Street Address</label>
+                                <textarea id="field2_address" name="field2_address" rows="3" required>{{ form_data.get('field2_address', '') }}</textarea>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="field2_city" class="form-label">City</label>
+                                <input type="text" id="field2_city" name="field2_city" class="form-control" value="{{ form_data.get('field2_city', '') }}" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="field2_state" class="form-label">State</label>
+                                <select class="form-select" id="field2_state" name="field2_state" required>
+                                    <option value="" {% if not form_data.get('field2_state') %}selected{% endif %} disabled>Select State</option>
+                                    {% for state_code in states_list %}
+                                        <option value="{{ state_code }}" {% if form_data.get('field2_state') == state_code %}selected{% endif %}>{{ state_code }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="invalid-feedback">
+                                    Valid state is required.
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="field2_zip" class="form-label">Zip Code</label>
+                                <input type="text" id="field2_zip" name="field2_zip" class="form-control" value="{{ form_data.get('field2_zip', '') }}" pattern="\d{5}(-\d{4})?" title="Enter a 5 or 9 digit ZIP code" required>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="mb-3">
+                        <legend>3. Type of Employment</legend>
+                        <input type="radio" id="field3_military" name="field3_type_employment" value="Military" {% if form_data.get('field3_type_employment') == 'Military' %}checked{% endif %} required>
+                        <label for="field3_military">Military</label><br>
+                        <input type="radio" id="field3_civilian" name="field3_type_employment" value="Civilian" {% if form_data.get('field3_type_employment') == 'Civilian' %}checked{% endif %}>
+                        <label for="field3_civilian">Civilian</label><br>
+                        <input type="radio" id="field3_other" name="field3_type_employment" value="Other" {% if form_data.get('field3_type_employment') == 'Other' %}checked{% endif %}>
+                        <label for="field3_other">Other</label>
+                        <input type="text" id="field3_other_specify" name="field3_other_specify" placeholder="Specify if Other" value="{{ form_data.get('field3_other_specify', '') }}">
+                    </fieldset>
+
+                    <fieldset class="mb-3">
+                        <legend>4. Date of Birth</legend>
+                        <input type="date" id="field_pdf_4_dob" name="field_pdf_4_dob" class="form-control" value="{{ form_data.get('field_pdf_4_dob', '') }}" required>
+                    </fieldset>
+
+                    <fieldset class="mb-3">
+                        <legend>5. Marital Status</legend>
+                        <select id="field_pdf_5_marital_status" name="field_pdf_5_marital_status" class="form-select" required>
+                            <option value="" disabled {% if not form_data.get('field_pdf_5_marital_status') %}selected{% endif %}>Select...</option>
+                            <option value="Single" {% if form_data.get('field_pdf_5_marital_status') == 'Single' %}selected{% endif %}>Single</option>
+                            <option value="Married" {% if form_data.get('field_pdf_5_marital_status') == 'Married' %}selected{% endif %}>Married</option>
+                            <option value="Divorced" {% if form_data.get('field_pdf_5_marital_status') == 'Divorced' %}selected{% endif %}>Divorced</option>
+                            <option value="Widowed" {% if form_data.get('field_pdf_5_marital_status') == 'Widowed' %}selected{% endif %}>Widowed</option>
+                        </select>
+                    </fieldset>
+
+                    <fieldset class="mb-3 d-none">
+                        <legend>6. Date and Day of Accident</legend>
+                        <div class="d-none">
+                            <input type="date" id="field6_date_of_incident" name="field6_date_of_incident" class="form-control" value="{{ form_data.get('field6_date_of_incident', '') }}">
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="mb-3 d-none">
+                        <legend>7. Time (A.M. or P.M.)</legend>
+                        <div class="d-none">
+                            <input type="time" id="field7_time_of_incident" name="field7_time_of_incident" class="form-control" value="{{ form_data.get('field7_time_of_incident', '') }}">
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="mb-3">
+                        <legend>8. Basis of Claim</legend>
+                        <p class="form-text">State in detail the known facts and circumstances attending the damage, injury, or death, identifying persons and property involved, the place of occurrence and the cause thereof. Use additional sheet(s) if necessary. (See instructions on reverse).</p>
+                        <textarea id="field8_basis_of_claim" name="field8_basis_of_claim" class="form-control" rows="5" required>{{ form_data.get('field8_basis_of_claim', '') }}</textarea>
+                    </fieldset>
+
+                    <fieldset class="mb-3 d-none">
+                        <legend>9. Property Damage</legend>
+                        <p class="form-text">Name and address of owner, if other than claimant. Describe the property and nature and extent of damage. State location where property may be inspected.</p>
+                        <textarea id="field9_property_damage_details" name="field9_property_damage_details" class="form-control" rows="3">{{ form_data.get('field9_property_damage_details', '') }}</textarea>
+                    </fieldset>
+
+                    <fieldset class="mb-3">
+                        <legend>10. Personal Injury/Wrongful Death</legend>
+                        <p class="form-text">State the nature and extent of each injury or cause of death, which forms the basis of the claim. If other than claimant, state the name of the injured person or decedent.</p>
+                        <textarea id="field10_nature_of_injury" name="field10_nature_of_injury" class="form-control" rows="5" required>{{ form_data.get('field10_nature_of_injury', '') }}</textarea>
+                    </fieldset>
+
+                    <fieldset class="mb-3 d-none">
+                        <legend>11. Itemized List of Expenses</legend>
+                        <p class="form-text">Attach detailed itemized list of expenses, including medical expenses, loss of earnings, property damage, etc.</p>
+                        <textarea id="field11_itemized_expenses" name="field11_itemized_expenses" class="form-control" rows="3">{{ form_data.get('field11_itemized_expenses', '') }}</textarea>
+                    </fieldset>
+
+                    <fieldset class="mb-3">
+                        <legend>12. Amount of Claim (in dollars)</legend>
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="field12a_property_damage_amount" class="form-label">12a. Property Damage</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" step="0.01" id="field12a_property_damage_amount" name="field12a_property_damage_amount" class="form-control" value="{{ form_data.get('field12a_property_damage_amount', '') }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="field12b_personal_injury_amount" class="form-label">12b. Personal Injury</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" step="0.01" id="field12b_personal_injury_amount" name="field12b_personal_injury_amount" class="form-control" value="{{ form_data.get('field12b_personal_injury_amount', '') }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="field12c_wrongful_death_amount" class="form-label">12c. Wrongful Death</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" step="0.01" id="field12c_wrongful_death_amount" name="field12c_wrongful_death_amount" class="form-control" value="{{ form_data.get('field12c_wrongful_death_amount', '') }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="field12d_total_amount" class="form-label">12d. Total</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" step="0.01" id="field12d_total_amount" name="field12d_total_amount" class="form-control" readonly value="{{ form_data.get('field12d_total_amount', '') }}" required>
+                                </div>
+                                <small class="form-text text-muted">Failure to specify may cause forfeiture of your rights.</small>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="mb-3">
+                        <legend>I CERTIFY THAT THE AMOUNT OF CLAIM COVERS ONLY DAMAGES AND INJURIES CAUSED BY THE INCIDENT ABOVE AND AGREE TO ACCEPT SAID AMOUNT IN FULL SATISFACTION AND FINAL SETTLEMENT OF THIS CLAIM.</legend>
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="field_pdf_13b_phone" class="form-label">13b. Phone Number of Person Signing Form</label>
+                                <input type="tel" id="field_pdf_13b_phone" name="field_pdf_13b_phone" class="form-control" value="{{ form_data.get('field_pdf_13b_phone', '') }}" placeholder="e.g., 555-123-4567" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="field14_date_signed" class="form-label">14. Date of Signature</label>
+                                <input type="date" id="field14_date_signed" name="field14_date_signed" class="form-control" value="{{ form_data.get('field14_date_signed', '') }}" required>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <div class="mb-3">
+
+                    <hr class="my-4">
+
+                    <div class="text-center mt-4 mb-4">
+                        <button type="submit" class="btn btn-primary btn-lg">Submit Claim Data</button>
                     </div>
                 </div>
-            </fieldset>
-
-            <button type="submit">Submit Claim</button>
+            </div>
         </form>
+
     </div>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
