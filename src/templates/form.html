@@ -119,9 +119,6 @@
                         <label for="field3_military">Military</label><br>
                         <input type="radio" id="field3_civilian" name="field3_type_employment" value="Civilian" {% if form_data.get('field3_type_employment') == 'Civilian' %}checked{% endif %}>
                         <label for="field3_civilian">Civilian</label><br>
-                        <input type="radio" id="field3_other" name="field3_type_employment" value="Other" {% if form_data.get('field3_type_employment') == 'Other' %}checked{% endif %}>
-                        <label for="field3_other">Other</label>
-                        <input type="text" id="field3_other_specify" name="field3_other_specify" placeholder="Specify if Other" value="{{ form_data.get('field3_other_specify', '') }}">
                     </fieldset>
 
                     <fieldset class="mb-3">
