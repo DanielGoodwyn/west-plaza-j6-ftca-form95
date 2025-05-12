@@ -1,0 +1,38 @@
+.filter-toggle-label {
+    display: inline-block;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 10px;
+    margin-bottom: 5px; /* Added for spacing if they wrap */
+    background-color: #f8f9fa; /* Default light background */
+    color: #495057;
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+    user-select: none; /* Prevent text selection */
+}
+
+.filter-toggle-label:hover {
+    background-color: #e9ecef;
+    border-color: #bbb;
+}
+
+.filter-toggle-input {
+    display: none; /* Hide the actual checkbox */
+}
+
+.filter-toggle-input:checked + .filter-toggle-label {
+    background-color: #007bff; /* Bootstrap primary blue for selected */
+    color: white;
+    border-color: #0056b3;
+}
+
+.filter-toggle-input:checked + .filter-toggle-label::before {
+    content: '\2713\00A0'; /* Checkmark character with a non-breaking space */
+    font-weight: bold;
+}
+
+.filter-toggle-label::before {
+    content: '\2610\00A0'; /* Empty box character with a non-breaking space */
+    font-weight: bold;
+}
