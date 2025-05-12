@@ -44,13 +44,14 @@ document.addEventListener('DOMContentLoaded', function() {
             let showRow = true;
             const cells = row.children;
 
-            // Name Filter (Starts With)
+            // Name Filter (Contains)
             if (nameFilter && typeof nameIndex !== 'undefined') {
-                const nameText = cells[nameIndex]?.textContent.toLowerCase() || '';
-                if (!nameText.startsWith(nameFilter)) {
+                const nameText = cells[nameIndex]?.textContent?.trim().toLowerCase() || ''; 
+                const includesCheck = nameText.includes(nameFilter); 
+                if (!includesCheck) { 
                     showRow = false;
                 }
-            }
+            } 
 
             // State Filter (Exact Match)
             if (showRow && stateFilter && typeof stateIndex !== 'undefined') {
@@ -71,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Signature Filter ('pending' or 'signed')
             if (showRow && signatureFilter && typeof signatureDateIndex !== 'undefined') {
                 const signatureDateText = cells[signatureDateIndex]?.textContent.trim() || '';
-                const isSigned = signatureDateText !== '' && signatureDateText.toLowerCase() !== 'pending'; // Consider non-empty as signed
+                const isSigned = signatureDateText !== '' && signatureDateText.toLowerCase() !== 'pending'; 
 
                 if (signatureFilter === 'pending' && isSigned) {
                     showRow = false;
@@ -90,16 +91,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Sorting Listeners (Existing Code)
     headers.forEach((header) => {
         const columnName = header.dataset.columnName || header.textContent.trim();
-        if (!columnName || header.textContent.trim() === 'Actions') return; // Skip if no data-column-name or it's the Actions column
+        if (!columnName || header.textContent.trim() === 'Actions') return; 
 
-        sortDirection[columnName] = 'asc'; // Default to ascending
+        sortDirection[columnName] = 'asc'; 
 
         header.addEventListener('click', () => {
-            const rows = Array.from(tbody.querySelectorAll('tr:not([style*="display: none"])')); // Sort only visible rows
+            const rows = Array.from(tbody.querySelectorAll('tr:not([style*="display: none"])')); 
             if (rows.length === 0) return;
 
-            const headerIndex = columnIndexMap[columnName]; // Get index from map
-            if (typeof headerIndex === 'undefined') return; // Skip if column index not found
+            const headerIndex = columnIndexMap[columnName]; 
+            if (typeof headerIndex === 'undefined') return; 
 
             const currentDirection = sortDirection[columnName];
             const isAscending = currentDirection === 'asc';
@@ -124,11 +125,11 @@ document.addEventListener('DOMContentLoaded', function() {
                             comparison = aText.localeCompare(bText);
                         }
                     } catch (e) {
-                        comparison = aText.localeCompare(bText); // Fallback
+                        comparison = aText.localeCompare(bText); 
                     }
                 } else {
                      // Attempt numeric comparison
-                    const aNum = parseFloat(aText.replace(/[^\d.-]/g, '')); // Attempt to strip non-numeric except . and -
+                    const aNum = parseFloat(aText.replace(/[^\d.-]/g, '')); 
                     const bNum = parseFloat(bText.replace(/[^\d.-]/g, ''));
                     if (!isNaN(aNum) && !isNaN(bNum)) {
                         comparison = aNum - bNum;
@@ -154,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
             header.classList.add(isAscending ? 'sort-asc' : 'sort-desc');
 
             // Re-append sorted rows
-            rows.forEach(row => tbody.appendChild(row)); // Append moves the element
+            rows.forEach(row => tbody.appendChild(row)); 
         });
     });
 
@@ -176,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function() {
             height: 0;
             border-left: 5px solid transparent;
             border-right: 5px solid transparent;
-            border-bottom: 5px solid currentColor; /* Default arrow pointing up */
+            border-bottom: 5px solid currentColor; 
         }
         .sortable-header.sort-asc::after {
             opacity: 1;
