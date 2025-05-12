@@ -34,6 +34,54 @@
             </div>
         {% endif %}
 
+        {# Filter Section Start #}
+        <div class="card mb-3">
+            <div class="card-header">Filters</div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label for="filter-name" class="form-label">Filter by Name (Starts With):</label>
+                        <input type="text" id="filter-name" class="form-control form-control-sm" placeholder="Start typing name...">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="filter-state" class="form-label">Filter by State:</label>
+                        <select id="filter-state" class="form-select form-select-sm">
+                            <option value="" selected>All States</option>
+                            {% if states_for_filter %}
+                                {% for state in states_for_filter %}
+                                    <option value="{{ state }}">{{ state }}</option>
+                                {% endfor %}
+                            {% endif %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="filter-employment" class="form-label">Filter by Employment:</label>
+                        <select id="filter-employment" class="form-select form-select-sm">
+                            <option value="" selected>All Types</option>
+                            <option value="Military">Military</option>
+                            <option value="Civilian">Civilian</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label d-block">Filter by Signature:</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input filter-signature" type="radio" name="filter-signature-options" id="filter-sig-all" value="" checked>
+                            <label class="form-check-label" for="filter-sig-all">All</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input filter-signature" type="radio" name="filter-signature-options" id="filter-sig-pending" value="pending">
+                            <label class="form-check-label" for="filter-sig-pending">Pending</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input filter-signature" type="radio" name="filter-signature-options" id="filter-sig-signed" value="signed">
+                            <label class="form-check-label" for="filter-sig-signed">Signed</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {# Filter Section End #}
+
         {% if claims %}
             <div class="table-responsive">
                 <table id="admin-table" class="table table-striped table-hover">

@@ -2,36 +2,140 @@ document.addEventListener('DOMContentLoaded', function() {
     const table = document.getElementById('admin-table');
     if (!table) return; // Exit if table not found
 
-    const headers = table.querySelectorAll('th.sortable-header');
+    const thead = table.querySelector('thead');
     const tbody = table.querySelector('tbody#admin-table-body');
+    const headers = Array.from(thead.querySelectorAll('th.sortable-header')); // Convert NodeList to Array
     let sortDirection = {}; // Store sort direction for each column
 
+    // --- Filter Elements ---
+    const filterNameInput = document.getElementById('filter-name');
+    const filterStateSelect = document.getElementById('filter-state');
+    const filterEmploymentSelect = document.getElementById('filter-employment');
+    const filterSignatureRadios = document.querySelectorAll('.filter-signature');
+
+    // --- Column Index Mapping ---
+    // Create a map from display header name to column index
+    const columnIndexMap = {};
     headers.forEach((header, index) => {
-        // Initialize sort direction state for each column
-        const columnName = header.dataset.columnName;
-        if (!columnName) return; // Skip if no data-column-name
+        const columnName = header.dataset.columnName || header.textContent.trim();
+        columnIndexMap[columnName] = index;
+    });
+
+    // --- Filter Function ---
+    function applyFilters() {
+        if (!tbody) return;
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const nameFilter = filterNameInput.value.toLowerCase();
+        const stateFilter = filterStateSelect.value;
+        const employmentFilter = filterEmploymentSelect.value;
+        let signatureFilter = '';
+        filterSignatureRadios.forEach(radio => {
+            if (radio.checked) {
+                signatureFilter = radio.value;
+            }
+        });
+
+        const nameIndex = columnIndexMap['Claimant Name'];
+        const stateIndex = columnIndexMap['State'];
+        const employmentIndex = columnIndexMap['Type of Employment'];
+        const signatureDateIndex = columnIndexMap['Date and Time Signed']; // Assuming this column indicates signed status
+
+        rows.forEach(row => {
+            let showRow = true;
+            const cells = row.children;
+
+            // Name Filter (Starts With)
+            if (nameFilter && typeof nameIndex !== 'undefined') {
+                const nameText = cells[nameIndex]?.textContent.toLowerCase() || '';
+                if (!nameText.startsWith(nameFilter)) {
+                    showRow = false;
+                }
+            }
+
+            // State Filter (Exact Match)
+            if (showRow && stateFilter && typeof stateIndex !== 'undefined') {
+                const stateText = cells[stateIndex]?.textContent.trim() || '';
+                if (stateText !== stateFilter) {
+                    showRow = false;
+                }
+            }
+
+            // Employment Filter (Exact Match)
+            if (showRow && employmentFilter && typeof employmentIndex !== 'undefined') {
+                const employmentText = cells[employmentIndex]?.textContent.trim() || '';
+                if (employmentText !== employmentFilter) {
+                    showRow = false;
+                }
+            }
+
+            // Signature Filter ('pending' or 'signed')
+            if (showRow && signatureFilter && typeof signatureDateIndex !== 'undefined') {
+                const signatureDateText = cells[signatureDateIndex]?.textContent.trim() || '';
+                const isSigned = signatureDateText !== '' && signatureDateText.toLowerCase() !== 'pending'; // Consider non-empty as signed
+
+                if (signatureFilter === 'pending' && isSigned) {
+                    showRow = false;
+                }
+                if (signatureFilter === 'signed' && !isSigned) {
+                    showRow = false;
+                }
+            }
+
+            // Apply visibility
+            row.style.display = showRow ? '' : 'none';
+        });
+    }
+
+    // --- Event Listeners ---
+    // Sorting Listeners (Existing Code)
+    headers.forEach((header) => {
+        const columnName = header.dataset.columnName || header.textContent.trim();
+        if (!columnName || header.textContent.trim() === 'Actions') return; // Skip if no data-column-name or it's the Actions column
+
         sortDirection[columnName] = 'asc'; // Default to ascending
 
         header.addEventListener('click', () => {
-            const rows = Array.from(tbody.querySelectorAll('tr'));
+            const rows = Array.from(tbody.querySelectorAll('tr:not([style*="display: none"])')); // Sort only visible rows
+            if (rows.length === 0) return;
+
+            const headerIndex = columnIndexMap[columnName]; // Get index from map
+            if (typeof headerIndex === 'undefined') return; // Skip if column index not found
+
             const currentDirection = sortDirection[columnName];
             const isAscending = currentDirection === 'asc';
 
-            // Sort rows
+            // Sort visible rows
             rows.sort((a, b) => {
-                const aText = a.children[index]?.textContent.trim() || '';
-                const bText = b.children[index]?.textContent.trim() || '';
+                const aText = a.children[headerIndex]?.textContent.trim() || '';
+                const bText = b.children[headerIndex]?.textContent.trim() || '';
 
-                // Basic numeric comparison (add date/currency parsing if needed)
-                const aNum = parseFloat(aText);
-                const bNum = parseFloat(bText);
+                // Basic numeric/date/string comparison (can be enhanced)
                 let comparison = 0;
-
-                if (!isNaN(aNum) && !isNaN(bNum)) {
-                    comparison = aNum - bNum;
+                // Attempt date comparison first for 'Date' columns
+                if (columnName.includes('Date')) {
+                    try {
+                        // Attempt to parse dates - might need more robust parsing
+                        const dateA = new Date(aText);
+                        const dateB = new Date(bText);
+                        if (!isNaN(dateA) && !isNaN(dateB)) {
+                            comparison = dateA - dateB;
+                        } else {
+                           // Fallback to string compare if dates are invalid/mixed
+                            comparison = aText.localeCompare(bText);
+                        }
+                    } catch (e) {
+                        comparison = aText.localeCompare(bText); // Fallback
+                    }
                 } else {
-                    // Case-insensitive string comparison
-                    comparison = aText.toLowerCase().localeCompare(bText.toLowerCase());
+                     // Attempt numeric comparison
+                    const aNum = parseFloat(aText.replace(/[^\d.-]/g, '')); // Attempt to strip non-numeric except . and -
+                    const bNum = parseFloat(bText.replace(/[^\d.-]/g, ''));
+                    if (!isNaN(aNum) && !isNaN(bNum)) {
+                        comparison = aNum - bNum;
+                    } else {
+                        // Fallback to case-insensitive string comparison
+                        comparison = aText.toLowerCase().localeCompare(bText.toLowerCase());
+                    }
                 }
 
                 return isAscending ? comparison : -comparison;
@@ -40,22 +144,27 @@ document.addEventListener('DOMContentLoaded', function() {
             // Update sort direction for the next click
             sortDirection[columnName] = isAscending ? 'desc' : 'asc';
 
-            // Reset directions for other columns if needed (optional)
-            // Object.keys(sortDirection).forEach(key => {
-            //     if (key !== columnName) sortDirection[key] = 'asc';
-            // });
-
             // Update header indicators
-            headers.forEach(h => h.classList.remove('sort-asc', 'sort-desc'));
+            headers.forEach(h => {
+                 const hColName = h.dataset.columnName || h.textContent.trim();
+                 if (hColName !== 'Actions') {
+                    h.classList.remove('sort-asc', 'sort-desc');
+                 }
+            });
             header.classList.add(isAscending ? 'sort-asc' : 'sort-desc');
 
-            // Clear and re-append sorted rows
-            tbody.innerHTML = '';
-            rows.forEach(row => tbody.appendChild(row));
+            // Re-append sorted rows
+            rows.forEach(row => tbody.appendChild(row)); // Append moves the element
         });
     });
 
-    // Add some basic CSS for sort indicators (can be moved to style.css)
+    // Filter Listeners
+    filterNameInput.addEventListener('input', applyFilters);
+    filterStateSelect.addEventListener('change', applyFilters);
+    filterEmploymentSelect.addEventListener('change', applyFilters);
+    filterSignatureRadios.forEach(radio => radio.addEventListener('change', applyFilters));
+
+    // --- Initial Styling for Sort Arrows (Existing Code) ---
     const style = document.createElement('style');
     style.textContent = `
         .sortable-header::after {
@@ -79,6 +188,10 @@ document.addEventListener('DOMContentLoaded', function() {
             border-top: 5px solid currentColor;
             border-bottom: none;
         }
+        /* Style for filtered rows (optional) */
+        /* tbody tr[style*="display: none"] { */
+        /*     background-color: #f8f9fa; */
+        /* } */
     `;
     document.head.appendChild(style);
 });

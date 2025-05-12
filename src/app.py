@@ -890,7 +890,13 @@ def admin_view():
     select_columns_str = ', '.join(select_columns_list)
 
     try:
-        # Select the actual 'id' column along with others
+        # Get distinct states for the filter dropdown
+        cursor.execute("SELECT DISTINCT field2_state FROM claims WHERE field2_state IS NOT NULL AND field2_state != '' ORDER BY field2_state")
+        states_data = cursor.fetchall()
+        # Extract state names from tuples like [('CA',), ('NY',)] into ['CA', 'NY']
+        states_list_for_filter = [state[0] for state in states_data]
+
+        # Select the actual 'id' column along with others for the main table
         cursor.execute(f"SELECT {select_columns_str} FROM claims ORDER BY created_at DESC")
         raw_claims_data = cursor.fetchall() # List of sqlite3.Row objects
         
@@ -912,11 +918,11 @@ def admin_view():
 
         current_app.logger.info(f"Fetched {len(claims_list_for_template)} claims for admin view.")
         # Pass display_header_names for the table headers in the template
-        return render_template('admin.html', claims=claims_list_for_template, column_names=display_header_names, title="Admin - Submissions")
-    except sqlite3.Error as e:
-        current_app.logger.error(f"Database error in admin_view: {e}")
-        flash(f"Error fetching claims: {e}", 'danger')
-        return render_template('admin.html', claims=[], column_names=display_header_names, title="Admin - Submissions", error="Could not retrieve claims.")
+        return render_template('admin.html', title="Admin - View Submissions", claims=claims_list_for_template, column_names=display_header_names, states_for_filter=states_list_for_filter)
+    except Exception as e:
+        current_app.logger.error(f"--- admin_view --- Error fetching admin data: {e}", exc_info=True)
+        # Also pass an empty list for states if there's an error fetching claims
+        return render_template('admin.html', title="Admin - Error", claims=[], column_names=[], states_for_filter=[], error=f"An error occurred: {e}")
 
 # New route for deleting a claim
 @app.route('/admin/delete/<int:claim_id>', methods=['POST'])
