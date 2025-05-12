@@ -1,5 +1,1 @@
-fillpdf==0.7.3
-Flask==3.1.0
-flask-session==0.8.0
-pytz==2024.1
-Werkzeug==3.1.3
+wheel==0.45.1

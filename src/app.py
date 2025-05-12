@@ -11,6 +11,12 @@ import csv
 from unicodedata import normalize
 from werkzeug.utils import secure_filename
 import pytz # Added for timezone conversion
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
+from werkzeug.security import generate_password_hash, check_password_hash
+from src.forms import LoginForm # Import the LoginForm
+from dotenv import load_dotenv # Added
+
+load_dotenv() # Added: Load .env file from project root
 
 # Import utility functions
 from utils.pdf_filler import fill_sf95_pdf, DEFAULT_VALUES as PDF_FILLER_DEFAULTS
@@ -18,10 +24,11 @@ import utils.pdf_filler
 # from utils.notifier import send_notification_email
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'your_default_secret_key') # Use environment variable or default
+app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8') # Use environment variable or default
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_FILE_DIR'] = './flask_session/' # Ensure this directory exists and is writable
 app.config['FILLED_FORMS_DIR'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'filled_forms')
+app.config['APPLICATION_ROOT'] = '/west-plaza-lawsuit' # Added
 
 # Ensure session directory exists
 if not os.path.exists(app.config['SESSION_FILE_DIR']):
@@ -162,8 +169,62 @@ def create_tables_if_not_exist(logger): # Accept logger
         else:
             logger.info(f"'{table_name}' table schema appears up to date with DB_SCHEMA. No columns were added.")
 
+    # Create 'users' table if it doesn't exist
+    if not table_exists(cursor, 'users', logger):
+        create_users_table_sql = """
+        CREATE TABLE users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL
+        );
+        """
+        logger.info("Creating 'users' table.")
+        cursor.execute(create_users_table_sql)
+        # Optionally, create a default admin user here if one doesn't exist
+        # For simplicity, we'll handle admin user creation separately for now or via a script.
+        logger.info("'users' table created successfully.")
+    else:
+        logger.info("'users' table already exists.")
+
     logger.info("Exiting create_tables_if_not_exist function.")
 
+# --- User Model ---
+class User(UserMixin):
+    def __init__(self, id, username, password_hash):
+        self.id = id
+        self.username = username
+        self.password_hash = password_hash
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    @staticmethod
+    def get_by_username(username):
+        db = get_db()
+        cursor = db.cursor()
+        user_data = cursor.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
+        if user_data:
+            return User(id=user_data['id'], username=user_data['username'], password_hash=user_data['password_hash'])
+        return None
+
+    @staticmethod
+    def get_by_id(user_id):
+        db = get_db()
+        cursor = db.cursor()
+        user_data = cursor.execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
+        if user_data:
+            return User(id=user_data['id'], username=user_data['username'], password_hash=user_data['password_hash'])
+        return None
+
+# --- Flask-Login Setup ---
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login' # The route name for the login page
+login_manager.login_message_category = 'info'
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.get_by_id(int(user_id))
 
 # Centralized app initialization function
 def initialize_application_internals(flask_app_object):
@@ -869,6 +930,7 @@ def download_filled_pdf(filename):
         return redirect(url_for('admin_view')) # Or 'form'
 
 @app.route('/admin', methods=['GET'])
+@login_required # Protect the admin route
 def admin_view():
     db = get_db()
     cursor = db.cursor()
@@ -895,6 +957,7 @@ def admin_view():
         states_data = cursor.fetchall()
         # Extract state names from tuples like [('CA',), ('NY',)] into ['CA', 'NY']
         states_list_for_filter = [state[0] for state in states_data]
+        current_app.logger.info(f"--- admin_view --- Distinct states fetched for filter: {states_list_for_filter}")
 
         # Select the actual 'id' column along with others for the main table
         cursor.execute(f"SELECT {select_columns_str} FROM claims ORDER BY created_at DESC")
@@ -1047,6 +1110,31 @@ def init_db_command():
     with app.app_context():
         db = get_db()
     print('Initialized the database defined in app.config[DATABASE].')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.get_by_username(form.username.data)
+        if user and user.check_password(form.password.data):
+            login_user(user)
+            flash('Login successful!', 'success')
+            next_page = request.args.get('next')
+            return redirect(next_page or url_for('admin_view'))
+        else:
+            flash('Login Unsuccessful. Please check username and password', 'danger')
+    return render_template('login.html', title='Admin Login', form=form)
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('login'))
+
+@app.route('/health')
+def health_check():
+    return "OK", 200
 
 if __name__ == '__main__':
     # Ensure the session directory exists
