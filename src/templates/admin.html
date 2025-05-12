@@ -35,116 +35,6 @@
             </div>
         {% endif %}
 
-        {# Filter Section Start #}
-        <div class="card mb-3">
-            <div class="card-header">Filters</div>
-            <div class="card-body">
-                <div class="row g-3 mb-3"> 
-                    <div class="col-md-3">
-                        <label for="filter-name" class="form-label">Filter by Name (Contains):</label>
-                        <input type="text" id="filter-name" class="form-control form-control-sm" placeholder="Type name...">
-                    </div>
-                    <div class="col-md-3">
-                        <label for="filter-state" class="form-label">Filter by State:</label>
-                        <select id="filter-state" class="form-select form-select-sm">
-                            <option value="" selected>All States</option>
-                            {% if states_for_filter %}
-                                {% for state in states_for_filter %}
-                                    <option value="{{ state }}">{{ state }}</option>
-                                {% endfor %}
-                            {% endif %}
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label for="filter-employment" class="form-label">Filter by Employment:</label>
-                        <select id="filter-employment" class="form-select form-select-sm">
-                            <option value="" selected>All Types</option>
-                            <option value="Military">Military</option>
-                            <option value="Civilian">Civilian</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label d-block">Filter by Signature:</label>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input filter-signature" type="radio" name="filter-signature-options" id="filter-sig-all" value="" checked>
-                            <label class="form-check-label" for="filter-sig-all">All</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input filter-signature" type="radio" name="filter-signature-options" id="filter-sig-pending" value="pending">
-                            <label class="form-check-label" for="filter-sig-pending">Pending</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input filter-signature" type="radio" name="filter-signature-options" id="filter-sig-signed" value="signed">
-                            <label class="form-check-label" for="filter-sig-signed">Signed</label>
-                        </div>
-                    </div>
-                </div>
-                <div class="row g-3 mb-3"> 
-                    <div class="col-md-3">
-                        <label for="filter-email" class="form-label">Filter by Email (Contains):</label>
-                        <input type="text" id="filter-email" class="form-control form-control-sm" placeholder="Type email...">
-                    </div>
-                     <div class="col-md-3">
-                        <label for="filter-date-start" class="form-label">Created Date From:</label>
-                        <input type="date" id="filter-date-start" class="form-control form-control-sm">
-                    </div>
-                     <div class="col-md-3">
-                        <label for="filter-date-end" class="form-label">Created Date To:</label>
-                        <input type="date" id="filter-date-end" class="form-control form-control-sm">
-                    </div>
-                </div>
-                 <div class="row g-3"> 
-                     <div class="col-md-3">
-                        <label for="filter-amount-type" class="form-label">Filter by Amount Type:</label>
-                        <select id="filter-amount-type" class="form-select form-select-sm">
-                            <option value="" selected>Select Amount Type...</option>
-                            <option value="Property Damage Amount">Property Damage</option>
-                            <option value="Personal Injury Amount">Personal Injury</option>
-                            <option value="Wrongful Death Amount">Wrongful Death</option>
-                            <option value="Total Claim Amount">Total Claim</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label for="filter-amount-min" class="form-label">Min Amount:</label>
-                        <input type="number" id="filter-amount-min" class="form-control form-control-sm" placeholder="Min" step="0.01">
-                    </div>
-                    <div class="col-md-3">
-                        <label for="filter-amount-max" class="form-label">Max Amount:</label>
-                        <input type="number" id="filter-amount-max" class="form-control form-control-sm" placeholder="Max" step="0.01">
-                    </div>
-                 </div>
-                 <div class="row g-3 mt-1"> 
-                     <div class="col-md-3">
-                        <label for="filter-signed-date-start" class="form-label">Signed Date From:</label>
-                        <input type="date" id="filter-signed-date-start" class="form-control form-control-sm">
-                    </div>
-                     <div class="col-md-3">
-                        <label for="filter-signed-date-end" class="form-label">Signed Date To:</label>
-                        <input type="date" id="filter-signed-date-end" class="form-control form-control-sm">
-                    </div>
-                 </div>
-                 <div class="row g-3 mt-1"> 
-                    <div class="col-md-6">
-                        <div class="form-check">
-                            <input class="form-check-input filter-toggle-input" type="checkbox" value="" id="filter-basis-deviation">
-                            <label class="form-check-label filter-toggle-label" for="filter-basis-deviation">
-                                Basis of Claim: Show Only Deviations
-                            </label>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-check">
-                            <input class="form-check-input filter-toggle-input" type="checkbox" value="" id="filter-injury-deviation">
-                            <label class="form-check-label filter-toggle-label" for="filter-injury-deviation">
-                                Personal Injury/Wrongful Death: Show Only Deviations
-                            </label>
-                        </div>
-                    </div>
-                 </div>
-            </div>
-        </div>
-        {# Filter Section End #}
-
         {% if claims %}
             <div class="table-responsive">
                 <table id="admin-table" class="table table-striped table-hover">
@@ -152,17 +42,123 @@
                         <tr>
                             {% if column_names %}
                                 {% for col_name in column_names %}
-                                    <th class="sortable-header" data-column-name="{{ col_name }}" style="cursor: pointer;">{{ col_name }}</th>
+                                    <th class="sortable-header" data-column-name="{{ col_name }}">
+                                        <span class="column-title">{{ col_name }}</span>
+                                        {# --- Insert Filters Conditionally --- #}
+                                        {% if col_name == 'Claimant Name' %}
+                                            <input type="text" id="filter-name" class="form-control form-control-sm header-filter" placeholder="Filter...">
+                                        {% elif col_name == 'Email Address' %}
+                                            <input type="text" id="filter-email" class="form-control form-control-sm header-filter" placeholder="Filter...">
+                                        {% elif col_name == 'Phone Number' %}
+                                            <input type="text" id="filter-phone-number" class="form-control form-control-sm header-filter" placeholder="Filter...">
+                                        {% elif col_name == 'Street Address' %}
+                                            <input type="text" id="filter-street-address" class="form-control form-control-sm header-filter" placeholder="Filter...">
+                                        {% elif col_name == 'City' %}
+                                            <input type="text" id="filter-city" class="form-control form-control-sm header-filter" placeholder="Filter...">
+                                        {% elif col_name == 'State' %}
+                                            <select id="filter-state" class="form-select form-select-sm header-filter">
+                                                <option value="" selected>All States</option>
+                                                {% for state in states_for_filter %}
+                                                <option value="{{ state }}">{{ state }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        {% elif col_name == 'Type of Employment' %}
+                                            <select id="filter-employment" class="form-select form-select-sm header-filter">
+                                                <option value="" selected>All Types</option>
+                                                <option value="Military">Military</option>
+                                                <option value="Civilian">Civilian</option>
+                                            </select>
+                                        {% elif col_name == 'Marital Status' %}
+                                            <select id="filter-marital-status" class="form-select form-select-sm header-filter">
+                                                <option value="" selected>All Statuses</option>
+                                                <option value="Single">Single</option>
+                                                <option value="Married">Married</option>
+                                                <option value="Divorced">Divorced</option>
+                                                <option value="Widowed">Widowed</option>
+                                            </select>
+                                        {% elif col_name == 'Basis of Claim' %}
+                                            <input type="text" id="filter-basis-of-claim" class="form-control form-control-sm header-filter" placeholder="Filter...">
+                                            <div> <!-- Wrapper needed for toggle -->
+                                                <input type="checkbox" id="filter-basis-deviation" class="filter-toggle-input">
+                                                <label for="filter-basis-deviation" class="filter-toggle-label header-filter">Show Deviations</label>
+                                            </div>
+                                        {% elif col_name == 'Nature of Injury' %}
+                                            <input type="text" id="filter-nature-of-injury" class="form-control form-control-sm header-filter" placeholder="Filter...">
+                                            <div> <!-- Wrapper needed for toggle -->
+                                                <input type="checkbox" id="filter-injury-deviation" class="filter-toggle-input">
+                                                <label for="filter-injury-deviation" class="filter-toggle-label header-filter">Show Deviations</label>
+                                            </div>
+                                        {% elif col_name == 'Capitol Experience' %}
+                                            <input type="text" id="filter-capitol-experience" class="form-control form-control-sm header-filter" placeholder="Filter...">
+                                        {% elif col_name == 'Injuries/Damages' %}
+                                            <input type="text" id="filter-injuries-damages" class="form-control form-control-sm header-filter" placeholder="Filter...">
+                                        {% elif col_name == 'Entry/Exit Time' %}
+                                            <input type="text" id="filter-entry-exit-time" class="form-control form-control-sm header-filter" placeholder="Filter...">
+                                        {% elif col_name == 'Inside Capitol Details' %}
+                                            <input type="text" id="filter-inside-capitol-details" class="form-control form-control-sm header-filter" placeholder="Filter...">
+                                        {% elif col_name == 'Zip Code' %}
+                                            <input type="text" id="filter-zip-code" class="form-control form-control-sm header-filter" placeholder="Filter...">
+                                        {% elif col_name == 'Property Damage Amount' %}
+                                            <div class="range-filter-group">
+                                                <input type="number" id="filter-prop-dmg-min" class="form-control form-control-sm header-filter amount-range-filter" placeholder="Min" step="0.01" style="margin-bottom: 2px;">
+                                                <input type="number" id="filter-prop-dmg-max" class="form-control form-control-sm header-filter amount-range-filter" placeholder="Max" step="0.01">
+                                            </div>
+                                        {% elif col_name == 'Personal Injury Amount' %}
+                                            <div class="range-filter-group">
+                                                <input type="number" id="filter-pers-inj-min" class="form-control form-control-sm header-filter amount-range-filter" placeholder="Min" step="0.01" style="margin-bottom: 2px;">
+                                                <input type="number" id="filter-pers-inj-max" class="form-control form-control-sm header-filter amount-range-filter" placeholder="Max" step="0.01">
+                                            </div>
+                                        {% elif col_name == 'Wrongful Death Amount' %}
+                                            <div class="range-filter-group">
+                                                <input type="number" id="filter-wrongful-death-min" class="form-control form-control-sm header-filter amount-range-filter" placeholder="Min" step="0.01" style="margin-bottom: 2px;">
+                                                <input type="number" id="filter-wrongful-death-max" class="form-control form-control-sm header-filter amount-range-filter" placeholder="Max" step="0.01">
+                                            </div>
+                                        {% elif col_name == 'Signature' %}
+                                            <div class="filter-group">
+                                                <select id="filter-signature-status" class="form-select form-select-sm header-filter">
+                                                    <option value="all" selected>Either Pending Signature or Signed</option>
+                                                    <option value="pending">Pending Signature</option>
+                                                    <option value="signed">Signed</option>
+                                                </select>
+                                            </div>
+                                            <input type="text" id="filter-signature-text" class="form-control form-control-sm header-filter" placeholder="Filter Text..." style="margin-top: 2px;">
+                                        {% elif col_name == 'Date and Time Created' %}
+                                            <div class="range-filter-group">
+                                                <input type="date" id="filter-created-start" class="form-control form-control-sm header-filter date-range-filter" placeholder="From" style="margin-bottom: 2px;">
+                                                <input type="date" id="filter-created-end" class="form-control form-control-sm header-filter date-range-filter" placeholder="To">
+                                            </div>
+                                        {% elif col_name == 'Date and Time Signed' %}
+                                            <div class="range-filter-group" style="margin-bottom: 5px;">
+                                                <input type="date" id="filter-signed-date-start" class="form-control form-control-sm header-filter date-range-filter" placeholder="From" style="margin-bottom: 2px;">
+                                                <input type="date" id="filter-signed-date-end" class="form-control form-control-sm header-filter date-range-filter" placeholder="To">
+                                            </div>
+                                            <div class="filter-group">
+                                                <select id="filter-signed-date-status" class="form-select form-select-sm header-filter">
+                                                    <option value="all" selected>Either Pending Signature or Signed</option>
+                                                    <option value="pending_signature_via_date_col_dd">Pending Signature</option>
+                                                    <option value="signed_via_date_col_dd">Signed</option>
+                                                </select>
+                                            </div>
+                                        {% elif col_name == 'Total Claim Amount' %}
+                                            <div class="range-filter-group">
+                                                <input type="number" id="filter-amount-min" class="form-control form-control-sm header-filter amount-range-filter" placeholder="Min" step="0.01" style="margin-bottom: 2px;">
+                                                <input type="number" id="filter-amount-max" class="form-control form-control-sm header-filter amount-range-filter" placeholder="Max" step="0.01">
+                                            </div>
+                                        {% endif %}
+                                        {# --- End Filter Insertion --- #}
+                                    </th>
                                 {% endfor %}
-                                <th>Actions</th>
+                                <th><span class="column-title">Actions</span></th> {# Actions column doesn't need sorting/filtering #}
                             {% else %}
-                                {# Fallback or default headers if column_names is not available, though it should be #}
+                                {# Fallback headers if column_names is somehow missing (should not happen) #}
                                 <th>ID</th>
                                 <th>Claimant Name</th>
-                                <th>Email</th>
-                                <th>Date Signed</th>
-                                <th>Submission Time</th>
-                                <th>PDF Filename</th>
+                                <th>Email Address</th>
+                                <th>State</th>
+                                <th>Type of Employment</th>
+                                <th>Basis of Claim</th>
+                                <th>Nature of Injury</th>
+                                <th>Signature</th>
                                 <th>Actions</th>
                             {% endif %}
                         </tr>
