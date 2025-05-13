@@ -33,7 +33,7 @@ data/uploads/
 
 # Logs
 *.log
-debugging-logs.txt
+
 
 # Flask session files
 flask_session/
