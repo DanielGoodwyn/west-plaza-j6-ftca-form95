@@ -937,7 +937,10 @@ def success_page(submission_id):
 
     return render_template('success.html', submission_id=submission_id, pdf_filename=pdf_filename)
 
+from flask_login import login_required
+
 @app.route('/download_filled_pdf/<filename>')
+@login_required
 def download_filled_pdf(filename):
     current_app.logger.info(f"--- download_filled_pdf --- Attempting to send file: {filename}")
     try:
