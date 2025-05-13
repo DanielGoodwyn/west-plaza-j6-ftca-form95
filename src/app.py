@@ -1,3 +1,16 @@
+# import os
+# import sys
+#
+# # Path hack for direct script execution and relative imports
+# if __name__ == '__main__' and __package__ is None:
+#     parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+#     if parent_dir not in sys.path:
+#         sys.path.insert(0, parent_dir)
+#     # Attempt to set the package context if running as a script directly
+#     # This helps Python resolve relative imports like '.forms' when 'src.app' is run.
+#     # This block is primarily for the temporary direct execution for DB setup.
+#     __package__ = "src"
+
 import sqlite3
 import os
 import logging
@@ -11,17 +24,18 @@ import csv
 from unicodedata import normalize
 from werkzeug.utils import secure_filename
 import pytz # Added for timezone conversion
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
-from werkzeug.security import generate_password_hash, check_password_hash
-from src.forms import LoginForm # Import the LoginForm
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user # Added for Flask-Login
+from werkzeug.security import generate_password_hash, check_password_hash # Ensuring this is present
+
+from .forms import LoginForm # Import the LoginForm
 from dotenv import load_dotenv # Added
 
 load_dotenv() # Added: Load .env file from project root
 
 # Import utility functions
-from utils.pdf_filler import fill_sf95_pdf, DEFAULT_VALUES as PDF_FILLER_DEFAULTS
-import utils.pdf_filler
-# from utils.notifier import send_notification_email
+from .utils.pdf_filler import fill_sf95_pdf, DEFAULT_VALUES as PDF_FILLER_DEFAULTS
+from .utils.helpers import get_db, create_tables_if_not_exist, is_safe_url, init_db, init_app_db # Added init_app_db
+from .utils.logging_config import setup_logging # Corrected to relative
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8') # Use environment variable or default
@@ -47,6 +61,9 @@ if not os.path.exists(app.config['FILLED_FORMS_DIR']):
     except Exception as e:
         app.logger.error(f"Error creating filled forms directory {app.config['FILLED_FORMS_DIR']}: {e}")
         # Decide if this error is critical enough to raise
+
+# Call init_app_db to register teardown context
+init_app_db(app)
 
 Session(app) # Initialize Flask-Session
 
@@ -216,6 +233,13 @@ class User(UserMixin):
             return User(id=user_data['id'], username=user_data['username'], password_hash=user_data['password_hash'])
         return None
 
+    @staticmethod
+    def create_user(username, password):
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute('INSERT INTO users (username, password_hash) VALUES (?, ?)', (username, generate_password_hash(password)))
+        db.commit()
+
 # --- Flask-Login Setup ---
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -230,10 +254,10 @@ def load_user(user_id):
 def initialize_application_internals(flask_app_object):
     if flask_app_object:
         # 0. Setup logging (File and Console)
-        log_file_path = '/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/debugging-logs.txt'
-        # Ensure log directory exists (though in this case, it's the project root)
+        # Use a log file relative to the current file's directory (project root on server)
+        log_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'debugging-logs.txt')
         log_dir = os.path.dirname(log_file_path)
-        if not os.path.exists(log_dir) and log_dir: # Create dir if it's not project root and doesn't exist
+        if not os.path.exists(log_dir) and log_dir:
             os.makedirs(log_dir, exist_ok=True)
 
         # Configure file handler
@@ -1137,12 +1161,5 @@ def health_check():
     return "OK", 200
 
 if __name__ == '__main__':
-    # Ensure the session directory exists
-    if not os.path.exists(app.config['SESSION_FILE_DIR']):
-        os.makedirs(app.config['SESSION_FILE_DIR'])
-    # Ensure the filled forms directory exists
-    if not os.path.exists(app.config['FILLED_FORMS_DIR']):
-        os.makedirs(app.config['FILLED_FORMS_DIR'])
-    
     app.logger.info("Starting Flask development server.") # Use app.logger here
     app.run(debug=True, port=61663)
