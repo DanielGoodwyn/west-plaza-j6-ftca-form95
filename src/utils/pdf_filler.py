@@ -1,6 +1,6 @@
 import os
 import json
-from utils.helpers import subprocess
+import subprocess
 from utils.helpers import tempfile
 from utils.helpers import datetime
 from utils.logging_config import logging
