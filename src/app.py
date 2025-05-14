@@ -27,7 +27,7 @@ import pytz # Added for timezone conversion
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user # Added for Flask-Login
 from werkzeug.security import generate_password_hash, check_password_hash # Ensuring this is present
 
-from forms import LoginForm # Import the LoginForm
+from .forms import LoginForm # Import the LoginForm
 from dotenv import load_dotenv # Added
 
 load_dotenv() # Added: Load .env file from project root
@@ -521,219 +521,6 @@ def form():
 def redirect_form_to_root():
     return redirect(url_for('form'))
 
-    pdf_data_for_filling_draft = map_form_data_to_pdf_fields(form_data)
-    current_app.logger.info(f"--- process_step1 --- Data for DRAFT PDF after mapping: {pdf_data_for_filling_draft}")
-
-
-    db_filled_pdf_filename_draft = None
-    try:
-        fill_sf95_pdf(pdf_data_for_filling_draft, PDF_TEMPLATE_PATH, output_pdf_path)
-        current_app.logger.info(f"--- process_step1 --- Draft PDF generated: {output_pdf_path}")
-        db_filled_pdf_filename_draft = os.path.basename(output_pdf_path)
-    except Exception as e:
-        current_app.logger.error(f"--- process_step1 --- Error filling DRAFT PDF: {e}")
-        flash(f"Error generating draft PDF: {e}. Please proceed to signature, the PDF can be regenerated.", "warning")
-        # Non-fatal for draft, allow proceeding to signature. Final PDF generation is key.
-        db_filled_pdf_filename_draft = output_pdf_filename_with_ext # Store expected name even if generation failed
-
-    # Prepare data for DB (Stage 1 - signature/date are None)
-    data_to_save_for_db_stage1 = {}
-    # Get all column names from DB_SCHEMA, excluding 'id' for inserts/updates handled by DB
-    schema_column_names_for_data = [col.split(' ')[0] for col in DB_SCHEMA if col.split(' ')[0] != 'id']
-
-    for key in schema_column_names_for_data:
-        if key == 'filled_pdf_filename':
-            data_to_save_for_db_stage1[key] = db_filled_pdf_filename_draft
-        # Ensure specific fields for actual signature text and full signature date are empty at Stage 1 for DB
-        elif key == 'field17_signature_of_claimant':
-            data_to_save_for_db_stage1[key] = "" # Store empty for actual signature text
-        elif key == 'field18_date_of_signature':
-            data_to_save_for_db_stage1[key] = "" # Store empty for signature timestamp
-        # For other fields, including 'field13a_signature' and 'field14_date_signed' which are now set
-        # for the draft PDF, get them from pdf_data_for_filling_draft.
-        # If a key is a DB column but not in pdf_data_for_filling_draft (e.g. new supplemental question not yet mapped),
-        # try form_data as a fallback, then empty string.
-        else:
-            data_to_save_for_db_stage1[key] = pdf_data_for_filling_draft.get(key, form_data.get(key, ''))
-
-    current_app.logger.info(f"--- process_step1 --- Data for DB (Stage 1): {data_to_save_for_db_stage1}")
-
-    submission_id_in_progress = None
-
-    # Store required session data for signature_review
-    session['pdf_data_for_filling_draft'] = pdf_data_for_filling_draft
-    session['claimant_name_for_signature'] = name
-    session_cookie = request.cookies.get('session')
-    current_app.logger.info(f"SIGNATURE POST: Session before redirect: {dict(session)} | Session cookie: {session_cookie} | Headers: {dict(request.headers)}")
-    log_msg = f"\nSIGNATURE POST: Session before redirect: {dict(session)} | Session cookie: {session_cookie} | Headers: {dict(request.headers)}\n"
-    with open('debugging-logs.txt', 'a') as f:
-        f.write(log_msg)
-    trim_debug_log()
-    return redirect(url_for('signature_review'))
-
-# --- Helper: Trim debug log to 1000 lines ---
-def trim_debug_log():
-    try:
-        with open('debugging-logs.txt', 'r+') as f:
-            lines = f.readlines()
-            if len(lines) > 1000:
-                f.seek(0)
-                f.writelines(lines[-1000:])
-                f.truncate()
-    except Exception as e:
-        print(f"Failed to trim debugging-logs.txt: {e}")  # Use print as fallback if logger fails
-
-# --- Helper: Map form/session data to PDF field keys ---
-def map_form_data_to_pdf_fields(form_data):
-    '''
-    Centralizes mapping from user form/session data to PDF field keys.
-    Handles all fields in pdf_field_map.json, including concatenation, formatting, and defaulting.
-    Logs any missing or blank fields for debugging.
-    '''
-    from utils.pdf_filler import PDF_FIELD_MAP, DEFAULT_VALUES
-    pdf_data = {}
-    # Claimant info combined
-    name = form_data.get('field2_name', '')
-    address = form_data.get('field2_address', '')
-    city = form_data.get('field2_city', '')
-    state = form_data.get('field2_state', '')
-    zip_code = form_data.get('field2_zip', '')
-    pdf_data['field2_claimant_info_combined'] = f"{name}\n{address}\n{city}, {state} {zip_code}".strip()
-    pdf_data['field2_name'] = name
-    pdf_data['field2_address'] = address
-    pdf_data['field2_city'] = city
-    pdf_data['field2_state'] = state
-    pdf_data['field2_zip'] = zip_code
-    # Type of employment
-    employment_type = form_data.get('field3_type_employment', '')
-    pdf_data['field3_type_employment'] = form_data.get('field3_other_specify', '') if employment_type == 'Other' else employment_type
-    pdf_data['field3_checkbox_civilian'] = employment_type == 'Civilian'
-    pdf_data['field3_checkbox_military'] = employment_type == 'Military'
-    # DOB, marital status
-    pdf_data['field_pdf_4_dob'] = form_data.get('field_pdf_4_dob', '')
-    pdf_data['field_pdf_5_marital_status'] = form_data.get('field_pdf_5_marital_status', '')
-    # Basis of claim
-    pdf_data['field8_basis_of_claim'] = form_data.get('field8_basis_of_claim', DEFAULT_VALUES.get('field8_basis_of_claim', ''))
-    # Property damage
-    prop_damage_vehicle = form_data.get('field9_property_damage_description_vehicle', '')
-    prop_damage_other = form_data.get('field9_property_damage_description_other', '')
-    combined_prop_desc = f"{prop_damage_vehicle}\n{prop_damage_other}".strip()
-    pdf_data['field9_property_damage_description'] = combined_prop_desc if combined_prop_desc else DEFAULT_VALUES.get('field9_property_damage_description', '')
-    pdf_data['field9_owner_name_address'] = form_data.get('field9_owner_name_address', DEFAULT_VALUES.get('field9_owner_name_address', ''))
-    # Nature of injury
-    pdf_data['field10_nature_of_injury'] = form_data.get('field10_nature_of_injury', DEFAULT_VALUES.get('field10_nature_of_injury', ''))
-    # Witnesses
-    pdf_data['field11_witness_name'] = form_data.get('field11_witness_name', DEFAULT_VALUES.get('field11_witness_name', ''))
-    pdf_data['field11_witness_address'] = form_data.get('field11_witness_address', DEFAULT_VALUES.get('field11_witness_address', ''))
-    # Amounts
-    pdf_data['field12a_property_damage'] = form_data.get('field12a_property_damage_amount', DEFAULT_VALUES.get('field12a_property_damage', ''))
-    pdf_data['field12b_personal_injury'] = form_data.get('field12b_personal_injury_amount', DEFAULT_VALUES.get('field12b_personal_injury', ''))
-    pdf_data['field12c_wrongful_death'] = form_data.get('field12c_wrongful_death_amount', DEFAULT_VALUES.get('field12c_wrongful_death', ''))
-    pdf_data['field12d_total_claim_amount'] = form_data.get('field12d_total_amount', form_data.get('field12d_total_claim_amount', DEFAULT_VALUES.get('field12d_total_claim_amount', '')))
-    # Signature and phone
-    pdf_data['field13a_signature'] = form_data.get('field13a_signature', 'Pending Signature')
-    pdf_data['field_pdf_13b_phone'] = form_data.get('field_pdf_13b_phone', '')
-    pdf_data['field14_date_signed'] = form_data.get('field14_date_signed', '')
-    # Insurance, claim details, etc.
-    pdf_data['field15_accident_insurance'] = form_data.get('field15_accident_insurance', '')
-    pdf_data['field15_insurer_name_address_policy'] = form_data.get('field15_insurer_name_address_policy', '')
-    pdf_data['field16_filed_claim'] = form_data.get('field16_filed_claim', '')
-    pdf_data['field16_claim_details'] = form_data.get('field16_claim_details', '')
-    pdf_data['field17_deductible_amount'] = form_data.get('field17_deductible_amount', '')
-    pdf_data['field18_insurer_action'] = form_data.get('field18_insurer_action', '')
-    pdf_data['field19_liability_insurance'] = form_data.get('field19_liability_insurance', '')
-    pdf_data['field19_insurer_name_address'] = form_data.get('field19_insurer_name_address', '')
-    # Log missing/blank fields for all PDF fields
-    from flask import current_app
-    from utils.pdf_filler import PDF_FIELD_MAP
-    for app_key, pdf_field in PDF_FIELD_MAP.items():
-        if app_key not in pdf_data or pdf_data[app_key] in (None, ""):
-            current_app.logger.warning(f"PDF MAPPING: Field '{app_key}' (PDF: '{pdf_field}') is missing or blank in PDF data.")
-    return pdf_data
-
-
-
-    try:
-        cursor.execute("SELECT id FROM claims WHERE field2_name = ?", (claimant_name,))
-        existing_record = cursor.fetchone()
-        current_time_utc = datetime.now(timezone.utc)
-
-        if existing_record:
-            existing_id = existing_record['id']
-            current_app.logger.info(f"--- process_step1 --- Claimant '{claimant_name}' found (ID: {existing_id}). Updating with Stage 1 data.")
-            update_fields_sql_parts = []
-            update_values_list = []
-            # Construct SET clause for existing columns in data_to_save_for_db_stage1
-            for col_key, col_value in data_to_save_for_db_stage1.items():
-                 if col_key in schema_column_names_for_data and col_key not in ['created_at']:
-                    update_fields_sql_parts.append(f"{col_key} = ?")
-                    update_values_list.append(col_value)
-            
-            if update_fields_sql_parts:
-                update_fields_sql_parts.append("updated_at = ?")
-                update_values_list.append(current_time_utc)
-                update_values_list.append(existing_id) # For the WHERE clause
-
-                update_sql = f"UPDATE claims SET {', '.join(update_fields_sql_parts)} WHERE id = ?"
-                cursor.execute(update_sql, tuple(update_values_list))
-                db.commit()
-                submission_id_in_progress = existing_id
-                current_app.logger.info(f"--- process_step1 --- Record for '{claimant_name}' (ID: {existing_id}) updated with Stage 1 data.")
-            else:
-                 current_app.logger.warning(f"--- process_step1 --- No fields to update for existing claimant '{claimant_name}' at Stage 1.")
-                 submission_id_in_progress = existing_id # Still use existing ID if no data changed
-        else:
-            current_app.logger.info(f"--- process_step1 --- New claimant '{claimant_name}'. Inserting Stage 1 data.")
-            data_to_save_for_db_stage1['created_at'] = current_time_utc
-            data_to_save_for_db_stage1['updated_at'] = current_time_utc
-            
-            cols_for_insert_sql = []
-            vals_for_insert_list = []
-            placeholders_for_insert_sql = []
-            
-            # Ensure all keys in data_to_save_for_db_stage1 are valid columns
-            for col_name in schema_column_names_for_data + ['created_at', 'updated_at']:
-                if col_name in data_to_save_for_db_stage1: # only include if value was prepared
-                    cols_for_insert_sql.append(col_name)
-                    vals_for_insert_list.append(data_to_save_for_db_stage1[col_name])
-                    placeholders_for_insert_sql.append('?')
-            
-            if cols_for_insert_sql:
-                insert_sql = f"INSERT INTO claims ({', '.join(cols_for_insert_sql)}) VALUES ({', '.join(placeholders_for_insert_sql)})"
-                cursor.execute(insert_sql, tuple(vals_for_insert_list))
-                db.commit()
-                submission_id_in_progress = cursor.lastrowid
-                current_app.logger.info(f"--- process_step1 --- New record for '{claimant_name}' inserted with Stage 1 data (ID: {submission_id_in_progress}).")
-            else:
-                current_app.logger.error(f"--- process_step1 --- No columns to insert for Stage 1 for '{claimant_name}'.")
-                flash("Error saving initial form data. No data to insert.", "danger")
-                session['form_step1_data'] = form_data # Preserve submitted data
-                return redirect(url_for('form'))
-
-        # Store necessary info in session for Step 2 (signature)
-        session['submission_id_in_progress'] = submission_id_in_progress
-        # Storing the ALREADY MAPPED data from step 1, which uses app-side keys
-        session['pdf_data_for_filling_draft'] = pdf_data_for_filling_draft 
-        session['claimant_name_for_signature'] = pdf_data_for_filling_draft.get('field2_name', '') # Get name from mapped data
-        
-        current_app.logger.info(f"--- process_step1 --- Stored submission_id_in_progress: {submission_id_in_progress}, claimant_name: {session['claimant_name_for_signature']} in session. Redirecting to signature page.")
-        # Clear any previous step 1 validation errors as we are proceeding
-        session.pop('validation_errors_step1', None)
-        return redirect(url_for('signature_review'))
-
-    except sqlite3.Error as e:
-        current_app.logger.error(f"--- process_step1 --- Database error during Stage 1 save for '{claimant_name}': {e}")
-        db.rollback()
-        flash(f"Database error while saving initial data: {e}. Please try again.", "danger")
-        session['form_step1_data'] = form_data # Preserve data on error
-        return redirect(url_for('form'))
-    except Exception as e:
-        current_app.logger.error(f"--- process_step1 --- Unexpected error during Stage 1 for '{claimant_name}': {e}", exc_info=True)
-        db.rollback()
-        flash("An unexpected error occurred while saving initial data. Please try again.", "danger")
-        session['form_step1_data'] = form_data
-        return redirect(url_for('form'))
-
 @app.route('/signature', methods=['GET', 'POST'])
 def signature():
     session_cookie = request.cookies.get('session')
@@ -794,6 +581,7 @@ def signature():
             validation_errors_step2['field17_signature_of_claimant'] = "Signature is required."
         elif signature_of_claimant_from_form.strip().lower() != claimant_name_from_step1.strip().lower():
             validation_errors_step2['field17_signature_of_claimant'] = f"Signature must exactly match the claimant's name: '{claimant_name_from_step1}'."
+
         if validation_errors_step2:
             session['validation_errors_step2'] = validation_errors_step2
             session['form_data_step2_errors'] = form_data
@@ -801,9 +589,13 @@ def signature():
 
         db = get_db()
         cursor = db.cursor()
+
+        # PDF Filename (should be same as draft, using claimant name from Step 1 data)
         slug = slugify(claimant_name_from_step1)
         output_pdf_filename_with_ext = f"{slug}_SF95.pdf"
         output_pdf_path = os.path.join(current_app.config['FILLED_FORMS_DIR'], output_pdf_filename_with_ext)
+
+        # Server-generated Date of Signature (UTC)
         date_of_signature_utc_dt = datetime.now(timezone.utc)
         date_of_signature_utc_str_for_db = date_of_signature_utc_dt.strftime('%Y-%m-%dT%H:%M:%S')
         current_app.logger.info(f"SIGNATURE FINALIZATION: Server-generated signature datetime (UTC): {date_of_signature_utc_str_for_db}")
@@ -840,28 +632,34 @@ def signature():
             update_fields_sql_parts = []
             update_values_list = []
             schema_column_names = [col.split(' ')[0] for col in DB_SCHEMA]
+
             for col_key, col_value in data_to_update_in_db.items():
-                if col_key in schema_column_names:
+                if col_key in schema_column_names: # Ensure we only try to update valid columns
                     update_fields_sql_parts.append(f"{col_key} = ?")
                     update_values_list.append(col_value)
+        
             if not update_fields_sql_parts:
                 current_app.logger.error(f"SIGNATURE FINALIZATION: No valid fields to update in DB for ID {submission_id_in_progress}. This is unexpected.")
                 flash("Error finalizing submission: No data fields to update.", "danger")
-                session['submission_id_in_progress'] = submission_id_in_progress
+                # Keep session data for retry/debug if needed by redirecting back to signature page
+                session['submission_id_in_progress'] = submission_id_in_progress 
                 session['pdf_data_for_filling_draft'] = pdf_data_for_filling_draft
                 session['claimant_name_for_signature'] = claimant_name_from_step1
                 return redirect(url_for('signature'))
-            update_values_list.append(submission_id_in_progress)
+
+            update_values_list.append(submission_id_in_progress) # For the WHERE id = ?
             update_sql = f"UPDATE claims SET {', '.join(update_fields_sql_parts)} WHERE id = ?"
+        
             current_app.logger.info(f"SIGNATURE FINALIZATION: Executing SQL: {update_sql} with values: {tuple(update_values_list)}")
             cursor.execute(update_sql, tuple(update_values_list))
             db.commit()
             current_app.logger.info(f"SIGNATURE FINALIZATION: Successfully updated record ID {submission_id_in_progress} in database.")
+
             # Clear session data after successful submission
             session.pop('submission_id_in_progress', None)
             session.pop('pdf_data_for_filling_draft', None)
             session.pop('claimant_name_for_signature', None)
-            session.pop('form_data', None)
+            session.pop('form_data', None) # Clean up old key if present
             session.pop('validation_errors_step1', None)
             session.pop('form_data_step2_errors', None)
             session.pop('validation_errors_step2', None)
