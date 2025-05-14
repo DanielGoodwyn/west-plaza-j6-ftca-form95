@@ -23,4 +23,6 @@ def create_and_fill_test_pdf(test_value):
         output_pdf,
         {test_field_map['test_field']: test_value}
     )
+    # Flatten the PDF to make the filled value visible everywhere
+    fillpdfs.flatten_pdf(output_pdf, output_pdf)
     return output_pdf
