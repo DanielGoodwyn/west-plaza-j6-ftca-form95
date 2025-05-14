@@ -1,1 +1,9 @@
+Flask
+Flask-Login
+Flask-Session
+python-dotenv
+fillpdf
+pytz
+flask-wtf
+wtforms
 wheel==0.45.1

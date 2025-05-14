@@ -170,8 +170,12 @@
                                     {% for col_name in column_names %}
                                         <td>
                                             <div class="cell-content-wrapper">
-                                                {{ claim[col_name] }}
-                                            </div>
+    {% if col_name == 'ID' and claim[col_name] and claim[col_name].endswith('.pdf') %}
+        <a href="{{ url_for('download_filled_pdf', filename=claim[col_name]) }}" target="_blank">{{ claim[col_name] }}</a>
+    {% else %}
+        {{ claim[col_name] }}
+    {% endif %}
+</div>
                                         </td>
                                     {% endfor %}
                                     <td>

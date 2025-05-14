@@ -36,3 +36,69 @@
     content: '\2610\00A0'; /* Empty box character with a non-breaking space */
     font-weight: bold;
 }
+
+/* Styling for Filters inside Table Headers */
+th .header-filter {
+    margin-top: 5px; /* Add some space below the column title */
+    margin-bottom: 2px; /* Reduce bottom margin */
+    display: block; /* Make inputs/selects take full width of available space */
+    max-width: 150px; /* Prevent filters from becoming too wide */
+    font-size: 0.8rem; /* Slightly smaller font for filters */
+}
+
+/* Specific adjustments for different filter types */
+th input.header-filter,
+th select.header-filter {
+    padding-top: 0.2rem;
+    padding-bottom: 0.2rem;
+    height: auto; /* Adjust height based on padding */
+}
+
+/* Ensure toggle labels don't get too wide */
+th label.header-filter {
+     max-width: none; /* Allow label to take needed space */
+     margin-top: 5px;
+     display: inline-block; /* Align with checkbox */
+     font-weight: normal; /* Normal weight for filter labels */
+}
+
+/* Style the wrapper for signature radio buttons */
+th .signature-filter-group {
+    margin-top: 5px;
+    text-align: left; /* Align radios left */
+}
+
+th .signature-filter-group .form-check {
+    padding-left: 0; /* Remove default padding */
+    margin-right: 5px !important; /* Space between radios */
+}
+
+th .signature-filter-group .form-check-inline {
+    margin-right: 0.5rem; /* Consistent spacing */
+     display: block; /* Stack radios vertically */
+     margin-bottom: 2px; /* Space between stacked radios */
+}
+
+th .signature-filter-group .form-check-label {
+    font-size: 0.8rem; /* Match other filter font size */
+    font-weight: normal;
+    padding-left: 3px; /* Space after radio button */
+    display: inline; /* Keep label inline with radio */
+    margin-bottom: 0;
+}
+
+/* Adjust toggle button styling within header */
+th .filter-toggle-label.header-filter {
+    padding: 0.2rem 0.4rem; /* Smaller padding */
+    font-size: 0.75rem; /* Even smaller font for toggle */
+    /* Inherit other toggle styles automatically */
+}
+
+/* Ensure column title has spacing from filter below */
+th .column-title {
+    display: block; /* Ensure it takes its own line */
+    margin-bottom: 3px;
+}
+
+/* Adjust sort indicator positioning if needed */
+/* Removed empty ruleset for .sortable-header::after */

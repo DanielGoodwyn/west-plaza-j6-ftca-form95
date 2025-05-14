@@ -1,3 +1,16 @@
+# import os
+# import sys
+#
+# # Path hack for direct script execution and relative imports
+# if __name__ == '__main__' and __package__ is None:
+#     parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+#     if parent_dir not in sys.path:
+#         sys.path.insert(0, parent_dir)
+#     # Attempt to set the package context if running as a script directly
+#     # This helps Python resolve relative imports like '.forms' when 'src.app' is run.
+#     # This block is primarily for the temporary direct execution for DB setup.
+#     __package__ = "src"
+
 import sqlite3
 import os
 import logging
@@ -11,17 +24,18 @@ import csv
 from unicodedata import normalize
 from werkzeug.utils import secure_filename
 import pytz # Added for timezone conversion
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required
-from werkzeug.security import generate_password_hash, check_password_hash
-from src.forms import LoginForm # Import the LoginForm
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user # Added for Flask-Login
+from werkzeug.security import generate_password_hash, check_password_hash # Ensuring this is present
+
+from .forms import LoginForm # Import the LoginForm
 from dotenv import load_dotenv # Added
 
 load_dotenv() # Added: Load .env file from project root
 
 # Import utility functions
-from utils.pdf_filler import fill_sf95_pdf, DEFAULT_VALUES as PDF_FILLER_DEFAULTS
-import utils.pdf_filler
-# from utils.notifier import send_notification_email
+from .utils.pdf_filler import fill_sf95_pdf, DEFAULT_VALUES as PDF_FILLER_DEFAULTS
+from .utils.helpers import get_db, create_tables_if_not_exist, is_safe_url, init_db, init_app_db # Added init_app_db
+from .utils.logging_config import setup_logging # Corrected to relative
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8') # Use environment variable or default
@@ -29,6 +43,7 @@ app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_FILE_DIR'] = './flask_session/' # Ensure this directory exists and is writable
 app.config['FILLED_FORMS_DIR'] = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'filled_forms')
 app.config['APPLICATION_ROOT'] = '/west-plaza-lawsuit' # Added
+app.debug = True  # Enable debug mode for detailed error output (disable in production)
 
 # Ensure session directory exists
 if not os.path.exists(app.config['SESSION_FILE_DIR']):
@@ -47,6 +62,9 @@ if not os.path.exists(app.config['FILLED_FORMS_DIR']):
     except Exception as e:
         app.logger.error(f"Error creating filled forms directory {app.config['FILLED_FORMS_DIR']}: {e}")
         # Decide if this error is critical enough to raise
+
+# Call init_app_db to register teardown context
+init_app_db(app)
 
 Session(app) # Initialize Flask-Session
 
@@ -202,7 +220,8 @@ class User(UserMixin):
     def get_by_username(username):
         db = get_db()
         cursor = db.cursor()
-        user_data = cursor.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
+        username_lower = username.lower()
+        user_data = cursor.execute('SELECT * FROM users WHERE LOWER(username) = ?', (username_lower,)).fetchone()
         if user_data:
             return User(id=user_data['id'], username=user_data['username'], password_hash=user_data['password_hash'])
         return None
@@ -215,6 +234,13 @@ class User(UserMixin):
         if user_data:
             return User(id=user_data['id'], username=user_data['username'], password_hash=user_data['password_hash'])
         return None
+
+    @staticmethod
+    def create_user(username, password):
+        db = get_db()
+        cursor = db.cursor()
+        cursor.execute('INSERT INTO users (username, password_hash) VALUES (?, ?)', (username, generate_password_hash(password)))
+        db.commit()
 
 # --- Flask-Login Setup ---
 login_manager = LoginManager()
@@ -230,10 +256,10 @@ def load_user(user_id):
 def initialize_application_internals(flask_app_object):
     if flask_app_object:
         # 0. Setup logging (File and Console)
-        log_file_path = '/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/debugging-logs.txt'
-        # Ensure log directory exists (though in this case, it's the project root)
+        # Use a log file relative to the current file's directory (project root on server)
+        log_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'debugging-logs.txt')
         log_dir = os.path.dirname(log_file_path)
-        if not os.path.exists(log_dir) and log_dir: # Create dir if it's not project root and doesn't exist
+        if not os.path.exists(log_dir) and log_dir:
             os.makedirs(log_dir, exist_ok=True)
 
         # Configure file handler
@@ -402,56 +428,63 @@ def format_datetime_for_display(utc_datetime_input, target_tz_str='America/New_Y
 # --- Routes ---
 @app.route('/')
 def form():
-    today_date = datetime.today().strftime('%Y-%m-%d')
-    form_data = session.get('form_data', {})
-    html_form_defaults = session.get('html_form_defaults', {
-        'field1_agency': '', # Let user type, PDF_FILLER_DEFAULTS will handle if empty at PDF gen
-        'field2_name': '',
-        'field2_address': '',
-        'field2_city': '',
-        'field2_state': '',
-        'field2_zip': '',
-        'field3_type_employment': 'Civilian', # Default to Civilian
-        'field_pdf_4_dob': '',
-        'field_pdf_5_marital_status': '', # Assuming it's a dropdown/radio
-        'field_pdf_13b_phone': '',
-        'field8_basis_of_claim': PDF_FILLER_DEFAULTS.get('field8_basis_of_claim', "On January 6, 2021, at the U.S. Capitol, claimant was subjected to excessive force by federal officers, including tear gas and rubber bullets, leading to physical injury and emotional distress."),
-        'field9_property_damage_description': '',
-        'field10_nature_of_injury': PDF_FILLER_DEFAULTS.get('field10_nature_of_injury', "Respiratory distress from tear gas, contusions from rubber bullets, and severe emotional distress."),
-        'field11_witness_name_1': '',
-        'field11_witness_address_1': '',
-        'field11_witness_name_2': '',
-        'field11_witness_address_2': '',
-        'field12a_property_damage_amount': '0',
-        'field12b_personal_injury_amount': '90000',
-        'field12c_wrongful_death_amount': '0',
-        'field12d_total_claim_amount': '0',
-        'user_email_address': '',
-        'supplemental_question_1_capitol_experience': '',
-        'supplemental_question_2_injuries_damages': '',
-        'supplemental_question_3_entry_exit_time': '',
-        'supplemental_question_4_inside_capitol_details': ''
-    })
-    session['html_form_defaults'] = html_form_defaults
-    
-    # Ensure all expected keys from defaults are in form_data for initial load or if new fields were added
-    for key, value in html_form_defaults.items():
-        form_data.setdefault(key, value)
-    
-    # Persist updated form_data (with any newly added default keys) back to session for consistency
-    # This helps if new default fields are added and user already had a session.
-    session['form_data'] = form_data
+    import traceback
+    try:
+        today_date = datetime.today().strftime('%Y-%m-%d')
+        form_data = session.get('form_data', {})
+        html_form_defaults = session.get('html_form_defaults', {
+            'field1_agency': '', # Let user type, PDF_FILLER_DEFAULTS will handle if empty at PDF gen
+            'field2_name': '',
+            'field2_address': '',
+            'field2_city': '',
+            'field2_state': '',
+            'field2_zip': '',
+            'field3_type_employment': 'Civilian', # Default to Civilian
+            'field_pdf_4_dob': '',
+            'field_pdf_5_marital_status': '', # Assuming it's a dropdown/radio
+            'field_pdf_13b_phone': '',
+            'field8_basis_of_claim': PDF_FILLER_DEFAULTS.get('field8_basis_of_claim', "On January 6, 2021, at the U.S. Capitol, claimant was subjected to excessive force by federal officers, including tear gas and rubber bullets, leading to physical injury and emotional distress."),
+            'field9_property_damage_description': '',
+            'field10_nature_of_injury': PDF_FILLER_DEFAULTS.get('field10_nature_of_injury', "Respiratory distress from tear gas, contusions from rubber bullets, and severe emotional distress."),
+            'field11_witness_name_1': '',
+            'field11_witness_address_1': '',
+            'field11_witness_name_2': '',
+            'field11_witness_address_2': '',
+            'field12a_property_damage_amount': '0',
+            'field12b_personal_injury_amount': '90000',
+            'field12c_wrongful_death_amount': '0',
+            'field12d_total_claim_amount': '0',
+            'user_email_address': '',
+            'supplemental_question_1_capitol_experience': '',
+            'supplemental_question_2_injuries_damages': '',
+            'supplemental_question_3_entry_exit_time': '',
+            'supplemental_question_4_inside_capitol_details': ''
+        })
+        session['html_form_defaults'] = html_form_defaults
+        
+        # Ensure all expected keys from defaults are in form_data for initial load or if new fields were added
+        for key, value in html_form_defaults.items():
+            form_data.setdefault(key, value)
+        
+        # Persist updated form_data (with any newly added default keys) back to session for consistency
+        # This helps if new default fields are added and user already had a session.
+        session['form_data'] = form_data
 
-    states_and_territories = [
-        'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
-        'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
-        'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
-        'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
-        'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY',
-        'DC', 'AS', 'GU', 'MP', 'PR', 'VI'
-    ]
-    validation_errors = session.pop('validation_errors_step1', {})
-    return render_template('form.html', form_data=form_data, title="SF-95 Claim Form - Step 1", validation_errors=validation_errors, states_list=states_and_territories)
+        states_and_territories = [
+            'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
+            'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
+            'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
+            'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
+            'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY',
+            'DC', 'AS', 'GU', 'MP', 'PR', 'VI'
+        ]
+        validation_errors = session.pop('validation_errors_step1', {})
+        return render_template('form.html', form_data=form_data, title="SF-95 Claim Form - Step 1", validation_errors=validation_errors, states_list=states_and_territories)
+    except Exception as e:
+        with open('/home3/investi9/public_html/west-plaza-lawsuit/debugging-logs.txt', 'a') as f:
+            f.write('\n--- Exception during form submission ---\n')
+            traceback.print_exc(file=f)
+        raise
 
 @app.route('/form')
 def redirect_form_to_root():
@@ -459,12 +492,14 @@ def redirect_form_to_root():
 
 @app.route('/process_step1', methods=['POST'])
 def process_step1():
-    current_app.logger.info("--- process_step1 --- Received POST request.")
-    form_data_step1 = dict(request.form)
-    current_app.logger.info(f"--- process_step1 --- Form data: {form_data_step1}")
-
-    # Server-side validation for Step 1
-    validation_errors_step1 = {}
+    import os
+    import traceback
+    LOG_PATH = 'debugging-logs.txt'
+    MAX_LINES = 1000
+    def log_exception_with_limit():
+        if os.path.exists(LOG_PATH):
+            with open(LOG_PATH, 'r') as f:
+                lines = f.readlines()
     required_fields_step1 = ['field2_name', 'field2_address', 'field2_city', 'field2_state', 'field2_zip', 'user_email_address']
     for field in required_fields_step1:
         if not form_data_step1.get(field):
@@ -913,7 +948,10 @@ def success_page(submission_id):
 
     return render_template('success.html', submission_id=submission_id, pdf_filename=pdf_filename)
 
+from flask_login import login_required
+
 @app.route('/download_filled_pdf/<filename>')
+@login_required
 def download_filled_pdf(filename):
     current_app.logger.info(f"--- download_filled_pdf --- Attempting to send file: {filename}")
     try:
@@ -1115,7 +1153,7 @@ def init_db_command():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.get_by_username(form.username.data)
+        user = User.get_by_username(form.username.data.lower())
         if user and user.check_password(form.password.data):
             login_user(user)
             flash('Login successful!', 'success')
@@ -1137,12 +1175,5 @@ def health_check():
     return "OK", 200
 
 if __name__ == '__main__':
-    # Ensure the session directory exists
-    if not os.path.exists(app.config['SESSION_FILE_DIR']):
-        os.makedirs(app.config['SESSION_FILE_DIR'])
-    # Ensure the filled forms directory exists
-    if not os.path.exists(app.config['FILLED_FORMS_DIR']):
-        os.makedirs(app.config['FILLED_FORMS_DIR'])
-    
     app.logger.info("Starting Flask development server.") # Use app.logger here
     app.run(debug=True, port=61663)
