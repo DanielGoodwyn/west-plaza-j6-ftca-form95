@@ -1,5 +1,5 @@
 import logging
-from utils.helpers import sys
+import sys
 import os
 
 def setup_logging(log_level_str='INFO', log_file=None):
