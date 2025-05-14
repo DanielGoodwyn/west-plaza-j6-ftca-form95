@@ -33,7 +33,8 @@ def setup_logging(log_level_str='INFO', log_file=None):
             log_dir = os.path.dirname(log_file)
             if log_dir and not os.path.exists(log_dir):
                 os.makedirs(log_dir)
-            file_handler = logging.FileHandler(log_file, encoding='utf-8')
+            from logging.handlers import RotatingFileHandler
+            file_handler = RotatingFileHandler(log_file, maxBytes=524288, backupCount=0, encoding='utf-8')
             file_handler.setFormatter(logging.Formatter(log_format, datefmt=date_format))
             handlers.append(file_handler)
         except Exception as e:
