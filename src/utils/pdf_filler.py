@@ -158,9 +158,18 @@ def fill_sf95_pdf(form_data, pdf_template_path_param, output_pdf_full_path_param
         logger.info(f"Output directory confirmed to exist: {os.path.isdir(output_dir)}")
         logger.info(f"Write permissions for output directory ({output_dir}): {os.access(output_dir, os.W_OK)}")
 
-        # Corrected pdfcpu command arguments and added -mode xfa
+        import shutil
+        pdfcpu_path = shutil.which('pdfcpu')
+        logger.info(f"Resolved pdfcpu path: {pdfcpu_path}")
+        if not pdfcpu_path:
+            logger.error("pdfcpu binary not found in PATH. Please install pdfcpu and ensure it is executable.")
+            return None
+        if not os.access(pdfcpu_path, os.X_OK):
+            logger.error(f"pdfcpu binary at {pdfcpu_path} is not executable. Run 'chmod +x {pdfcpu_path}' on the server.")
+            return None
+
         pdfcpu_command = [
-            'pdfcpu',
+            pdfcpu_path,
             'form','fill',
             '-mode', 'xfa',             # Specify XFA mode
             resolved_template_path,     # 1. Input PDF path (resolved)
