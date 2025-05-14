@@ -33,10 +33,13 @@ data/uploads/
 
 # Logs
 *.log
-debugging-logs.txt
+
 
 # Flask session files
 flask_session/
+
+# One-time admin creation scripts
+create_admins.py
 
 # Application specific data files to ignore
 data/csv/claims_export.csv
