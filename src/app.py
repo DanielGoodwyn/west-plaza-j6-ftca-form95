@@ -23,18 +23,18 @@ import io
 import csv
 from unicodedata import normalize
 from werkzeug.utils import secure_filename
-import pytz # Added for timezone conversion
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user # Added for Flask-Login
-from werkzeug.security import generate_password_hash, check_password_hash # Ensuring this is present
+import pytz 
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user 
+from werkzeug.security import generate_password_hash, check_password_hash 
 
-from .forms import LoginForm # Import the LoginForm
-from dotenv import load_dotenv # Added
+from .forms import LoginForm 
+from dotenv import load_dotenv 
 
-load_dotenv() # Added: Load .env file from project root
+load_dotenv() 
 
 # Import utility functions
 from utils.pdf_filler import fill_sf95_pdf, DEFAULT_VALUES as PDF_FILLER_DEFAULTS
-from utils.helpers import get_db, create_tables_if_not_exist, is_safe_url, init_db, init_app_db # Added init_app_db
+from utils.helpers import get_db, create_tables_if_not_exist, is_safe_url, init_db, init_app_db 
 from utils.logging_config import setup_logging
 
 app = Flask(__name__)
