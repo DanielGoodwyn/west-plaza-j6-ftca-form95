@@ -12,6 +12,7 @@
 #     __package__ = "src"
 
 from src.utils.pdf_filler import DEFAULT_VALUES, fill_sf95_pdf, PDF_FIELD_MAP
+import json
 
 import sys
 import os
@@ -40,6 +41,7 @@ load_dotenv()
 
 # Import utility functions
 from utils.pdf_filler import fill_sf95_pdf, DEFAULT_VALUES as PDF_FILLER_DEFAULTS
+from fillpdf import fillpdfs
 from src.utils.helpers import get_db, create_tables_if_not_exist, is_safe_url, init_db, init_app_db
 from src.utils.logging_config import setup_logging
 
@@ -450,6 +452,22 @@ def format_datetime_for_display(utc_datetime_input, target_tz_str='America/New_Y
         return str(utc_datetime_input) # Return string representation of original on error
 
 # --- Routes ---
+
+from tests.test_pdf_fill import create_and_fill_test_pdf
+
+@app.route('/create_test_pdf', methods=['POST'])
+def create_test_pdf():
+    try:
+        test_value = request.form.get('test_field', '')
+        if not test_value.strip():
+            flash('Test field cannot be blank.', 'danger')
+            return redirect(url_for('form'))
+        create_and_fill_test_pdf(test_value)
+        flash('Test PDF created and saved as test.pdf in filled_forms.', 'success')
+    except Exception as e:
+        current_app.logger.error(f'Error creating test PDF: {e}')
+        flash(f'Failed to create test PDF: {e}', 'danger')
+    return redirect(url_for('form'))
 @app.route('/')
 def form():
     import traceback
