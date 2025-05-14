@@ -935,10 +935,16 @@ def submit_form():
 
     # --- Step 1.6: Generate draft PDF immediately ---
     try:
-        fill_sf95_pdf(pdf_data_for_filling_draft, PDF_TEMPLATE_PATH, output_pdf_path)
-        current_app.logger.info(f"SUBMIT_FORM: Draft PDF generated: {output_pdf_path}")
+        current_app.logger.info(f"SUBMIT_FORM: Attempting to generate draft PDF at: {output_pdf_path} with data: {pdf_data_for_filling_draft}")
+        pdf_result = fill_sf95_pdf(pdf_data_for_filling_draft, PDF_TEMPLATE_PATH, output_pdf_path)
+        if pdf_result:
+            current_app.logger.info(f"SUBMIT_FORM: Draft PDF generated successfully: {output_pdf_path}")
+        else:
+            current_app.logger.error(f"SUBMIT_FORM: fill_sf95_pdf returned None. PDF not generated for path: {output_pdf_path} with data: {pdf_data_for_filling_draft}")
+            flash("Warning: PDF generation failed for your draft submission. Please contact support if this persists.", "warning")
     except Exception as e:
-        current_app.logger.error(f"SUBMIT_FORM: Error generating draft PDF: {e}")
+        current_app.logger.error(f"SUBMIT_FORM: Exception during draft PDF generation: {e}\nForm data: {pdf_data_for_filling_draft}", exc_info=True)
+        flash("Critical error: Could not generate draft PDF. Please contact support.", "danger")
 
     # Save filename to session for later steps
     session['draft_pdf_filename'] = output_pdf_filename_with_ext
