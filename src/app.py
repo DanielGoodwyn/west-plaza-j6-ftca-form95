@@ -11,7 +11,7 @@
 #     # This block is primarily for the temporary direct execution for DB setup.
 #     __package__ = "src"
 
-from src.utils.pdf_filler import DEFAULT_VALUES, fill_sf95_pdf, PDF_FIELD_MAP
+from utils.pdf_filler import DEFAULT_VALUES, fill_sf95_pdf, PDF_FIELD_MAP
 
 import sys
 import os
@@ -33,15 +33,15 @@ import pytz
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user 
 from werkzeug.security import generate_password_hash, check_password_hash 
 
-from src.forms import LoginForm 
+from forms import LoginForm 
 from dotenv import load_dotenv 
 
 load_dotenv() 
 
 # Import utility functions
-from src.utils.pdf_filler import fill_sf95_pdf, DEFAULT_VALUES as PDF_FILLER_DEFAULTS
-from src.utils.helpers import get_db, create_tables_if_not_exist, is_safe_url, init_db, init_app_db
-from src.utils.logging_config import setup_logging
+from utils.pdf_filler import fill_sf95_pdf, DEFAULT_VALUES as PDF_FILLER_DEFAULTS
+from utils.helpers import get_db, create_tables_if_not_exist, is_safe_url, init_db, init_app_db
+from utils.logging_config import setup_logging
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8') # Use environment variable or default
@@ -810,7 +810,8 @@ def signature():
         cursor = db.cursor()
 
         # PDF Filename (should be same as draft, using claimant name from Step 1 data)
-        slug = src.utils.slugify(claimant_name_from_step1)
+        from utils import slugify
+        slug = slugify(claimant_name_from_step1)
         output_pdf_filename_with_ext = f"{slug}_SF95.pdf"
         output_pdf_path = os.path.join(current_app.config['FILLED_FORMS_DIR'], output_pdf_filename_with_ext)
 
@@ -917,7 +918,8 @@ def submit_form():
 
     # --- Step 1.5: Generate slugified claimant ID and draft PDF filename ---
     claimant_name = form_data.get('field2_name', '')
-    slug = src.utils.slugify(claimant_name)
+    from utils import slugify
+    slug = slugify(claimant_name)
     output_pdf_filename_with_ext = f"{slug}_SF95.pdf"
     output_pdf_path = os.path.join(current_app.config['FILLED_FORMS_DIR'], output_pdf_filename_with_ext)
 

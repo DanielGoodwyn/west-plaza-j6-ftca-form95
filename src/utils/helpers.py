@@ -2,6 +2,9 @@ import sqlite3
 from flask import g, current_app, request
 import os
 from urllib.parse import urlparse, urljoin
+import utils.pdf_filler3
+from utils.pdf_filler import pdf_filler
+from utils.logging_config import logger
 
 # DATABASE_PATH points to 'database.db' located in the 'src' directory,
 # consistent with where src/User.py expects it.
