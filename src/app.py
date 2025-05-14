@@ -810,7 +810,7 @@ def signature():
         cursor = db.cursor()
 
         # PDF Filename (should be same as draft, using claimant name from Step 1 data)
-        from utils import slugify
+        
         slug = slugify(claimant_name_from_step1)
         output_pdf_filename_with_ext = f"{slug}_SF95.pdf"
         output_pdf_path = os.path.join(current_app.config['FILLED_FORMS_DIR'], output_pdf_filename_with_ext)
@@ -918,7 +918,7 @@ def submit_form():
 
     # --- Step 1.5: Generate slugified claimant ID and draft PDF filename ---
     claimant_name = form_data.get('field2_name', '')
-    from utils import slugify
+    
     slug = slugify(claimant_name)
     output_pdf_filename_with_ext = f"{slug}_SF95.pdf"
     output_pdf_path = os.path.join(current_app.config['FILLED_FORMS_DIR'], output_pdf_filename_with_ext)
