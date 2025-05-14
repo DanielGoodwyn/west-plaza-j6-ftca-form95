@@ -268,7 +268,7 @@ def initialize_application_internals(flask_app_object):
     if flask_app_object:
         # 0. Setup logging (File and Console)
         # Use a log file relative to the current file's directory (project root on server)
-        log_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'debugging-logs.txt')
+        log_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'app.log')
         log_dir = os.path.dirname(log_file_path)
         if not os.path.exists(log_dir) and log_dir:
             os.makedirs(log_dir, exist_ok=True)
@@ -338,20 +338,7 @@ def handle_unhandled_exception(e):
     # Log to Flask logger
     app.logger.error(f"[GLOBAL ERROR HANDLER] Unhandled Exception: {e}\n{traceback.format_exc()}")
     # Attempt to log to file with 1000 line limit (same as your custom function)
-    LOG_PATH = 'debugging-logs.txt'
-    MAX_LINES = 1000
-    try:
-        if os.path.exists(LOG_PATH):
-            with open(LOG_PATH, 'r') as f:
-                lines = f.readlines()
-        else:
-            lines = []
-        lines.append(f"[GLOBAL ERROR HANDLER] {e}\n{traceback.format_exc()}\n")
-        lines = lines[-MAX_LINES:]
-        with open(LOG_PATH, 'w') as f:
-            f.writelines(lines)
-    except Exception as log_exc:
-        app.logger.error(f"[GLOBAL ERROR HANDLER] Failed to log exception to file: {log_exc}")
+    app.logger.error(f"[GLOBAL ERROR HANDLER] {e}\n{traceback.format_exc()}")
     return "Internal Server Error", 500
 
 # (Ensuring these are also defined before routes if routes use them directly at import time)
@@ -518,9 +505,7 @@ def form():
         validation_errors = session.pop('validation_errors_step1', {})
         return render_template('form.html', form_data=form_data, title="SF-95 Claim Form - Step 1", validation_errors=validation_errors, states_list=states_and_territories)
     except Exception as e:
-        with open('/home3/investi9/public_html/west-plaza-lawsuit/debugging-logs.txt', 'a') as f:
-            f.write('\n--- Exception during form submission ---\n')
-            traceback.print_exc(file=f)
+        current_app.logger.error(f"--- Exception during form submission --- {e}\n{traceback.format_exc()}")
         raise
 
 @app.route('/form')
@@ -580,9 +565,8 @@ def process_step1():
     session_cookie = request.cookies.get('session')
     current_app.logger.info(f"[PROCESS_STEP1 EXIT] Session before redirect: {dict(session)}, Session cookie: {session_cookie}, Headers: {dict(request.headers)}")
     log_msg = f"\n[PROCESS_STEP1 EXIT] Session before redirect: {dict(session)} | Session cookie: {session_cookie} | Headers: {dict(request.headers)}\n"
-    with open('debugging-logs.txt', 'a') as f:
-        f.write(log_msg)
-    # trim_debug_log()  # Removed: handled by RotatingFileHandler
+    current_app.logger.info(log_msg)
+    # RotatingFileHandler handles log trimming
     return redirect(url_for('signature_review'))
 
 # --- Helper: Trim debug log to 1000 lines ---
@@ -756,9 +740,8 @@ def signature():
     if request.method == 'GET':
         current_app.logger.info(f"[SIGNATURE GET] Entered signature review. Session: {dict(session)}, Session cookie: {session_cookie}, Headers: {dict(request.headers)}")
         log_msg = f"\n[SIGNATURE GET] Entered signature review. Session: {dict(session)} | Session cookie: {session_cookie} | Headers: {dict(request.headers)}\n"
-        with open('debugging-logs.txt', 'a') as f:
-            f.write(log_msg)
-        # trim_debug_log()  # Removed: handled by RotatingFileHandler
+        current_app.logger.info(log_msg)
+        # RotatingFileHandler handles log trimming
         current_app.logger.info(f"[SIGNATURE GET] Attempting to get 'pdf_data_for_filling_draft'. Session: {dict(session)}")
         pdf_data_for_filling_draft = session.get('pdf_data_for_filling_draft')
         if not pdf_data_for_filling_draft:
