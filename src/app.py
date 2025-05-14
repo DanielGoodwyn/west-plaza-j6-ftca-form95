@@ -935,6 +935,7 @@ def submit_form():
 
     # --- Step 1.6: Generate draft PDF immediately ---
     try:
+        current_app.logger.info(f"SUBMIT_FORM: DIAGNOSTIC - About to call fill_sf95_pdf with output path: {output_pdf_path}")
         current_app.logger.info(f"SUBMIT_FORM: Attempting to generate draft PDF at: {output_pdf_path} with data: {pdf_data_for_filling_draft}")
         pdf_result = fill_sf95_pdf(pdf_data_for_filling_draft, PDF_TEMPLATE_PATH, output_pdf_path)
         if pdf_result:
