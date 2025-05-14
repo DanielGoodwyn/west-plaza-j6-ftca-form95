@@ -5,7 +5,7 @@ import tempfile
 import datetime
 import logging
 import traceback
-from src.utils import logging
+import logging
 
 logger = logging.getLogger(__name__)
 
