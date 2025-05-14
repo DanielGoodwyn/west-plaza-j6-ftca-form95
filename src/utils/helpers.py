@@ -3,7 +3,6 @@ from flask import g, current_app, request
 import os
 from urllib.parse import urlparse, urljoin
 
-from utils.pdf_filler import pdf_filler
 from utils.logging_config import logger
 
 # DATABASE_PATH points to 'database.db' located in the 'src' directory,
