@@ -5,6 +5,7 @@ import tempfile
 import datetime
 import logging
 import traceback
+from src.utils import logging
 
 logger = logging.getLogger(__name__)
 
@@ -198,7 +199,7 @@ if __name__ == '__main__':
         'field1_agency': 'Test Agency',
     }
     # Simulate ImmutableMultiDict for direct call if needed, or just pass dict
-    from werkzeug.datastructures import ImmutableMultiDict
+    from src.utils.werkzeug.datastructures import ImmutableMultiDict
     sample_form_data_imm = ImmutableMultiDict(sample_form_data)
 
     pdf_template_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'data', 'sf95.pdf') # Corrected filename
