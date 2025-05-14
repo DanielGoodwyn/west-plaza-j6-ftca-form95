@@ -2,6 +2,8 @@ import logging
 import sys
 import os
 
+logger = logging.getLogger(__name__)
+
 def setup_logging(log_level_str='INFO', log_file=None):
     """
     Configures basic logging for the application.
