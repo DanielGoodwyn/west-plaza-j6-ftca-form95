@@ -190,6 +190,14 @@ def fill_sf95_pdf(form_data, pdf_template_path_param, output_pdf_full_path_param
     except Exception as e:
         logger.error(f"Exception during PDF filling: {e}")
         logger.error(f"Traceback: {traceback.format_exc()}")
+        logger.error(f"PDF Template Path: {pdf_template_path_param}")
+        logger.error(f"Output PDF Path: {output_pdf_full_path_param}")
+        logger.error(f"pdfcpu command: {pdfcpu_command if 'pdfcpu_command' in locals() else 'Not constructed'}")
+        logger.error(f"Environment PATH: {os.environ.get('PATH')}")
+        logger.error(f"Environment variables: {os.environ}")
+        if 'process_result' in locals():
+            logger.error(f"Process stdout: {process_result.stdout}")
+            logger.error(f"Process stderr: {process_result.stderr}")
         return None
     finally:
         if temp_json_file_path and os.path.exists(temp_json_file_path):
