@@ -582,11 +582,11 @@ def process_step1():
     log_msg = f"\n[PROCESS_STEP1 EXIT] Session before redirect: {dict(session)} | Session cookie: {session_cookie} | Headers: {dict(request.headers)}\n"
     with open('debugging-logs.txt', 'a') as f:
         f.write(log_msg)
-    trim_debug_log()
+    # trim_debug_log()  # Removed: handled by RotatingFileHandler
     return redirect(url_for('signature_review'))
 
 # --- Helper: Trim debug log to 1000 lines ---
-# def trim_debug_log():
+# def # trim_debug_log()  # Removed: handled by RotatingFileHandler:
 #     try:
 #         with open('debugging-logs.txt', 'r+') as f:
 #             lines = f.readlines()
@@ -758,7 +758,7 @@ def signature():
         log_msg = f"\n[SIGNATURE GET] Entered signature review. Session: {dict(session)} | Session cookie: {session_cookie} | Headers: {dict(request.headers)}\n"
         with open('debugging-logs.txt', 'a') as f:
             f.write(log_msg)
-        trim_debug_log()
+        # trim_debug_log()  # Removed: handled by RotatingFileHandler
         current_app.logger.info(f"[SIGNATURE GET] Attempting to get 'pdf_data_for_filling_draft'. Session: {dict(session)}")
         pdf_data_for_filling_draft = session.get('pdf_data_for_filling_draft')
         if not pdf_data_for_filling_draft:
@@ -1008,7 +1008,7 @@ def submit_form():
 
     # --- Step 4: Redirect to signature page ---
     current_app.logger.info(f"SUBMIT_FORM: Redirecting to signature page with session: {dict(session)}")
-    trim_debug_log()
+    # trim_debug_log()  # Removed: handled by RotatingFileHandler
     return redirect(url_for('signature'))
 
     signature_page_data = dict(request.form) # Data from the signature page submission
@@ -1030,7 +1030,7 @@ def submit_form():
         # Session variables are already set from signature, just add errors and redirect back
         session['form_data_step2_errors'] = signature_page_data # To prefill signature attempt on error
         session['validation_errors_step2'] = validation_errors_step2
-        trim_debug_log()
+        # trim_debug_log()  # Removed: handled by RotatingFileHandler
         return redirect(url_for('signature_review'))
 
     # --- Finalize Submission (Stage 2) ---
