@@ -528,51 +528,57 @@ def redirect_form_to_root():
 
 @app.route('/process_step1', methods=['POST'])
 def process_step1():
+    # Thorough logging: route entry
+    current_app.logger.info(f"[PROCESS_STEP1 ENTRY] User: {getattr(current_user, 'id', None)}, IP: {request.remote_addr}, Method: {request.method}, Session: {dict(session)}, Headers: {dict(request.headers)}")
+    
+    # Retrieve and log incoming form data
+    form_data = request.form.to_dict() if request.method == 'POST' else {}
+    current_app.logger.info(f"[PROCESS_STEP1] Raw incoming form data: {form_data}")
+
+    # Map form data to PDF fields
     pdf_data_for_filling_draft = map_form_data_to_pdf_fields(form_data)
+    current_app.logger.info(f"[PROCESS_STEP1] Data for DRAFT PDF after mapping: {pdf_data_for_filling_draft}")
 
-    current_app.logger.info(f"--- process_step1 --- Data for DRAFT PDF after mapping: {pdf_data_for_filling_draft}")
-
+    # Prepare output path for draft PDF
+    claimant_name = pdf_data_for_filling_draft.get('field2_name', 'unknown')
+    slug = slugify(claimant_name)
+    output_pdf_filename_with_ext = f"{slug}_SF95.pdf"
+    output_pdf_path = os.path.join(current_app.config['FILLED_FORMS_DIR'], output_pdf_filename_with_ext)
+    current_app.logger.info(f"[PROCESS_STEP1] Output PDF path for draft: {output_pdf_path}")
 
     db_filled_pdf_filename_draft = None
     try:
+        current_app.logger.info(f"[PROCESS_STEP1] Calling fill_sf95_pdf with template: {PDF_TEMPLATE_PATH}, output: {output_pdf_path}")
         fill_sf95_pdf(pdf_data_for_filling_draft, PDF_TEMPLATE_PATH, output_pdf_path)
-        current_app.logger.info(f"--- process_step1 --- Draft PDF generated: {output_pdf_path}")
+        current_app.logger.info(f"[PROCESS_STEP1] Draft PDF generated successfully: {output_pdf_path}")
         db_filled_pdf_filename_draft = os.path.basename(output_pdf_path)
     except Exception as e:
-        current_app.logger.error(f"--- process_step1 --- Error filling DRAFT PDF: {e}")
+        current_app.logger.error(f"[PROCESS_STEP1] Error filling DRAFT PDF: {e}", exc_info=True)
         flash(f"Error generating draft PDF: {e}. Please proceed to signature, the PDF can be regenerated.", "warning")
-        # Non-fatal for draft, allow proceeding to signature. Final PDF generation is key.
         db_filled_pdf_filename_draft = output_pdf_filename_with_ext # Store expected name even if generation failed
 
     # Prepare data for DB (Stage 1 - signature/date are None)
     data_to_save_for_db_stage1 = {}
-    # Get all column names from DB_SCHEMA, excluding 'id' for inserts/updates handled by DB
     schema_column_names_for_data = [col.split(' ')[0] for col in DB_SCHEMA if col.split(' ')[0] != 'id']
-
     for key in schema_column_names_for_data:
         if key == 'filled_pdf_filename':
             data_to_save_for_db_stage1[key] = db_filled_pdf_filename_draft
-        # Ensure specific fields for actual signature text and full signature date are empty at Stage 1 for DB
         elif key == 'field17_signature_of_claimant':
-            data_to_save_for_db_stage1[key] = "" # Store empty for actual signature text
+            data_to_save_for_db_stage1[key] = ""
         elif key == 'field18_date_of_signature':
-            data_to_save_for_db_stage1[key] = "" # Store empty for signature timestamp
-        # For other fields, including 'field13a_signature' and 'field14_date_signed' which are now set
-        # for the draft PDF, get them from pdf_data_for_filling_draft.
-        # If a key is a DB column but not in pdf_data_for_filling_draft (e.g. new supplemental question not yet mapped),
-        # try form_data as a fallback, then empty string.
+            data_to_save_for_db_stage1[key] = ""
         else:
             data_to_save_for_db_stage1[key] = pdf_data_for_filling_draft.get(key, form_data.get(key, ''))
 
-    current_app.logger.info(f"--- process_step1 --- Data for DB (Stage 1): {data_to_save_for_db_stage1}")
+    current_app.logger.info(f"[PROCESS_STEP1] Data for DB (Stage 1): {data_to_save_for_db_stage1}")
 
     submission_id_in_progress = None
 
     # Store necessary info in session for Step 2 (signature)
     session['pdf_data_for_filling_draft'] = pdf_data_for_filling_draft
     session_cookie = request.cookies.get('session')
-    current_app.logger.info(f"SIGNATURE POST: Session before redirect: {dict(session)} | Session cookie: {session_cookie} | Headers: {dict(request.headers)}")
-    log_msg = f"\nSIGNATURE POST: Session before redirect: {dict(session)} | Session cookie: {session_cookie} | Headers: {dict(request.headers)}\n"
+    current_app.logger.info(f"[PROCESS_STEP1 EXIT] Session before redirect: {dict(session)}, Session cookie: {session_cookie}, Headers: {dict(request.headers)}")
+    log_msg = f"\n[PROCESS_STEP1 EXIT] Session before redirect: {dict(session)} | Session cookie: {session_cookie} | Headers: {dict(request.headers)}\n"
     with open('debugging-logs.txt', 'a') as f:
         f.write(log_msg)
     trim_debug_log()
@@ -743,16 +749,19 @@ def map_form_data_to_pdf_fields(form_data):
 @app.route('/signature', methods=['GET', 'POST'])
 def signature():
     session_cookie = request.cookies.get('session')
+    # Thorough logging: route entry
+    current_app.logger.info(f"[SIGNATURE ROUTE ENTRY] User: {getattr(current_user, 'id', None)}, IP: {request.remote_addr}, Method: {request.method}, Session: {dict(session)}, Headers: {dict(request.headers)}")
+
     if request.method == 'GET':
-        current_app.logger.info(f"SIGNATURE_REVIEW: Entered. Current session: {dict(session)} | Session cookie: {session_cookie} | Headers: {dict(request.headers)}")
-        log_msg = f"\nSIGNATURE_REVIEW: Entered. Current session: {dict(session)} | Session cookie: {session_cookie} | Headers: {dict(request.headers)}\n"
+        current_app.logger.info(f"[SIGNATURE GET] Entered signature review. Session: {dict(session)}, Session cookie: {session_cookie}, Headers: {dict(request.headers)}")
+        log_msg = f"\n[SIGNATURE GET] Entered signature review. Session: {dict(session)} | Session cookie: {session_cookie} | Headers: {dict(request.headers)}\n"
         with open('debugging-logs.txt', 'a') as f:
             f.write(log_msg)
         trim_debug_log()
-        current_app.logger.info(f"SIGNATURE_REVIEW: Attempting to get 'pdf_data_for_filling_draft'. Session: {dict(session)}")
+        current_app.logger.info(f"[SIGNATURE GET] Attempting to get 'pdf_data_for_filling_draft'. Session: {dict(session)}")
         pdf_data_for_filling_draft = session.get('pdf_data_for_filling_draft')
         if not pdf_data_for_filling_draft:
-            current_app.logger.warning(f"SIGNATURE_REVIEW: 'pdf_data_for_filling_draft' NOT FOUND in session. Session: {dict(session)}. Redirecting to form.")
+            current_app.logger.warning(f"[SIGNATURE GET] 'pdf_data_for_filling_draft' NOT FOUND in session. Session: {dict(session)}. Redirecting to form.")
             flash('No data from step 1 found. Please start from the beginning.', 'error')
             return redirect(url_for('form'))
         today_date = datetime.today().strftime('%Y-%m-%d')
@@ -764,11 +773,12 @@ def signature():
                 'field17_signature_of_claimant': session.get('claimant_name_for_signature', ''),
             }
         validation_errors = session.pop('validation_errors_step2', {})
-        current_app.logger.info(f"--- signature_review (GET /signature) --- Rendering signature review page. claimant_name_for_signature='{session.get('claimant_name_for_signature', '')}'")
+        current_app.logger.info(f"[SIGNATURE GET] Rendering signature review page. claimant_name_for_signature='{session.get('claimant_name_for_signature', '')}'")
         return render_template('signature.html', pdf_data_for_filling_draft=pdf_data_for_filling_draft, today_date=today_date, form_data=signature_defaults, validation_errors=validation_errors)
     else:
         # POST: Handle signature submission and FINALIZE claim (PDF + DB)
         form_data = request.form.to_dict()
+        current_app.logger.info(f"[SIGNATURE POST] Received form data: {form_data}")
         required_fields = ['field17_signature_of_claimant']
         validation_errors = {}
         for field in required_fields:
@@ -779,13 +789,13 @@ def signature():
             session['form_data_step2_errors'] = form_data
             return redirect(url_for('signature'))
 
-        # --- BEGIN FINALIZATION LOGIC (from old /submit) ---
+        # --- BEGIN FINALIZATION LOGIC ---
         submission_id_in_progress = session.get('submission_id_in_progress')
         pdf_data_for_filling_draft = session.get('pdf_data_for_filling_draft')
-        current_app.logger.info(f"SIGNATURE FINALIZATION: submission_id_in_progress={submission_id_in_progress}, pdf_data_for_filling_draft={pdf_data_for_filling_draft}")
+        current_app.logger.info(f"[SIGNATURE FINALIZATION] submission_id_in_progress={submission_id_in_progress}, pdf_data_for_filling_draft={pdf_data_for_filling_draft}")
 
         if not submission_id_in_progress or not pdf_data_for_filling_draft:
-            current_app.logger.error("SIGNATURE FINALIZATION: Missing submission ID or Step 1 data in session. Redirecting to form.")
+            current_app.logger.error("[SIGNATURE FINALIZATION] Missing submission ID or Step 1 data in session. Redirecting to form.")
             flash("Your session may have expired or there was an error processing step 1. Please start over.", "danger")
             session.pop('submission_id_in_progress', None)
             session.pop('pdf_data_for_filling_draft', None)
@@ -810,15 +820,15 @@ def signature():
         cursor = db.cursor()
 
         # PDF Filename (should be same as draft, using claimant name from Step 1 data)
-        
         slug = slugify(claimant_name_from_step1)
         output_pdf_filename_with_ext = f"{slug}_SF95.pdf"
         output_pdf_path = os.path.join(current_app.config['FILLED_FORMS_DIR'], output_pdf_filename_with_ext)
+        current_app.logger.info(f"[SIGNATURE FINALIZATION] Output PDF path for final: {output_pdf_path}")
 
         # Server-generated Date of Signature (UTC)
         date_of_signature_utc_dt = datetime.now(timezone.utc)
         date_of_signature_utc_str_for_db = date_of_signature_utc_dt.strftime('%Y-%m-%dT%H:%M:%S')
-        current_app.logger.info(f"SIGNATURE FINALIZATION: Server-generated signature datetime (UTC): {date_of_signature_utc_str_for_db}")
+        current_app.logger.info(f"[SIGNATURE FINALIZATION] Server-generated signature datetime (UTC): {date_of_signature_utc_str_for_db}")
 
         pdf_data_for_filling_final = pdf_data_for_filling_draft.copy()
         pdf_data_for_filling_final['field13a_signature'] = signature_of_claimant_from_form
@@ -826,16 +836,17 @@ def signature():
         for default_key, default_value in DEFAULT_VALUES.items():
             if default_key not in pdf_data_for_filling_final:
                 pdf_data_for_filling_final[default_key] = default_value
-                current_app.logger.info(f"SIGNATURE FINALIZATION: Added default '{default_key}':'{default_value}' to final PDF data as it was missing.")
-        current_app.logger.info(f"SIGNATURE FINALIZATION: Final PDF data prepared: {pdf_data_for_filling_final}")
+                current_app.logger.info(f"[SIGNATURE FINALIZATION] Added default '{default_key}':'{default_value}' to final PDF data as it was missing.")
+        current_app.logger.info(f"[SIGNATURE FINALIZATION] Final PDF data prepared: {pdf_data_for_filling_final}")
 
         db_filled_pdf_filename_final = None
         try:
+            current_app.logger.info(f"[SIGNATURE FINALIZATION] Calling fill_sf95_pdf with template: {PDF_TEMPLATE_PATH}, output: {output_pdf_path}")
             fill_sf95_pdf(pdf_data_for_filling_final, PDF_TEMPLATE_PATH, output_pdf_path)
-            current_app.logger.info(f"SIGNATURE FINALIZATION: Final PDF generated: {output_pdf_path}")
+            current_app.logger.info(f"[SIGNATURE FINALIZATION] Final PDF generated successfully: {output_pdf_path}")
             db_filled_pdf_filename_final = os.path.basename(output_pdf_path)
         except Exception as e:
-            current_app.logger.error(f"SIGNATURE FINALIZATION: Error filling FINAL PDF for ID {submission_id_in_progress}: {e}", exc_info=True)
+            current_app.logger.error(f"[SIGNATURE FINALIZATION] Error filling FINAL PDF for ID {submission_id_in_progress}: {e}", exc_info=True)
             flash(f"Critical Error: Could not generate the final PDF document. Please contact support with submission ID {submission_id_in_progress}.", "danger")
             db_filled_pdf_filename_final = output_pdf_filename_with_ext
 
@@ -847,46 +858,45 @@ def signature():
             'field14_date_signed': date_of_signature_utc_str_for_db,
             'updated_at': datetime.now(timezone.utc)
         }
-        current_app.logger.info(f"SIGNATURE FINALIZATION: Data to update in DB for ID {submission_id_in_progress}: {data_to_update_in_db}")
+        current_app.logger.info(f"[SIGNATURE FINALIZATION] Data to update in DB for ID {submission_id_in_progress}: {data_to_update_in_db}")
         try:
             update_fields_sql_parts = []
             update_values_list = []
             schema_column_names = [col.split(' ')[0] for col in DB_SCHEMA]
 
             for col_key, col_value in data_to_update_in_db.items():
-                if col_key in schema_column_names: # Ensure we only try to update valid columns
+                if col_key in schema_column_names:
                     update_fields_sql_parts.append(f"{col_key} = ?")
                     update_values_list.append(col_value)
         
             if not update_fields_sql_parts:
-                current_app.logger.error(f"SIGNATURE FINALIZATION: No valid fields to update in DB for ID {submission_id_in_progress}. This is unexpected.")
+                current_app.logger.error(f"[SIGNATURE FINALIZATION] No valid fields to update in DB for ID {submission_id_in_progress}. This is unexpected.")
                 flash("Error finalizing submission: No data fields to update.", "danger")
-                # Keep session data for retry/debug if needed by redirecting back to signature page
                 session['submission_id_in_progress'] = submission_id_in_progress 
                 session['pdf_data_for_filling_draft'] = pdf_data_for_filling_draft
                 session['claimant_name_for_signature'] = claimant_name_from_step1
                 return redirect(url_for('signature'))
 
-            update_values_list.append(submission_id_in_progress) # For the WHERE id = ?
+            update_values_list.append(submission_id_in_progress)
             update_sql = f"UPDATE claims SET {', '.join(update_fields_sql_parts)} WHERE id = ?"
         
-            current_app.logger.info(f"SIGNATURE FINALIZATION: Executing SQL: {update_sql} with values: {tuple(update_values_list)}")
+            current_app.logger.info(f"[SIGNATURE FINALIZATION] Executing SQL: {update_sql} with values: {tuple(update_values_list)}")
             cursor.execute(update_sql, tuple(update_values_list))
             db.commit()
-            current_app.logger.info(f"SIGNATURE FINALIZATION: Successfully updated record ID {submission_id_in_progress} in database.")
+            current_app.logger.info(f"[SIGNATURE FINALIZATION] Successfully updated record ID {submission_id_in_progress} in database.")
 
             # Clear session data after successful submission
             session.pop('submission_id_in_progress', None)
             session.pop('pdf_data_for_filling_draft', None)
             session.pop('claimant_name_for_signature', None)
-            session.pop('form_data', None) # Clean up old key if present
+            session.pop('form_data', None)
             session.pop('validation_errors_step1', None)
             session.pop('form_data_step2_errors', None)
             session.pop('validation_errors_step2', None)
             flash('Form submitted successfully!', 'success')
             return redirect(url_for('success_page', submission_id=submission_id_in_progress))
         except sqlite3.Error as e:
-            current_app.logger.error(f"SIGNATURE FINALIZATION: Database error updating record ID {submission_id_in_progress}: {e}", exc_info=True)
+            current_app.logger.error(f"[SIGNATURE FINALIZATION] Database error updating record ID {submission_id_in_progress}: {e}", exc_info=True)
             db.rollback()
             flash(f"Database error finalizing submission: {e}. Please try again or contact support with ID {submission_id_in_progress}.", "danger")
             session['submission_id_in_progress'] = submission_id_in_progress
@@ -894,7 +904,7 @@ def signature():
             session['claimant_name_for_signature'] = claimant_name_from_step1
             return redirect(url_for('signature'))
         except Exception as e:
-            current_app.logger.error(f"SIGNATURE FINALIZATION: Unexpected error finalizing submission for ID {submission_id_in_progress}: {e}", exc_info=True)
+            current_app.logger.error(f"[SIGNATURE FINALIZATION] Unexpected error finalizing submission for ID {submission_id_in_progress}: {e}", exc_info=True)
             db.rollback()
             flash(f"An unexpected error occurred during final submission. Please contact support with ID {submission_id_in_progress}.", "danger")
             session['submission_id_in_progress'] = submission_id_in_progress
