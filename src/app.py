@@ -273,8 +273,9 @@ def initialize_application_internals(flask_app_object):
         if not os.path.exists(log_dir) and log_dir:
             os.makedirs(log_dir, exist_ok=True)
 
-        # Configure file handler
-        file_handler = logging.FileHandler(log_file_path)
+        # Configure rotating file handler (0.5MB max, 1 backup)
+        from logging.handlers import RotatingFileHandler
+        file_handler = RotatingFileHandler(log_file_path, maxBytes=524288, backupCount=1)
         file_handler.setLevel(logging.INFO) # Log INFO and above to file
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         file_handler.setFormatter(formatter)
@@ -585,16 +586,16 @@ def process_step1():
     return redirect(url_for('signature_review'))
 
 # --- Helper: Trim debug log to 1000 lines ---
-def trim_debug_log():
-    try:
-        with open('debugging-logs.txt', 'r+') as f:
-            lines = f.readlines()
-            if len(lines) > 1000:
-                f.seek(0)
-                f.writelines(lines[-1000:])
-                f.truncate()
-    except Exception as e:
-        print(f"Failed to trim debugging-logs.txt: {e}")  # Use print as fallback if logger fails
+# def trim_debug_log():
+#     try:
+#         with open('debugging-logs.txt', 'r+') as f:
+#             lines = f.readlines()
+#             if len(lines) > 1000:
+#                 f.seek(0)
+#                 f.writelines(lines[-1000:])
+#                 f.truncate()
+#     except Exception as e:
+#         print(f"Failed to trim debugging-logs.txt: {e}")  # Use print as fallback if logger fails
 
 # --- Helper: Map form/session data to PDF field keys ---
 def map_form_data_to_pdf_fields(form_data):
