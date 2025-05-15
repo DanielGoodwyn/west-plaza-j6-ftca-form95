@@ -948,18 +948,22 @@ def submit_form():
     output_pdf_path = os.path.join(current_app.config['FILLED_FORMS_DIR'], output_pdf_filename_with_ext)
 
     # --- Step 1.6: Generate draft PDF immediately ---
+    import traceback
     try:
-        current_app.logger.info(f"SUBMIT_FORM: DIAGNOSTIC - About to call fill_sf95_pdf with output path: {output_pdf_path}")
-        current_app.logger.info(f"SUBMIT_FORM: Attempting to generate draft PDF at: {output_pdf_path} with data: {pdf_data_for_filling_draft}")
+        current_app.logger.info(f"SUBMIT_FORM: ENTER PDF GENERATION BLOCK. Output path: {output_pdf_path}, PDF_TEMPLATE_PATH: {PDF_TEMPLATE_PATH}")
+        current_app.logger.info(f"SUBMIT_FORM: About to call fill_sf95_pdf with data: {pdf_data_for_filling_draft}")
         pdf_result = fill_sf95_pdf(pdf_data_for_filling_draft, PDF_TEMPLATE_PATH, output_pdf_path)
         if pdf_result:
             current_app.logger.info(f"SUBMIT_FORM: Draft PDF generated successfully: {output_pdf_path}")
         else:
-            current_app.logger.error(f"SUBMIT_FORM: fill_sf95_pdf returned None. PDF not generated for path: {output_pdf_path} with data: {pdf_data_for_filling_draft}")
+            current_app.logger.error(f"SUBMIT_FORM: fill_sf95_pdf returned None. PDF not generated. Path: {output_pdf_path}, Data: {pdf_data_for_filling_draft}")
             flash("Warning: PDF generation failed for your draft submission. Please contact support if this persists.", "warning")
     except Exception as e:
-        current_app.logger.error(f"SUBMIT_FORM: Exception during draft PDF generation: {e}\nForm data: {pdf_data_for_filling_draft}", exc_info=True)
+        tb = traceback.format_exc()
+        current_app.logger.error(f"SUBMIT_FORM: Exception during draft PDF generation: {e}\nTraceback:\n{tb}\nForm data: {pdf_data_for_filling_draft}\nOutput path: {output_pdf_path}, PDF_TEMPLATE_PATH: {PDF_TEMPLATE_PATH}")
         flash("Critical error: Could not generate draft PDF. Please contact support.", "danger")
+    finally:
+        current_app.logger.info(f"SUBMIT_FORM: EXIT PDF GENERATION BLOCK. Attempted output: {output_pdf_path}")
 
     # Save filename to session for later steps
     session['draft_pdf_filename'] = output_pdf_filename_with_ext
