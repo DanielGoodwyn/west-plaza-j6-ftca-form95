@@ -37,10 +37,10 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, login_
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 
-from src.utils.pdf_filler import fill_sf95_pdf, DEFAULT_VALUES as PDF_FILLER_DEFAULTS, PDF_FIELD_MAP
-from src.forms import LoginForm
-from src.utils.helpers import get_db, create_tables_if_not_exist, is_safe_url, init_db, init_app_db
-from src.utils.logging_config import setup_logging
+from utils.pdf_filler import fill_sf95_pdf, DEFAULT_VALUES as PDF_FILLER_DEFAULTS, PDF_FIELD_MAP
+from forms import LoginForm
+from utils.helpers import get_db, create_tables_if_not_exist, is_safe_url, init_db, init_app_db
+from utils.logging_config import setup_logging
 
 load_dotenv()
 
@@ -452,7 +452,7 @@ def format_datetime_for_display(utc_datetime_input, target_tz_str='America/New_Y
 
 # --- Routes ---
 
-from tests.test_pdf_fill import create_and_fill_test_pdf
+# from tests.test_pdf_fill import create_and_fill_test_pdf
 
 @app.route('/create_test_pdf', methods=['POST'])
 def create_test_pdf():
@@ -606,62 +606,8 @@ def map_form_data_to_pdf_fields(form_data):
     Logs any missing or blank fields for debugging.
     '''
     pdf_data = {}
-    # Claimant info combined
-    name = form_data.get('field2_name', '')
-    address = form_data.get('field2_address', '')
-    city = form_data.get('field2_city', '')
-    state = form_data.get('field2_state', '')
-    zip_code = form_data.get('field2_zip', '')
-    pdf_data['field2_claimant_info_combined'] = f"{name}\n{address}\n{city}, {state} {zip_code}".strip()
-    pdf_data['field2_name'] = name
-    pdf_data['field2_address'] = address
-    pdf_data['field2_city'] = city
-    pdf_data['field2_state'] = state
-    pdf_data['field2_zip'] = zip_code
-    # Type of employment
-    employment_type = form_data.get('field3_type_employment', '')
-    pdf_data['field3_type_employment'] = form_data.get('field3_other_specify', '') if employment_type == 'Other' else employment_type
-    pdf_data['field3_checkbox_civilian'] = employment_type == 'Civilian'
-    pdf_data['field3_checkbox_military'] = employment_type == 'Military'
-    # DOB, marital status
-    pdf_data['field_pdf_4_dob'] = form_data.get('field_pdf_4_dob', '')
-    pdf_data['field_pdf_5_marital_status'] = form_data.get('field_pdf_5_marital_status', '')
-    # Basis of claim
-    pdf_data['field8_basis_of_claim'] = form_data.get('field8_basis_of_claim', PDF_FILLER_DEFAULTS.get('field8_basis_of_claim', ''))
-    # Property damage
-    prop_damage_vehicle = form_data.get('field9_property_damage_description_vehicle', '')
-    prop_damage_other = form_data.get('field9_property_damage_description_other', '')
-    combined_prop_desc = f"{prop_damage_vehicle}\n{prop_damage_other}".strip()
-    pdf_data['field9_property_damage_description'] = combined_prop_desc if combined_prop_desc else PDF_FILLER_DEFAULTS.get('field9_property_damage_description', '')
-    pdf_data['field9_owner_name_address'] = form_data.get('field9_owner_name_address', PDF_FILLER_DEFAULTS.get('field9_owner_name_address', ''))
-    # Nature of injury
-    pdf_data['field10_nature_of_injury'] = form_data.get('field10_nature_of_injury', PDF_FILLER_DEFAULTS.get('field10_nature_of_injury', ''))
-    # Witnesses
-    pdf_data['field11_witness_name'] = form_data.get('field11_witness_name', PDF_FILLER_DEFAULTS.get('field11_witness_name', ''))
-    pdf_data['field11_witness_address'] = form_data.get('field11_witness_address', PDF_FILLER_DEFAULTS.get('field11_witness_address', ''))
-    # Amounts
-    pdf_data['field12a_property_damage'] = form_data.get('field12a_property_damage_amount', PDF_FILLER_DEFAULTS.get('field12a_property_damage', ''))
-    pdf_data['field12b_personal_injury'] = form_data.get('field12b_personal_injury_amount', PDF_FILLER_DEFAULTS.get('field12b_personal_injury', ''))
-    pdf_data['field12c_wrongful_death'] = form_data.get('field12c_wrongful_death_amount', PDF_FILLER_DEFAULTS.get('field12c_wrongful_death', ''))
-    pdf_data['field12d_total_claim_amount'] = form_data.get('field12d_total_amount', form_data.get('field12d_total_claim_amount', PDF_FILLER_DEFAULTS.get('field12d_total_claim_amount', '')))
-    # Signature and phone
-    pdf_data['field13a_signature'] = form_data.get('field13a_signature', 'Pending Signature')
-    pdf_data['field_pdf_13b_phone'] = form_data.get('field_pdf_13b_phone', '')
-    pdf_data['field14_date_signed'] = form_data.get('field14_date_signed', '')
-    # Insurance, claim details, etc.
-    pdf_data['field15_accident_insurance'] = form_data.get('field15_accident_insurance', '')
-    pdf_data['field15_insurer_name_address_policy'] = form_data.get('field15_insurer_name_address_policy', '')
-    pdf_data['field16_filed_claim'] = form_data.get('field16_filed_claim', '')
-    pdf_data['field16_claim_details'] = form_data.get('field16_claim_details', '')
-    pdf_data['field17_deductible_amount'] = form_data.get('field17_deductible_amount', '')
-    pdf_data['field18_insurer_action'] = form_data.get('field18_insurer_action', '')
-    pdf_data['field19_liability_insurance'] = form_data.get('field19_liability_insurance', '')
-    pdf_data['field19_insurer_name_address'] = form_data.get('field19_insurer_name_address', '')
-    # Log missing/blank fields for all PDF fields
-    from flask import current_app
-    for app_key, pdf_field in PDF_FIELD_MAP.items():
-        if app_key not in pdf_data or pdf_data[app_key] in (None, ""):
-            current_app.logger.warning(f"PDF MAPPING: Field '{app_key}' (PDF: '{pdf_field}') is missing or blank in PDF data.")
+    # Only fill field1_agency for now
+    pdf_data['field1_agency'] = form_data.get('field1_agency', '')
     return pdf_data
 
 

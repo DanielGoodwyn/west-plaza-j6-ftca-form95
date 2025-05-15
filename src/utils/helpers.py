@@ -3,7 +3,7 @@ from flask import g, current_app, request
 import os
 from urllib.parse import urlparse, urljoin
 
-from src.utils.logging_config import logger
+from utils.logging_config import logger
 
 # DATABASE_PATH points to 'database.db' located in the 'src' directory,
 # consistent with where src/User.py expects it.
