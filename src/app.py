@@ -606,8 +606,8 @@ def map_form_data_to_pdf_fields(form_data):
     Logs any missing or blank fields for debugging.
     '''
     pdf_data = {}
-    # Only fill field1_agency for now
-    pdf_data['field1_agency'] = form_data.get('field1_agency', '')
+    # Only fill field2_claimant_info_combined (Box 2: Name)
+    pdf_data['field2_claimant_info_combined'] = form_data.get('field2_name', 'John Doe')
     return pdf_data
 
 
