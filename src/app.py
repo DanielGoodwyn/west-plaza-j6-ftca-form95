@@ -484,9 +484,9 @@ def form():
             'field_pdf_4_dob': '',
             'field_pdf_5_marital_status': '', # Assuming it's a dropdown/radio
             'field_pdf_13b_phone': '',
-            'field8_basis_of_claim': DEFAULT_VALUES.get('field8_basis_of_claim', "On January 6, 2021, at the U.S. Capitol, claimant was subjected to excessive force by federal officers, including tear gas and rubber bullets, leading to physical injury and emotional distress."),
+            'field8_basis_of_claim': PDF_FILLER_DEFAULTS.get('field8_basis_of_claim', "On January 6, 2021, at the U.S. Capitol, claimant was subjected to excessive force by federal officers, including tear gas and rubber bullets, leading to physical injury and emotional distress."),
             'field9_property_damage_description': '',
-            'field10_nature_of_injury': DEFAULT_VALUES.get('field10_nature_of_injury', "Respiratory distress from tear gas, contusions from rubber bullets, and severe emotional distress."),
+            'field10_nature_of_injury': PDF_FILLER_DEFAULTS.get('field10_nature_of_injury', "Respiratory distress from tear gas, contusions from rubber bullets, and severe emotional distress."),
             'field11_witness_name_1': '',
             'field11_witness_address_1': '',
             'field11_witness_name_2': '',
@@ -627,23 +627,23 @@ def map_form_data_to_pdf_fields(form_data):
     pdf_data['field_pdf_4_dob'] = form_data.get('field_pdf_4_dob', '')
     pdf_data['field_pdf_5_marital_status'] = form_data.get('field_pdf_5_marital_status', '')
     # Basis of claim
-    pdf_data['field8_basis_of_claim'] = form_data.get('field8_basis_of_claim', DEFAULT_VALUES.get('field8_basis_of_claim', ''))
+    pdf_data['field8_basis_of_claim'] = form_data.get('field8_basis_of_claim', PDF_FILLER_DEFAULTS.get('field8_basis_of_claim', ''))
     # Property damage
     prop_damage_vehicle = form_data.get('field9_property_damage_description_vehicle', '')
     prop_damage_other = form_data.get('field9_property_damage_description_other', '')
     combined_prop_desc = f"{prop_damage_vehicle}\n{prop_damage_other}".strip()
-    pdf_data['field9_property_damage_description'] = combined_prop_desc if combined_prop_desc else DEFAULT_VALUES.get('field9_property_damage_description', '')
-    pdf_data['field9_owner_name_address'] = form_data.get('field9_owner_name_address', DEFAULT_VALUES.get('field9_owner_name_address', ''))
+    pdf_data['field9_property_damage_description'] = combined_prop_desc if combined_prop_desc else PDF_FILLER_DEFAULTS.get('field9_property_damage_description', '')
+    pdf_data['field9_owner_name_address'] = form_data.get('field9_owner_name_address', PDF_FILLER_DEFAULTS.get('field9_owner_name_address', ''))
     # Nature of injury
-    pdf_data['field10_nature_of_injury'] = form_data.get('field10_nature_of_injury', DEFAULT_VALUES.get('field10_nature_of_injury', ''))
+    pdf_data['field10_nature_of_injury'] = form_data.get('field10_nature_of_injury', PDF_FILLER_DEFAULTS.get('field10_nature_of_injury', ''))
     # Witnesses
-    pdf_data['field11_witness_name'] = form_data.get('field11_witness_name', DEFAULT_VALUES.get('field11_witness_name', ''))
-    pdf_data['field11_witness_address'] = form_data.get('field11_witness_address', DEFAULT_VALUES.get('field11_witness_address', ''))
+    pdf_data['field11_witness_name'] = form_data.get('field11_witness_name', PDF_FILLER_DEFAULTS.get('field11_witness_name', ''))
+    pdf_data['field11_witness_address'] = form_data.get('field11_witness_address', PDF_FILLER_DEFAULTS.get('field11_witness_address', ''))
     # Amounts
-    pdf_data['field12a_property_damage'] = form_data.get('field12a_property_damage_amount', DEFAULT_VALUES.get('field12a_property_damage', ''))
-    pdf_data['field12b_personal_injury'] = form_data.get('field12b_personal_injury_amount', DEFAULT_VALUES.get('field12b_personal_injury', ''))
-    pdf_data['field12c_wrongful_death'] = form_data.get('field12c_wrongful_death_amount', DEFAULT_VALUES.get('field12c_wrongful_death', ''))
-    pdf_data['field12d_total_claim_amount'] = form_data.get('field12d_total_amount', form_data.get('field12d_total_claim_amount', DEFAULT_VALUES.get('field12d_total_claim_amount', '')))
+    pdf_data['field12a_property_damage'] = form_data.get('field12a_property_damage_amount', PDF_FILLER_DEFAULTS.get('field12a_property_damage', ''))
+    pdf_data['field12b_personal_injury'] = form_data.get('field12b_personal_injury_amount', PDF_FILLER_DEFAULTS.get('field12b_personal_injury', ''))
+    pdf_data['field12c_wrongful_death'] = form_data.get('field12c_wrongful_death_amount', PDF_FILLER_DEFAULTS.get('field12c_wrongful_death', ''))
+    pdf_data['field12d_total_claim_amount'] = form_data.get('field12d_total_amount', form_data.get('field12d_total_claim_amount', PDF_FILLER_DEFAULTS.get('field12d_total_claim_amount', '')))
     # Signature and phone
     pdf_data['field13a_signature'] = form_data.get('field13a_signature', 'Pending Signature')
     pdf_data['field_pdf_13b_phone'] = form_data.get('field_pdf_13b_phone', '')
@@ -829,7 +829,7 @@ def signature():
             pdf_data_for_filling_final = pdf_data_for_filling_draft.copy()
             pdf_data_for_filling_final['field13a_signature'] = signature_of_claimant_from_form
             pdf_data_for_filling_final['field14_date_signed'] = date_of_signature_utc_dt.strftime('%m/%d/%Y')
-            for default_key, default_value in DEFAULT_VALUES.items():
+            for default_key, default_value in PDF_FILLER_DEFAULTS.items():
                 if default_key not in pdf_data_for_filling_final:
                     pdf_data_for_filling_final[default_key] = default_value
                     current_app.logger.info(f"[SIGNATURE FINALIZATION] Added default '{default_key}':'{default_value}' to final PDF data as it was missing.")
@@ -914,7 +914,7 @@ def signature():
         pdf_data_for_filling_final = pdf_data_for_filling_draft.copy()
         pdf_data_for_filling_final['field13a_signature'] = signature_of_claimant_from_form
         pdf_data_for_filling_final['field14_date_signed'] = date_of_signature_utc_dt.strftime('%m/%d/%Y')
-        for default_key, default_value in DEFAULT_VALUES.items():
+        for default_key, default_value in PDF_FILLER_DEFAULTS.items():
             if default_key not in pdf_data_for_filling_final:
                 pdf_data_for_filling_final[default_key] = default_value
                 current_app.logger.info(f"[SIGNATURE FINALIZATION] Added default '{default_key}':'{default_value}' to final PDF data as it was missing.")
