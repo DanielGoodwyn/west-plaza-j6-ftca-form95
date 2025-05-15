@@ -48,6 +48,24 @@ def fill_sf95_pdf(form_data, pdf_template_path_param, output_pdf_full_path_param
     logger.info(f"Output PDF Path: {output_pdf_full_path_param}")
     logger.debug(f'Raw form_data received by fill_sf95_pdf: {form_data}')
 
+    # --- Diagnostics: Check template file and output dir permissions ---
+    import os
+    if not os.path.isfile(pdf_template_path_param):
+        logger.error(f"[PDF FILLER] Template file does not exist: {pdf_template_path_param}")
+    elif not os.access(pdf_template_path_param, os.R_OK):
+        logger.error(f"[PDF FILLER] Template file is not readable: {pdf_template_path_param}")
+    else:
+        logger.info(f"[PDF FILLER] Template file is present and readable.")
+
+    output_dir = os.path.dirname(output_pdf_full_path_param)
+    if not os.path.isdir(output_dir):
+        logger.error(f"[PDF FILLER] Output directory does not exist: {output_dir}")
+    elif not os.access(output_dir, os.W_OK):
+        logger.error(f"[PDF FILLER] Output directory is not writable: {output_dir}")
+    else:
+        logger.info(f"[PDF FILLER] Output directory is present and writable: {output_dir}")
+    # --- End diagnostics ---
+
     # Initialize pdfcpu_data to match the structure from 'pdfcpu form export'
     pdfcpu_data = {
         "forms": [
