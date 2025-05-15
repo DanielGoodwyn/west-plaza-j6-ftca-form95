@@ -11,15 +11,17 @@
 #     # This block is primarily for the temporary direct execution for DB setup.
 #     __package__ = "src"
 
-from src.utils.pdf_filler import DEFAULT_VALUES, fill_sf95_pdf, PDF_FIELD_MAP
-import json
-
+import os
 import sys
-import os
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+# Ensure the 'src' directory is in sys.path for absolute imports regardless of execution context
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+src_path = os.path.join(project_root, 'src')
+if src_path not in sys.path:
+    sys.path.insert(0, src_path)
+
+import json
 import sqlite3
-import os
 import logging
 from datetime import datetime, timezone
 from flask import Flask, request, jsonify, render_template, redirect, url_for, flash, current_app, g, Response, session, send_from_directory
@@ -30,20 +32,17 @@ import io
 import csv
 from unicodedata import normalize
 from werkzeug.utils import secure_filename
-import pytz 
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user 
-from werkzeug.security import generate_password_hash, check_password_hash 
+import pytz
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
+from dotenv import load_dotenv
 
-from src.forms import LoginForm 
-from dotenv import load_dotenv 
-
-load_dotenv() 
-
-# Import utility functions
-from utils.pdf_filler import fill_sf95_pdf, DEFAULT_VALUES as PDF_FILLER_DEFAULTS
-from fillpdf import fillpdfs
+from src.utils.pdf_filler import fill_sf95_pdf, DEFAULT_VALUES as PDF_FILLER_DEFAULTS, PDF_FIELD_MAP
+from src.forms import LoginForm
 from src.utils.helpers import get_db, create_tables_if_not_exist, is_safe_url, init_db, init_app_db
 from src.utils.logging_config import setup_logging
+
+load_dotenv()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8') # Use environment variable or default
