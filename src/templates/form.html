@@ -27,20 +27,7 @@
             <h1>J6 West Plaza Civil Action Form</h1>
         </header>
 
-        <!--
-        Test PDF Generation Section (Fully Disabled)
-        <form action="{{ url_for('create_test_pdf') }}" method="POST" class="mb-4" style="border:1px solid #ccc; padding:1em; border-radius:8px;">
-            <div class="row align-items-end">
-                <div class="col-md-8">
-                    <label for="test_field" class="form-label"><strong>Test Field</strong></label>
-                    <input type="text" class="form-control" id="test_field" name="test_field" placeholder="Enter test value...">
-                </div>
-                <div class="col-md-4">
-                    <button type="submit" class="btn btn-primary mt-3 w-100">Create and Fill Test PDF</button>
-                </div>
-            </div>
-        </form>
--->
+        
 
         <form action="{{ url_for('submit_form') }}" method="POST">
             <div class="card mb-4">
