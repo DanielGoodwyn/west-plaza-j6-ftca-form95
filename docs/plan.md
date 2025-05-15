@@ -2,6 +2,54 @@
 
 This document outlines a step-by-step plan for building the FTCA Form 95 Intake web application, from Minimum Viable Product (MVP) to a more production-ready state.
 
+---
+
+## 🔄 Codebase Reconciliation Plan (Critical Path)
+
+We are currently synthesizing three key codebase states/commits to achieve reliable PDF generation on both local and FastComet server environments:
+
+1. **Local Working Version**  
+   [`370709f`](https://github.com/DanielGoodwyn/west-plaza-j6-ftca-form95/commit/370709f23fb1e97b5385eb2423d78a1688ffc6c3)  
+   _All form-to-PDF functionality works locally._
+
+2. **First Server Success (No PDF)**  
+   [`4d9225c`](https://github.com/DanielGoodwyn/west-plaza-j6-ftca-form95/commit/4d9225cb29f9f097db8968169a32830c58ef1219)  
+   _App runs on FastComet, but PDF generation does not work._
+
+3. **Test PDF Button Works on Server**  
+   [`13ecb37`](https://github.com/DanielGoodwyn/west-plaza-j6-ftca-form95/commit/13ecb374d31acac12d570dc2e3580c521e768019)  
+   _Test route proves PDF can be filled and saved on FastComet, but only via a test field/button._
+
+### What to Examine from Each Commit
+- **370709f**: Review canonical form submission and PDF filling logic.
+- **4d9225c**: Note changes that enabled server compatibility (env, paths, etc.).
+- **13ecb37**: Compare PDF generation logic in the test route to main form submission; identify why test works but main does not on server.
+
+### Next Steps Checklist
+- [✅] Local form submission fills and saves PDF correctly
+- [✅] FastComet server runs app and test PDF route works
+- [🔲] Main form submission on FastComet server fills and saves PDF correctly
+- [🔲] Unified codebase: merge/test working PDF logic from test route into main form submission
+- [🔲] Remove/hide test PDF field/button from UI (temporarily hidden, not fully removed)
+- [🔲] End-to-end test: user submits real form, PDF is generated and downloadable/admin-viewable on server
+- [🔲] Document reconciliation process and update all docs (plan.md, project.md, stack.md, README.md)
+
+---
+
+## Post-Reconciliation Feature Improvements
+
+After completing the PDF logic/codebase reconciliation, the following enhancements are planned:
+
+- [🔲] Change the blue instructional text on the form to dark gray or black ("Briefly list any additional facts...Attorney Use...")
+- [🔲] Format signatures as "/s/ Jane Doe" (e.g., "/s/ Jane Doe")
+- [🔲] Store phone numbers as digits only in the database, and display as (XXX) XXX-XXXX
+- [🔲] Add an Edit button to the admin screen's Actions column, which loads the form with the selected row's data for editing
+- [🔲] Hyperlink email addresses in the admin screen with `mailto:`
+- [🔲] Use slugified email address (not name) as the PDF filename and ID column in the database
+- [🔲] Implement user login/editing: after signature, prompt for password creation (or auto-generate one); allow users to log in later to edit their submission (details TBD)
+
+---
+
 ## Phase 1: Foundation & Core MVP
 
 **Goal:** Create a basic, functional application that can accept data for key fields, store it, and fill a PDF.
