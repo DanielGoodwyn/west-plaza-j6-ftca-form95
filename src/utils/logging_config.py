@@ -4,49 +4,39 @@ import os
 
 logger = logging.getLogger(__name__)
 
-def setup_logging(log_level_str='INFO', log_file=None):
+def setup_logging(log_level_str='INFO', log_file='app.log'):
     """
-    Configures basic logging for the application.
-
-    Args:
-        log_level_str (str): The minimum log level to capture (e.g., 'DEBUG', 'INFO', 'WARNING', 'ERROR').
-        log_file (str, optional): Path to a file for logging. If None, logs only to console.
+    Configures unified logging for the application.
+    All logs from all modules go to a single rotating app.log file (max 0.5MB, 1 backup).
+    Only app.log (latest) and app.log.1 (previous) will exist at any time.
+    Console logging is also enabled for development.
     """
-    # Ensure log level is valid
+    import logging.handlers
     log_level = getattr(logging, log_level_str.upper(), logging.INFO)
-
-    # Basic configuration
     log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     date_format = '%Y-%m-%d %H:%M:%S'
 
-    handlers = []
+    # Remove all existing handlers from root logger
+    for handler in logging.root.handlers[:]:
+        logging.root.removeHandler(handler)
 
-    # Console Handler
+    # Rotating file handler: maxBytes=0.5MB, backupCount=1
+    file_handler = logging.handlers.RotatingFileHandler(log_file, maxBytes=524288, backupCount=1, encoding='utf-8')
+    file_handler.setFormatter(logging.Formatter(log_format, datefmt=date_format))
+    file_handler.setLevel(log_level)
+
+    # Console handler (for dev)
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(logging.Formatter(log_format, datefmt=date_format))
-    handlers.append(console_handler)
+    console_handler.setLevel(log_level)
 
-    # File Handler (Optional)
-    if log_file:
-        try:
-            # Ensure log directory exists if log_file includes a path
-            log_dir = os.path.dirname(log_file)
-            if log_dir and not os.path.exists(log_dir):
-                os.makedirs(log_dir)
-            from logging.handlers import RotatingFileHandler
-            file_handler = RotatingFileHandler(log_file, maxBytes=524288, backupCount=0, encoding='utf-8')
-            file_handler.setFormatter(logging.Formatter(log_format, datefmt=date_format))
-            handlers.append(file_handler)
-        except Exception as e:
-            # Log error about file handler setup to console
-            # Use basicConfig temporarily to ensure this message gets out
-            logging.basicConfig(level=logging.ERROR)
-            logging.error(f"Failed to set up file logging handler for {log_file}: {e}", exc_info=True)
-            # We might want to remove the partially configured basicConfig logger after this
-            # For simplicity here, we just log the error and proceed without file logging
+    logging.basicConfig(level=log_level, handlers=[file_handler, console_handler], force=True)
 
-    # Apply basic config with handlers
-    logging.basicConfig(level=log_level, format=log_format, datefmt=date_format, handlers=handlers, force=True)
+    # Ensure all loggers propagate to root
+    logging.captureWarnings(True)
+    logging.getLogger().propagate = True
+    # Startup confirmation
+    logging.info(f"Unified logging initialized: log_file={os.path.abspath(log_file)}, maxBytes=524288, backupCount=1")
 
     # Example: You can get a specific logger for your app module
     # logger = logging.getLogger('src.app') # Or just __name__ in the module using it
