@@ -1,13 +1,8 @@
 import os
 import sys
 
-# --- Activate the virtual environment for Passenger ---
-venv_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'venv', 'bin', 'activate_this.py')
-if os.path.exists(venv_path):
-    with open(venv_path) as f:
-        exec(f.read(), {'__file__': venv_path})
-else:
-    raise RuntimeError(f"Virtualenv activate_this.py not found at {venv_path}")
+# NOTE: Passenger should use the venv's Python interpreter via PassengerPython directive in .htaccess or server config.
+# Remove activate_this.py logic (not present in modern venvs).
 
 # Determine the project directory (where this passenger_wsgi.py file is located)
 project_directory = os.path.dirname(os.path.abspath(__file__))
