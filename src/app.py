@@ -454,19 +454,6 @@ def format_datetime_for_display(utc_datetime_input, target_tz_str='America/New_Y
 
 # from tests.test_pdf_fill import create_and_fill_test_pdf
 
-@app.route('/create_test_pdf', methods=['POST'])
-def create_test_pdf():
-    try:
-        test_value = request.form.get('test_field', '')
-        if not test_value.strip():
-            flash('Test field cannot be blank.', 'danger')
-            return redirect(url_for('form'))
-        create_and_fill_test_pdf(test_value)
-        flash('Test PDF created and saved as test.pdf in filled_forms.', 'success')
-    except Exception as e:
-        current_app.logger.error(f'Error creating test PDF: {e}')
-        flash(f'Failed to create test PDF: {e}', 'danger')
-    return redirect(url_for('form'))
 @app.route('/')
 def form():
     import traceback
