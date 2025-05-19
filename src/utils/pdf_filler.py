@@ -197,12 +197,27 @@ def fill_sf95_pdf(form_data, pdf_template_path_param, output_pdf_full_path_param
         logger.info(f"Executing pdfcpu command: {' '.join(pdfcpu_command)}")
 
         process_result = subprocess.run(pdfcpu_command, capture_output=True, text=True, check=False)
+        logger.info(f"[POST_PDFCPU] Subprocess finished with return code: {process_result.returncode}")
         if process_result.returncode == 0:
             logger.info(f"PDF filled successfully: {resolved_output_pdf_path}")
+            # Confirm the file exists and is readable
+            if os.path.isfile(resolved_output_pdf_path):
+                logger.info(f"[POST_PDFCPU] Confirmed PDF exists at: {resolved_output_pdf_path}")
+                if os.access(resolved_output_pdf_path, os.R_OK):
+                    logger.info(f"[POST_PDFCPU] PDF is readable: {resolved_output_pdf_path}")
+                else:
+                    logger.error(f"[POST_PDFCPU] PDF exists but is NOT readable: {resolved_output_pdf_path}")
+            else:
+                logger.error(f"[POST_PDFCPU] PDF was expected at {resolved_output_pdf_path}, but file does NOT exist!")
             return resolved_output_pdf_path
         else:
             logger.error(f"Error filling PDF with pdfcpu. Return code: {process_result.returncode}")
             logger.error(f"pdfcpu error details: {process_result.stderr}")
+            # Check if a file was created anyway
+            if os.path.isfile(resolved_output_pdf_path):
+                logger.warning(f"[POST_PDFCPU] PDF file exists at {resolved_output_pdf_path} even though pdfcpu failed.")
+            else:
+                logger.info(f"[POST_PDFCPU] No PDF file created at {resolved_output_pdf_path} after pdfcpu failure.")
             return None
 
     except Exception as e:
