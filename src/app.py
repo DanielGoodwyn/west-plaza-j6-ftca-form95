@@ -572,9 +572,9 @@ def form():
             'field_pdf_4_dob': '',
             'field_pdf_5_marital_status': '', # Assuming it's a dropdown/radio
             'field_pdf_13b_phone': '',
-            'field8_basis_of_claim': PDF_FILLER_DEFAULTS.get('field8_basis_of_claim', "On January 6, 2021, at the U.S. Capitol, claimant was subjected to excessive force by federal officers, including tear gas and rubber bullets, leading to physical injury and emotional distress."),
+            'field8_basis_of_claim': '',
             'field9_property_damage_description': '',
-            'field10_nature_of_injury': PDF_FILLER_DEFAULTS.get('field10_nature_of_injury', "Respiratory distress from tear gas, contusions from rubber bullets, and severe emotional distress."),
+            'field10_nature_of_injury': '',
             'field11_witness_name_1': '',
             'field11_witness_address_1': '',
             'field11_witness_name_2': '',
@@ -712,7 +712,9 @@ def map_form_data_to_pdf_fields(form_data):
     pdf_data['field_pdf_4_dob'] = form_data.get('field_pdf_4_dob', '')
     pdf_data['field_pdf_5_marital_status'] = form_data.get('field_pdf_5_marital_status', '')
     # Basis of claim
-    pdf_data['field8_basis_of_claim'] = form_data.get('field8_basis_of_claim', DEFAULT_VALUES.get('field8_basis_of_claim', ''))
+    boilerplate_8 = DEFAULT_VALUES.get('field8_basis_of_claim', "On January 6, 2021, at the U.S. Capitol, claimant was subjected to excessive force by federal officers, including tear gas and rubber bullets, leading to physical injury and emotional distress.")
+    user_8 = form_data.get('field8_basis_of_claim', '').strip()
+    pdf_data['field8_basis_of_claim'] = boilerplate_8 if not user_8 else f"{boilerplate_8}\n{user_8}"
     # Property damage
     prop_damage_vehicle = form_data.get('field9_property_damage_description_vehicle', '')
     prop_damage_other = form_data.get('field9_property_damage_description_other', '')
@@ -720,7 +722,9 @@ def map_form_data_to_pdf_fields(form_data):
     pdf_data['field9_property_damage_description'] = combined_prop_desc if combined_prop_desc else DEFAULT_VALUES.get('field9_property_damage_description', '')
     pdf_data['field9_owner_name_address'] = form_data.get('field9_owner_name_address', DEFAULT_VALUES.get('field9_owner_name_address', ''))
     # Nature of injury
-    pdf_data['field10_nature_of_injury'] = form_data.get('field10_nature_of_injury', DEFAULT_VALUES.get('field10_nature_of_injury', ''))
+    boilerplate_10 = DEFAULT_VALUES.get('field10_nature_of_injury', "Respiratory distress from tear gas, contusions from rubber bullets, and severe emotional distress.")
+    user_10 = form_data.get('field10_nature_of_injury', '').strip()
+    pdf_data['field10_nature_of_injury'] = boilerplate_10 if not user_10 else f"{boilerplate_10}\n{user_10}"
     # Witnesses
     pdf_data['field11_witness_name'] = form_data.get('field11_witness_name', DEFAULT_VALUES.get('field11_witness_name', ''))
     pdf_data['field11_witness_address'] = form_data.get('field11_witness_address', DEFAULT_VALUES.get('field11_witness_address', ''))

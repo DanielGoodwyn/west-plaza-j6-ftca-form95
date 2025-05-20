@@ -158,11 +158,10 @@
 
                     <fieldset class="mb-3">
                         <legend>8. Basis of Claim</legend>
-                        <div class="form-text text-muted bg-light p-2 mb-2" style="border-radius: 4px;">
-                            On January 6, 2021, at the U.S. Capitol, claimant was subjected to excessive force by federal officers, including tear gas and rubber bullets, leading to physical injury and emotional distress.
-                        </div>
-                        <label for="field8_basis_of_claim" class="form-label">Add any additional facts or details (optional):</label>
-                        <textarea id="field8_basis_of_claim" name="field8_basis_of_claim" class="form-control" rows="5">{{ form_data.get('field8_basis_of_claim', '') }}</textarea>
+                        <label for="field8_boilerplate" class="form-label">Standard Basis of Claim (not editable):</label>
+                        <textarea id="field8_boilerplate" class="form-control mb-2" rows="3" readonly style="background-color: #f8f9fa; color: #6c757d;">While the claimant was protesting on January 6, 2021 at the West side of the U.S. Capitol, the Capitol Police and D.C. Metropolitan Police acting on behalf of the Capitol Police used excessive force against the claimant causing claimant physical injuries. The excessive force took the form of various munitions launched against the protesters including but not limited to: pepper balls, rubber balls or bullets some filled with Oleoresin Capsicum ("OC"), FM 303 projectiles, sting balls, flash bang, sting bomb and tear gas grenades, tripple chasers,pepper spray, CS Gas and physical strikes with firsts or batons.</textarea>
+<label for="field8_basis_of_claim" class="form-label">Add any additional facts or details (optional):</label>
+<textarea id="field8_basis_of_claim" name="field8_basis_of_claim" class="form-control" rows="5">{{ form_data['field8_basis_of_claim'] if form_data.get('field8_basis_of_claim') else '' }}</textarea>
                     </fieldset>
 
                     <fieldset class="mb-3 d-none">
@@ -173,11 +172,10 @@
 
                     <fieldset class="mb-3">
                         <legend>10. Personal Injury/Wrongful Death</legend>
-                        <div class="form-text text-muted bg-light p-2 mb-2" style="border-radius: 4px;">
-                            Respiratory distress from tear gas, contusions from rubber bullets, and severe emotional distress.
-                        </div>
-                        <label for="field10_nature_of_injury" class="form-label">Add any additional injury details (optional):</label>
-                        <textarea id="field10_nature_of_injury" name="field10_nature_of_injury" class="form-control" rows="5">{{ form_data.get('field10_nature_of_injury', '') }}</textarea>
+                        <label for="field10_boilerplate" class="form-label">Standard Injury Description (not editable):</label>
+                        <textarea id="field10_boilerplate" class="form-control mb-2" rows="3" readonly style="background-color: #f8f9fa; color: #6c757d;">The claimant went to the U.S. Capitol to peacefully protest the presidential election. While the claimant was in the area of the West Side of the U.S. Capitol building police launched weapons referenced above and used excessive force. The claimant was struck and or exposed to the launched munitions and/or OC or CS Gas and suffered injuries as a result. The legal ramifications of these actions are currently under review and form part of the ongoing damages being claimed.</textarea>
+<label for="field10_nature_of_injury" class="form-label">Add any additional injury details (optional):</label>
+<textarea id="field10_nature_of_injury" name="field10_nature_of_injury" class="form-control" rows="5">{{ form_data['field10_nature_of_injury'] if form_data.get('field10_nature_of_injury') else '' }}</textarea>
                     </fieldset>
 
                     <fieldset class="mb-3 d-none">

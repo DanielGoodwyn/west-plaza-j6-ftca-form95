@@ -1,31 +1,22 @@
 # Development Roadmap: FTCA Form 95 Intake Web App
 
-This document outlines a step-by-step plan for building the FTCA Form 95 Intake web application, from Minimum Viable Product (MVP) to a more production-ready state.
+This document outlines a unified, step-by-step plan for building the FTCA Form 95 Intake web application, from MVP to production, using a consistent checklist format for all phases, steps, and tasks.
 
 ---
 
-## 🔄 Codebase Reconciliation Plan (Critical Path)
+## Phase 0: Codebase Reconciliation (Critical Path)
 
-We are currently synthesizing three key codebase states/commits to achieve reliable PDF generation on both local and FastComet server environments:
+**Goal:** Achieve reliable PDF generation on both local and FastComet server environments.
 
-1. **Local Working Version**  
-   [`370709f`](https://github.com/DanielGoodwyn/west-plaza-j6-ftca-form95/commit/370709f23fb1e97b5385eb2423d78a1688ffc6c3)  
-   _All form-to-PDF functionality works locally._
+### Step 0.1: Analyze Key Commits
+- **Local Working Version:** [`370709f`](https://github.com/DanielGoodwyn/west-plaza-j6-ftca-form95/commit/370709f23fb1e97b5385eb2423d78a1688ffc6c3) (_All form-to-PDF functionality works locally._)
+- **First Server Success (No PDF):** [`4d9225c`](https://github.com/DanielGoodwyn/west-plaza-j6-ftca-form95/commit/4d9225cb29f9f097db8968169a32830c58ef1219) (_App runs on FastComet, but PDF generation does not work._)
+- **Test PDF Button Works on Server:** [`13ecb37`](https://github.com/DanielGoodwyn/west-plaza-j6-ftca-form95/commit/13ecb374d31acac12d570dc2e3580c521e768019) (_Test route proves PDF can be filled and saved on FastComet, but only via a test field/button._)
+- [✅] Review canonical form submission and PDF filling logic (370709f)
+- [✅] Note changes that enabled server compatibility (env, paths, etc.) (4d9225c)
+- [✅] Compare PDF generation logic in test route vs. main form submission (13ecb37)
 
-2. **First Server Success (No PDF)**  
-   [`4d9225c`](https://github.com/DanielGoodwyn/west-plaza-j6-ftca-form95/commit/4d9225cb29f9f097db8968169a32830c58ef1219)  
-   _App runs on FastComet, but PDF generation does not work._
-
-3. **Test PDF Button Works on Server**  
-   [`13ecb37`](https://github.com/DanielGoodwyn/west-plaza-j6-ftca-form95/commit/13ecb374d31acac12d570dc2e3580c521e768019)  
-   _Test route proves PDF can be filled and saved on FastComet, but only via a test field/button._
-
-### What to Examine from Each Commit
-- **370709f**: Review canonical form submission and PDF filling logic.
-- **4d9225c**: Note changes that enabled server compatibility (env, paths, etc.).
-- **13ecb37**: Compare PDF generation logic in the test route to main form submission; identify why test works but main does not on server.
-
-### Next Steps Checklist
+### Step 0.2: Reconciliation Checklist
 - [✅] Local form submission fills and saves PDF correctly
 - [✅] FastComet server runs app and test PDF route works
 - [🔲] Main form submission on FastComet server fills and saves PDF correctly
@@ -36,64 +27,49 @@ We are currently synthesizing three key codebase states/commits to achieve relia
 
 ---
 
-## Post-Reconciliation Feature Improvements
-
-After completing the PDF logic/codebase reconciliation, the following enhancements are planned:
-
-- [✅] Change the blue instructional text on the form to dark gray or black ("Briefly list any additional facts...Attorney Use...")
-- [✅] Format signatures as "/s/ Jane Doe" (e.g., "/s/ Jane Doe")
-- [✅] Store phone numbers as digits only in the database, and display as (XXX) XXX-XXXX
-- [🔲] Add an Edit button to the admin screen's Actions column, which loads the form with the selected row's data for editing
-- [🔲] Hyperlink email addresses in the admin screen with `mailto:`
-- [🔲] Use slugified email address (not name) as the PDF filename and ID column in the database
-- [🔲] Implement user login/editing: after signature, prompt for password creation (or auto-generate one); allow users to log in later to edit their submission (details TBD)
-
----
-
 ## Phase 1: Foundation & Core MVP
 
 **Goal:** Create a basic, functional application that can accept data for key fields, store it, and fill a PDF.
 
-1.  **Step 1: Project Setup & Environment (Day 1-2)**
-    *   [X] Initialize Git repository.
-    *   [X] Set up Python virtual environment.
-    *   [X] Create basic Flask application structure (`app.py`, `templates/`, `static/`, `utils/`, `data/`).
-    *   [X] Create initial `requirements.txt` (Flask).
-    *   [X] Draft `README.md`, `project.md`, `plan.md`, `python-flask-stack.md`.
-    *   [X] Download the SF-95 PDF (`data/sf95.pdf`).
+### Step 1.1: Project Setup & Environment
+- [✅] Initialize Git repository
+- [✅] Set up Python virtual environment
+- [✅] Create basic Flask application structure (`app.py`, `templates/`, `static/`, `utils/`, `data/`)
+- [✅] Create initial `requirements.txt` (Flask)
+- [✅] Draft `README.md`, `project.md`, `plan.md`, `python-flask-stack.md`
+- [✅] Download the SF-95 PDF (`data/sf95.pdf`)
 
-2.  **Step 2: PDF Field Name Discovery (Crucial - Day 2-3)**
-    *   [X] Objective: Identify all fillable field names in `sf95.pdf`.
-    *   [X] Task: Use Adobe Acrobat Pro, `pdfminer.six`, or other PDF analysis tools to list field names and their types (text, checkbox, etc.).
-    *   [X] Deliverable: An externalized, machine-readable mapping file (e.g., `data/pdf_field_map.json`). This file will explicitly link HTML form field names (or consistent intermediate data keys from `DB_SCHEMA`) to the precise internal field names required by the PDF filling tool (`pdfcpu`). The `utils/pdf_filler.py` script will be updated to load and use this external map for improved maintainability and clarity.
+### Step 1.2: PDF Field Name Discovery
+- [✅] Identify all fillable field names in `sf95.pdf`
+- [✅] Use PDF analysis tools to list field names and their types
+- [✅] Deliver a machine-readable mapping file (`data/pdf_field_map.json`)
+- [✅] Update PDF filling logic to use this map
 
-3.  **Step 3: Basic HTML Form (Day 3-4)**
-    *   [X] Objective: Create the frontend HTML form in `templates/form.html`.
-    *   [X] Task: Include input fields for the user-filled sections (2, 3 (checkbox), 4, 5, 13b, 14) and the editable pre-filled fields (8, 10, 12b, 12c).
-    *   [X] Task: Incorporate an 'Email Address' input field for internal team reference (data to be stored in DB, not for PDF).
-    *   [X] Task: Add four essay-style input boxes for supplemental questions (data to be stored in DB, not for PDF):
-        1.  What happened to you on January 6, 2021 at the U.S. Capitol in your own words?
-        2.  What injuries or damages were sustained on January 6, 2021 at the U.S. Capitol?
-        3.  What time approximately did you enter and exit US Capitol grounds?
-        4.  Did you go inside the U.S. Capitol Building? If so, approximately what time, and for how long.
-    *   [X] Task: Pre-populate fields (1, 6, 7, 8, 9, 10, 11, 12a, 12b, 12c) with their default values as specified. Mark fixed fields as read-only or display them as static text if appropriate. (Achieved desired default behavior: blank for most, specific for others)
-    *   [/] Basic styling with `static/css/style.css` for usability.
+### Step 1.3: Basic HTML Form
+- [✅] Create frontend HTML form in `templates/form.html`
+- [✅] Include input fields for user-filled and pre-filled sections
+- [✅] Add 'Email Address' and supplemental essay questions (store in DB, not PDF)
+- [✅] Pre-populate fields with specified defaults
+- [🔲] Basic styling with `static/css/style.css` for usability
 
-4.  **Step 4: Backend Form Handling & Data Storage (Day 4-6)**
-    *   [X] Objective: Receive form data, validate, and store it.
-    *   [X] Task: Create a Flask route (`/submit`) in `app.py` to handle POST requests from the form. (Routes `/` and `/sign` handle this)
-    *   [X] Task: Implement basic server-side validation for submitted data.
-        *   [X] Verification that all user-required fields (as defined in `project.md`) are present and not empty.
-        *   [X] Checks for correct data formats where applicable (e.g., dates for 'DateOfBirth' and 'DateSigned', numeric types for monetary amounts).
-        *   [ ] Potentially, checks for reasonable string lengths for text areas like Fields 8 and 10, and the new supplemental essay questions.
-        *   [X] If validation fails, the system should re-render the form, display user-friendly error messages (e.g., using Flask's `flash` mechanism), and repopulate the form with the user's previously entered data to avoid data loss.
-    *   [X] Task: Set up SQLite database (`data/form_data.db`). Define a table schema to store all relevant fields (user-input, pre-filled, calculated, and new supplemental fields: `user_email_address`, `supplemental_question_1_capitol_experience`, `supplemental_question_2_injuries_damages`, `supplemental_question_3_entry_exit_time`, `supplemental_question_4_inside_capitol_details`).
-    *   [X] Task: Write Python code (potentially in `utils/database_handler.py`) to insert validated form data into the SQLite table.
-    *   [X] Add `sqlite3` to `requirements.txt` (it's built-in, but good to note; `SQLAlchemy` might be added later for ORM).
+### Step 1.4: Backend Form Handling & Data Storage
+- [✅] Flask route (`/submit`) to handle POST requests
+- [✅] Basic server-side validation for submitted data
+    - [✅] All required fields present and not empty
+    - [✅] Correct data formats for dates, numbers
+    - [🔲] Reasonable string lengths for text areas
+    - [✅] User-friendly error messages and form repopulation
+- [✅] Set up SQLite database and schema for all fields
+- [✅] Insert validated data into SQLite
+- [✅] Add `sqlite3` to `requirements.txt`
 
-5.  **Step 5: PDF Filling Logic (Day 6-8)**
-    *   [X] Objective: Fill the `sf95.pdf` with data from a submission.
-    *   [X] Task: Choose and install a PDF filling library (e.g., `fillpdf`, `pdfrw`). Add to `requirements.txt`.
+### Step 1.5: PDF Filling Logic
+- [✅] Fill the `sf95.pdf` with data from a submission
+- [✅] Choose and install PDF filling library
+- [✅] Create PDF filler script/function
+- [✅] Save filled PDF to output directory with unique filenames
+- [✅] Integrate into `/submit` route
+- [✅] Verify all data is accurately transferred to PDF
     *   [X] Task: Create `utils/pdf_filler.py`. Write a function that takes the form data (and the PDF field name mapping from Step 2) and fills `sf95.pdf`. (Logic integrated into `app.py`)
     *   [X] Task: Save the filled PDF to a designated output directory (e.g., `data/filled_forms/`). Name files uniquely (e.g., `submission_id_timestamp.pdf`).
     *   [X] Integrate this into the `/submit` route in `app.py` after data storage.
