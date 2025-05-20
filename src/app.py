@@ -600,12 +600,12 @@ def form():
         current_app.logger.info(f"FORM PAGE: Loaded form_data from session: {form_data}")
 
         states_and_territories = [
-            'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
-            'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
-            'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
-            'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
-            'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY',
-            'DC', 'AS', 'GU', 'MP', 'PR', 'VI'
+            'AK', 'AL', 'AR', 'AS', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE',
+            'FL', 'GA', 'GU', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY',
+            'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MP', 'MS', 'MT',
+            'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK',
+            'OR', 'PA', 'PR', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA',
+            'VI', 'VT', 'WA', 'WI', 'WV', 'WY'
         ]
         validation_errors = session.pop('validation_errors_step1', {})
         current_app.logger.info(f"FORM PAGE: Rendering with form_data: {form_data}")
@@ -883,7 +883,9 @@ def signature():
                 'user_email_address': session.get('user_email_address', '')
             }
         validation_errors = session.pop('validation_errors_step2', {})
-        return render_template('signature.html', pdf_data_for_filling_draft=pdf_data_for_filling_draft, today_date=today_date, form_data=signature_defaults, validation_errors=validation_errors)
+        # Pass draft PDF filename if available
+        draft_pdf_filename = session.get('draft_pdf_filename')
+        return render_template('signature.html', pdf_data_for_filling_draft=pdf_data_for_filling_draft, today_date=today_date, form_data=signature_defaults, validation_errors=validation_errors, pdf_filename=draft_pdf_filename)
     else:
         # POST: Handle signature submission and FINALIZE claim (PDF + DB)
         form_data = request.form.to_dict()
@@ -1402,11 +1404,15 @@ def admin_view():
 
     try:
         # Get distinct states for the filter dropdown
-        cursor.execute("SELECT DISTINCT field2_state FROM claims WHERE field2_state IS NOT NULL AND field2_state != '' ORDER BY field2_state")
-        states_data = cursor.fetchall()
-        # Extract state names from tuples like [('CA',), ('NY',)] into ['CA', 'NY']
-        states_list_for_filter = [state[0] for state in states_data]
-        current_app.logger.info(f"--- admin_view --- Distinct states fetched for filter: {states_list_for_filter}")
+        # Hardcoded list of 50 US state codes in strict alphabetical order
+        states_list_for_filter = [
+            'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
+            'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
+            'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
+            'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
+            'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
+        ]
+        current_app.logger.info(f"--- admin_view --- DEBUG: FINAL state list passed to template: {states_list_for_filter}")
 
         # Select the actual 'id' column along with others for the main table
         cursor.execute(f"SELECT {select_columns_str} FROM claims ORDER BY created_at DESC")
