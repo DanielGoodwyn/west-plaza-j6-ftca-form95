@@ -10,7 +10,6 @@
 <body>
     <div class="container">
         <h1 class="mt-4 mb-3">SF-95 Claim - Step 2: Signature</h1>
-        <p class="mb-4">Please review your information and sign below.</p>
 
         <!-- Placeholder for displaying summary of Step 1 data -->
         <!-- We can populate this later if needed -->
@@ -27,26 +26,29 @@
 
         <form action="{{ url_for('signature') }}" method="post" id="signatureForm">
             <h2 class="mb-3">Claimant Signature</h2>
-            <div class="form-group mb-3">
-                <label for="user_email_address">Your Email Address (used for PDF filename)</label>
-                <input type="email" class="form-control" id="user_email_address" name="user_email_address" value="{{ form_data.get('user_email_address', session.get('user_email_address', '')) }}" readonly required>
-                <small class="form-text text-muted">This email will be used as your unique identifier and for the PDF filename.</small>
+            <div class="alert alert-info" role="alert">
+                <strong>Review your claim preview:</strong> Preview the PDF to confirm all details. If correct, sign and submit below. Your typed name is your electronic signature.
             </div>
-            <div class="form-group mb-3">
-                <label for="field17_signature_of_claimant">17. Signature of Claimant (Required)</label>
-                <input type="text" class="form-control {% if validation_errors and validation_errors.get('field17_signature_of_claimant') %}is-invalid{% endif %}" id="field17_signature_of_claimant" name="field17_signature_of_claimant" value="{{ form_data.get('field17_signature_of_claimant', '') }}" required>
-                {% if validation_errors and validation_errors.get('field17_signature_of_claimant') %}
-                    <div class="invalid-feedback">{{ validation_errors['field17_signature_of_claimant'] }}</div>
+            <!-- Hidden email field for backend, not shown to user -->
+            <input type="hidden" id="user_email_address" name="user_email_address" value="{{ form_data.get('user_email_address', session.get('user_email_address', '')) }}">
+            <div class="d-flex justify-content-center mb-4" style="gap: 1rem;">
+                <a href="{{ url_for('form') }}" class="btn btn-outline-secondary btn-lg">Return and Edit</a>
+                {% if pdf_filename %}
+                <a class="btn btn-success btn-lg" href="{{ url_for('download_filled_pdf', filename=pdf_filename) }}" target="_blank">Preview PDF</a>
                 {% endif %}
-                <small class="form-text text-muted">Type your full name as your electronic signature.</small>
             </div>
-
-            <button type="button" class="btn btn-primary" onclick="document.getElementById('signatureForm').submit();">Submit Claim</button>
+            <div class="form-group mb-1">
+                <div class="d-flex justify-content-center align-items-stretch" style="max-width: 600px; margin: 0 auto;">
+                    <input type="text" class="form-control flex-grow-1 {% if validation_errors and validation_errors.get('field17_signature_of_claimant') %}is-invalid{% endif %}" id="field17_signature_of_claimant" name="field17_signature_of_claimant" value="{{ form_data.get('field17_signature_of_claimant', '') }}" required placeholder="Full Name (electronic signature)" style="min-width: 220px; max-width: 320px; border-top-right-radius: 0; border-bottom-right-radius: 0; height: 48px;">
+                    <button type="button" class="btn btn-primary d-flex align-items-center justify-content-center" style="min-width: 160px; border-top-left-radius: 0; border-bottom-left-radius: 0; height: 48px;" onclick="document.getElementById('signatureForm').submit();">Sign Electronically</button>
+                </div>
+                {% if validation_errors and validation_errors.get('field17_signature_of_claimant') %}
+                    <div class="invalid-feedback d-block">{{ validation_errors['field17_signature_of_claimant'] }}</div>
+                {% endif %}
+            </div>
         </form>
 
-        <div class="mt-4">
-            <a href="{{ url_for('form') }}" class="btn btn-outline-secondary">Back to Edit Claim Information</a>
-        </div>
+
     </div>
 </body>
 </html>
