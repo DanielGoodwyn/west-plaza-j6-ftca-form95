@@ -3,7 +3,7 @@ from flask import g, current_app, request
 import os
 from urllib.parse import urlparse, urljoin
 
-from .logging_config import logger
+from src.utils.logging_config import logger
 
 # DATABASE_PATH points to 'database.db' located in the 'src' directory,
 # consistent with where src/User.py expects it.
@@ -14,14 +14,14 @@ try:
         os.makedirs(_db_dir, exist_ok=True)
         print(f"[helpers.py] Created DB directory: {_db_dir}")
         try:
-            from .logging_config import logger
+            from src.utils.logging_config import logger
             logger.info(f"[helpers.py] Created DB directory: {_db_dir}")
         except Exception:
             pass
 except Exception as e:
     print(f"[helpers.py] ERROR: Could not create DB directory {_db_dir}: {e}")
     try:
-        from .logging_config import logger
+        from src.utils.logging_config import logger
         logger.error(f"[helpers.py] ERROR: Could not create DB directory {_db_dir}: {e}")
     except Exception:
         pass
@@ -29,7 +29,7 @@ except Exception as e:
 
 print(f"[helpers.py] Using DATABASE_PATH: {os.path.abspath(DATABASE_PATH)}")
 try:
-    from .logging_config import logger
+    from src.utils.logging_config import logger
     logger.info(f"[helpers.py] Using DATABASE_PATH: {os.path.abspath(DATABASE_PATH)}")
 except Exception:
     pass
@@ -41,7 +41,7 @@ def ensure_filled_pdf_filename_unique():
     abs_db_path = os.path.abspath(DATABASE_PATH)
     print(f"[ensure_filled_pdf_filename_unique] Using DATABASE_PATH: {abs_db_path}")
     try:
-        from .logging_config import logger
+        from src.utils.logging_config import logger
         logger.info(f"[ensure_filled_pdf_filename_unique] Using DATABASE_PATH: {abs_db_path}")
     except Exception:
         pass
