@@ -748,7 +748,7 @@ def map_form_data_to_pdf_fields(form_data):
     pdf_data['field19_insurer_name_address'] = form_data.get('field19_insurer_name_address', '')
     # Log missing/blank fields for all PDF fields
     from flask import current_app
-    from utils.pdf_filler import PDF_FIELD_MAP
+    from src.utils.pdf_filler import PDF_FIELD_MAP
     for app_key, pdf_field in PDF_FIELD_MAP.items():
         if app_key not in pdf_data or pdf_data[app_key] in (None, ""):
             current_app.logger.warning(f"PDF MAPPING: Field '{app_key}' (PDF: '{pdf_field}') is missing or blank in PDF data.")
@@ -1133,7 +1133,7 @@ def submit_form():
 
     # --- Step 1.6: Generate draft PDF immediately ---
     try:
-        from utils.pdf_filler import fill_sf95_pdf
+        from src.utils.pdf_filler import fill_sf95_pdf
         fill_sf95_pdf(pdf_data_for_filling_draft, PDF_TEMPLATE_PATH, output_pdf_path)
         current_app.logger.info(f"SUBMIT_FORM: Draft PDF generated: {output_pdf_path}")
     except Exception as e:
