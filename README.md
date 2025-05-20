@@ -22,6 +22,31 @@ This application is built with a focus on self-hosting and data control.
 
 ## Development Setup
 
+---
+
+### Updating Production Deployment (investigatej6.org/west-plaza-lawsuit)
+
+To update your deployment at investigatej6.org/west-plaza-lawsuit, SSH into your FastComet server and run:
+
+```sh
+cd /path/to/your/west-plaza-j6-ftca-form95
+# Pull the latest changes from GitHub
+git pull origin main
+# (If using virtualenv)
+source venv/bin/activate
+pip install -r requirements.txt
+# Restart your Flask app (adjust as needed):
+# For gunicorn:
+# systemctl restart west-plaza-j6-ftca-form95
+# Or for nohup/python:
+pkill -f app.py
+nohup python3 src/app.py &
+```
+
+*Replace `/path/to/your/west-plaza-j6-ftca-form95` with your actual project path. Your database will persist between updates.*
+
+---
+
 1.  **Prerequisites:**
     *   Python 3.8+
     *   Pip (Python package installer)
@@ -39,6 +64,44 @@ This application is built with a focus on self-hosting and data control.
     python3 -m venv venv  # Or python -m venv venv
     source venv/bin/activate  # On Windows: venv\Scripts\activate
     ```
+
+---
+
+## 🚀 Deployment & Update Instructions (FastComet / investigatej6.org/west-plaza-lawsuit)
+
+To update your deployment on FastComet:
+
+1. **SSH into your FastComet server**
+2. **Navigate to your project directory:**
+   ```sh
+   cd /path/to/your/west-plaza-j6-ftca-form95
+   ```
+   *(Replace with the actual path on your server)*
+3. **Pull the latest code:**
+   ```sh
+   git pull origin main
+   ```
+4. **(If using a virtualenv) Activate it and install requirements:**
+   ```sh
+   source venv/bin/activate
+   pip install -r requirements.txt
+   ```
+5. **Restart your Flask app:**
+   - If using gunicorn:
+     ```sh
+     systemctl restart west-plaza-j6-ftca-form95
+     ```
+   - Or if running with nohup/python:
+     ```sh
+     pkill -f app.py
+     nohup python3 src/app.py &
+     ```
+
+**Note:**
+- Your database is now persistent and will NOT be reset on app restart.
+- Adjust the restart commands as needed for your server/process manager.
+- If you need help with deployment automation, see the project issues or contact the maintainer.
+
 
 4.  **Install Dependencies:**
     ```bash
