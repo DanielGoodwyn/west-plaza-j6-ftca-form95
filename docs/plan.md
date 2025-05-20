@@ -109,7 +109,35 @@ This document outlines a unified, step-by-step plan for building the FTCA Form 9
     *   [X] Task: Upon submission of the signature, regenerate the PDF (now including the signature). Redisplay this signed PDF on the same (or a dedicated confirmation) page. (Success page with download link)
     *   [X] Task: Provide a "Download Signed PDF" button for the user to download the finalized, signed document.
 
-3.  **Step 10: Improved Styling & Responsiveness** 
+3.  **Step 10: User Login and Editing After Signature**
+    *   [ ] **Objective:**
+        - Enable users to create a password after form submission (on the success page or later via a “set/reset password” link in an email), allowing them to log in and edit their own submission. Support secure role-based access for users, admins, and a superadmin, with robust password and account management.
+    *   [ ] **Requirements:**
+        *   **User Account Flow**
+            - Users submit the form with an email (no login required); the email becomes their username.
+            - Only one submission per email is allowed; a new submission replaces the previous one.
+            - After submission, users are prompted to create a password (optional) on the success page.
+            - If they skip password creation, a temporary password is stored in the database (user does not know it; admin can provide it later if needed).
+            - Users can also set or reset their password later via a “set password” or “forgot password” link sent to their email.
+        *   **Authentication & Roles**
+            - Login page allows normal users, admins, and superadmin to log in.
+            - Only admins and superadmin see the admin dashboard.
+            - Users can log in to edit their own submission and download their own PDF, but cannot access or download others' PDFs.
+            - Admins can view/edit/download all submissions and PDFs.
+            - Superadmin can manage (add/remove/edit/promote/demote) users and admins, and has all admin powers.
+            - Only one superadmin account exists.
+        *   **Password Management**
+            - Passwords are securely hashed in the database.
+            - Users and admins can reset their password via a "forgot password" flow (email-based link).
+        *   **Access Control & Security**
+            - All sensitive actions require authentication.
+            - No user can access or download another user's PDF unless they are admin or superadmin.
+        *   **Email Verification (Last Phase)**
+            - Email verification will be required before allowing login/editing (to prevent someone else from using their email). Implement this as the final step after all other features are complete.
+        *   **Admin Impersonation (Optional, Low Priority)**
+            - Admins may impersonate users for support purposes, if not difficult to implement.
+
+4.  **Step 11: Improved Styling & Responsiveness**
     *   [ ] Enhance `static/css/style.css` for a professional look and feel.
     *   [ ] Ensure the form is responsive and works well on different screen sizes.
 
