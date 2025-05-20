@@ -1,79 +1,70 @@
-# Development Roadmap: FTCA Form 95 Intake Web App
+# FTCA Form 95 Intake Web App – Task Checklist
 
-This document outlines a unified, step-by-step plan for building the FTCA Form 95 Intake web application, from MVP to production, using a consistent checklist format for all phases, steps, and tasks.
+[✅] Initialize Git repository
+[✅] Set up Python virtual environment
+[✅] Create basic Flask application structure (app.py, templates/, static/, utils/, data/)
+[✅] Create initial requirements.txt (Flask)
+[✅] Draft README.md, project.md, plan.md, python-flask-stack.md
+[✅] Download the SF-95 PDF (data/sf95.pdf)
 
----
+[✅] Identify all fillable field names in sf95.pdf
+[✅] Use PDF analysis tools to list field names and their types
+[✅] Deliver a machine-readable mapping file (data/pdf_field_map.json)
+[✅] Update PDF filling logic to use this map
 
-## Phase 0: Codebase Reconciliation (Critical Path)
+[✅] Create frontend HTML form in templates/form.html
+[✅] Include input fields for user-filled and pre-filled sections
+[✅] Add 'Email Address' and supplemental essay questions (store in DB, not PDF)
+[✅] Pre-populate fields with specified defaults
+[🔲] Basic styling with static/css/style.css for usability
 
-**Goal:** Achieve reliable PDF generation on both local and FastComet server environments.
+[✅] Flask route (/submit) to handle POST requests
+[✅] Basic server-side validation for submitted data
+[✅] All required fields present and not empty
+[✅] Correct data formats for dates, numbers
+[🔲] Reasonable string lengths for text areas
+[✅] User-friendly error messages and form repopulation
+[✅] Set up SQLite database and schema for all fields
+[✅] Insert validated data into SQLite
+[✅] Add sqlite3 to requirements.txt
 
-### Step 0.1: Analyze Key Commits
-- **Local Working Version:** [`370709f`](https://github.com/DanielGoodwyn/west-plaza-j6-ftca-form95/commit/370709f23fb1e97b5385eb2423d78a1688ffc6c3) (_All form-to-PDF functionality works locally._)
-- **First Server Success (No PDF):** [`4d9225c`](https://github.com/DanielGoodwyn/west-plaza-j6-ftca-form95/commit/4d9225cb29f9f097db8968169a32830c58ef1219) (_App runs on FastComet, but PDF generation does not work._)
-- **Test PDF Button Works on Server:** [`13ecb37`](https://github.com/DanielGoodwyn/west-plaza-j6-ftca-form95/commit/13ecb374d31acac12d570dc2e3580c521e768019) (_Test route proves PDF can be filled and saved on FastComet, but only via a test field/button._)
-- [✅] Review canonical form submission and PDF filling logic (370709f)
-- [✅] Note changes that enabled server compatibility (env, paths, etc.) (4d9225c)
-- [✅] Compare PDF generation logic in test route vs. main form submission (13ecb37)
+[✅] Fill the sf95.pdf with data from a submission
+[✅] Choose and install PDF filling library
+[✅] Create PDF filler script/function
+[✅] Save filled PDF to output directory with unique filenames
+[✅] Integrate into /submit route
+[✅] Verify all data is accurately transferred to PDF
 
-### Step 0.2: Reconciliation Checklist
-- [✅] Local form submission fills and saves PDF correctly
-- [✅] FastComet server runs app and test PDF route works
-- [✅] Main form submission on FastComet server fills and saves PDF correctly
-- [✅] Unified codebase: merge/test working PDF logic from test route into main form submission
-- [✅] Remove/hide test PDF field/button from UI (temporarily hidden, not fully removed)
-- [✅] End-to-end test: user submits real form, PDF is generated and downloadable/admin-viewable on server
-- [✅] Document reconciliation process and update all docs (plan.md, project.md, stack.md, README.md)
+[🔲] User Login and Editing After Signature
+    - Enable users to create a password after form submission (on the success page or later via a set/reset password link in an email), allowing them to log in and edit their own submission. Support secure role-based access for users, admins, and a superadmin, with robust password and account management.
+    - User Account Flow: Users submit the form with an email (no login required); the email becomes their username. Only one submission per email is allowed; a new submission replaces the previous one. After submission, users are prompted to create a password (optional) on the success page. If they skip password creation, a temporary password is stored in the database (user does not know it; admin can provide it later if needed). Users can also set or reset their password later via a set password or forgot password link sent to their email.
+    - Authentication & Roles: Login page allows normal users, admins, and superadmin to log in. Only admins and superadmin see the admin dashboard. Users can log in to edit their own submission and download their own PDF, but cannot access or download others' PDFs. Admins can view/edit/download all submissions and PDFs. Superadmin can manage (add/remove/edit/promote/demote) users and admins, and has all admin powers. Only one superadmin account exists.
+    - Password Management: Passwords are securely hashed in the database. Users and admins can reset their password via a forgot password flow (email-based link).
+    - Access Control & Security: All sensitive actions require authentication. No user can access or download another user's PDF unless they are admin or superadmin.
+    - Email Verification (Last Phase): Email verification will be required before allowing login/editing (to prevent someone else from using their email). Implement this as the final step after all other features are complete.
+    - Admin Impersonation (Optional, Low Priority): Admins may impersonate users for support purposes, if not difficult to implement.
 
----
+[🔲] Basic notification upon successful PDF generation (logging or email)
+[🔲] Create utils/notifier.py to send email using smtplib
+[🔲] Allow SMTP server, sender/recipient emails to be set via env/config
+[🔲] Integrate notification into /submit route
 
-## Phase 1: Foundation & Core MVP
+[🔲] Add/Edit button on review page to allow user to edit submission before signing
+[🔲] Client-side JavaScript validation for better UX (required fields, data types, char limits)
+[🔲] Server-side validation enhancement: more comprehensive checks
+[🔲] Calculation for Field 12d (Total) on frontend and backend
+[🔲] Improve handling of checkbox for Field 3
 
-**Goal:** Create a basic, functional application that can accept data for key fields, store it, and fill a PDF.
-
-### Step 1.1: Project Setup & Environment
-- [✅] Initialize Git repository
-- [✅] Set up Python virtual environment
-- [✅] Create basic Flask application structure (`app.py`, `templates/`, `static/`, `utils/`, `data/`)
-- [✅] Create initial `requirements.txt` (Flask)
-- [✅] Draft `README.md`, `project.md`, `plan.md`, `python-flask-stack.md`
-- [✅] Download the SF-95 PDF (`data/sf95.pdf`)
-
-### Step 1.2: PDF Field Name Discovery
-- [✅] Identify all fillable field names in `sf95.pdf`
-- [✅] Use PDF analysis tools to list field names and their types
-- [✅] Deliver a machine-readable mapping file (`data/pdf_field_map.json`)
-- [✅] Update PDF filling logic to use this map
-
-### Step 1.3: Basic HTML Form
-- [✅] Create frontend HTML form in `templates/form.html`
-- [✅] Include input fields for user-filled and pre-filled sections
-- [✅] Add 'Email Address' and supplemental essay questions (store in DB, not PDF)
-- [✅] Pre-populate fields with specified defaults
-- [🔲] Basic styling with `static/css/style.css` for usability
-
-### Step 1.4: Backend Form Handling & Data Storage
-- [✅] Flask route (`/submit`) to handle POST requests
-- [✅] Basic server-side validation for submitted data
-    - [✅] All required fields present and not empty
-    - [✅] Correct data formats for dates, numbers
-    - [🔲] Reasonable string lengths for text areas
-    - [✅] User-friendly error messages and form repopulation
-- [✅] Set up SQLite database and schema for all fields
-- [✅] Insert validated data into SQLite
-- [✅] Add `sqlite3` to `requirements.txt`
-
-### Step 1.5: PDF Filling Logic
-- [✅] Fill the `sf95.pdf` with data from a submission
-- [✅] Choose and install PDF filling library
-- [✅] Create PDF filler script/function
-- [✅] Save filled PDF to output directory with unique filenames
-- [✅] Integrate into `/submit` route
-- [✅] Verify all data is accurately transferred to PDF
-    *   [X] Task: Create `utils/pdf_filler.py`. Write a function that takes the form data (and the PDF field name mapping from Step 2) and fills `sf95.pdf`. (Logic integrated into `app.py`)
-    *   [X] Task: Save the filled PDF to a designated output directory (e.g., `data/filled_forms/`). Name files uniquely (e.g., `submission_id_timestamp.pdf`).
-    *   [X] Integrate this into the `/submit` route in `app.py` after data storage.
-    *   [X] Crucially, this step includes thorough verification that all data (user-input, pre-filled, and calculated values) is accurately transferred from the web form submission, through backend processing, and correctly placed into the designated fields within the generated PDF. This confirms the integrity of the PDF field mapping (Step 2) and data handling (Step 4).
+[🔲] Interactive PDF review & signing workflow (review, sign, download signed PDF)
+[🔲] Improved styling & responsiveness (static/css/style.css)
+[🔲] Robust error handling & logging (comprehensive backend errors, user-friendly frontend messages, structured logging)
+[🔲] Security hardening (CSRF protection, input sanitization, file permissions, rate limiting)
+[🔲] Configuration management (move config to env/config file)
+[🔲] Admin portal features (dashboard, data grid, CSV download, PDF management, consolidated PDF download)
+[🔲] Dockerization (Dockerfile, dependencies, test Docker run)
+[🔲] Unit & integration testing
+[🔲] Documentation review & update (README.md, operational procedures)
+[🔲] Ongoing monitoring & maintenance (logs, backups, dependency updates)
 
 6.  **Step 6: Basic Notification (Day 8-9)**
     *   [/] Objective: Send a simple notification upon successful PDF generation. (Logging done, not email)
