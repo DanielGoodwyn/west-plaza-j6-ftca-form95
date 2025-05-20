@@ -20,6 +20,6 @@ from werkzeug.security import generate_password_hash
 with app.app_context():
     db = get_db()
     db.execute("DELETE FROM users WHERE username=?", ('admin',))
-db.execute("INSERT INTO users (username, password_hash) VALUES (?, ?)", ('admin', generate_password_hash('SuperSecret123!')))
-db.commit()
-print('Admin user reset.')
+    db.execute("INSERT INTO users (username, password_hash) VALUES (?, ?)", ('admin', generate_password_hash('SuperSecret123!')))
+    db.commit()
+    print('Admin user reset.')
