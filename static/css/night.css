@@ -1,0 +1,89 @@
+body {
+    background: #181a1b;
+    color: #f1f1f1;
+}
+
+.container, .card, .alert {
+    background: #222426;
+    color: #f1f1f1;
+    border-color: #444;
+}
+
+/* Login Box */
+.login-container {
+    background: #23272b !important;
+    color: #f1f1f1 !important;
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.5);
+}
+.login-container h2 {
+    color: #f1f1f1 !important;
+}
+.login-container .form-control {
+    background: #181a1b;
+    color: #f1f1f1;
+    border: 1px solid #444;
+}
+.login-container .form-control::placeholder {
+    color: #b0b3b8;
+    opacity: 1;
+}
+.login-container .btn-primary {
+    background: #3399ff;
+    color: #fff;
+    border: none;
+    box-shadow: 0 2px 8px #22242644;
+}
+
+/* Admin Table */
+.admin-page .table {
+    background: #181a1b;
+    color: #f1f1f1;
+}
+.admin-page .table th, .admin-page .table td {
+    background: #23272b;
+    color: #f1f1f1;
+    border-color: #444;
+}
+.admin-page .table-striped > tbody > tr:nth-of-type(odd) {
+    background: #23272b;
+}
+.admin-page .table-striped > tbody > tr:nth-of-type(even) {
+    background: #181a1b;
+}
+.admin-page .header-filter, .admin-page .form-control, .admin-page .form-select {
+    background: #181a1b;
+    color: #f1f1f1;
+    border: 1px solid #444;
+}
+.admin-page .header-filter::placeholder {
+    color: #b0b3b8;
+}
+
+.btn-primary {
+    background: #3399ff;
+    color: #fff;
+    border: none;
+}
+.btn-success {
+    background: #4caf50;
+    color: #fff;
+    border: none;
+}
+.btn-outline-secondary {
+    background: #222426;
+    color: #f1f1f1;
+    border-color: #888;
+}
+
+input, textarea, select {
+    background: #222426;
+    color: #f1f1f1;
+    border: 1px solid #444;
+}
+
+/* Alerts and misc */
+.alert {
+    background: #23272b;
+    color: #f1f1f1;
+    border-color: #444;
+}
