@@ -19,11 +19,11 @@ This document outlines a unified, step-by-step plan for building the FTCA Form 9
 ### Step 0.2: Reconciliation Checklist
 - [✅] Local form submission fills and saves PDF correctly
 - [✅] FastComet server runs app and test PDF route works
-- [🔲] Main form submission on FastComet server fills and saves PDF correctly
-- [🔲] Unified codebase: merge/test working PDF logic from test route into main form submission
-- [🔲] Remove/hide test PDF field/button from UI (temporarily hidden, not fully removed)
-- [🔲] End-to-end test: user submits real form, PDF is generated and downloadable/admin-viewable on server
-- [🔲] Document reconciliation process and update all docs (plan.md, project.md, stack.md, README.md)
+- [✅] Main form submission on FastComet server fills and saves PDF correctly
+- [✅] Unified codebase: merge/test working PDF logic from test route into main form submission
+- [✅] Remove/hide test PDF field/button from UI (temporarily hidden, not fully removed)
+- [✅] End-to-end test: user submits real form, PDF is generated and downloadable/admin-viewable on server
+- [✅] Document reconciliation process and update all docs (plan.md, project.md, stack.md, README.md)
 
 ---
 
