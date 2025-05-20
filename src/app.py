@@ -30,7 +30,7 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, login_
 from werkzeug.security import generate_password_hash, check_password_hash # Ensuring this is present
 from werkzeug.exceptions import abort
 
-from forms import LoginForm # Import the LoginForm (absolute import for direct execution)
+from src.forms import LoginForm # Import the LoginForm (absolute import for direct execution)
 from dotenv import load_dotenv # Added
 
 load_dotenv() # Added: Load .env file from project root
@@ -127,7 +127,7 @@ init_app_db(app)
 Session(app) # Initialize Flask-Session
 
 # --- Configuration (Constants needed before initialization logic) ---
-from utils.helpers import DATABASE_PATH
+from src.utils.helpers import DATABASE_PATH
 DATABASE = DATABASE_PATH
 PDF_TEMPLATE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'sf95.pdf') # Corrected template filename
 
