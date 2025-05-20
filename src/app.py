@@ -11,6 +11,8 @@
 #     # This block is primarily for the temporary direct execution for DB setup.
 #     __package__ = "src"
 
+from utils.logging_config import setup_logging
+setup_logging(log_file='app.log')
 import sqlite3
 import os
 import logging
@@ -27,14 +29,14 @@ import pytz # Added for timezone conversion
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user # Added for Flask-Login
 from werkzeug.security import generate_password_hash, check_password_hash # Ensuring this is present
 
-from forms import LoginForm # Import the LoginForm
+from .forms import LoginForm # Import the LoginForm (relative import for Flask CLI compatibility)
 from dotenv import load_dotenv # Added
 
 load_dotenv() # Added: Load .env file from project root
 
 # Import utility functions
 from utils.pdf_filler import fill_sf95_pdf, DEFAULT_VALUES as PDF_FILLER_DEFAULTS
-from utils.helpers import get_db, create_tables_if_not_exist, is_safe_url, init_db, init_app_db # Added init_app_db
+from utils.helpers import get_db, create_tables_if_not_exist, is_safe_url, init_db, init_app_db, normalize_phone, format_phone, ensure_filled_pdf_filename_unique, force_recreate_claims_table # Added phone helpers and unique constraint
 from utils.logging_config import setup_logging
 
 app = Flask(__name__)
@@ -50,6 +52,64 @@ app.config['FILLED_FORMS_DIR'] = os.path.join(os.path.dirname(os.path.abspath(__
 app.config['APPLICATION_ROOT'] = '/west-plaza-lawsuit' # Added
 app.debug = True  # Enable debug mode for detailed error output (disable in production)
 
+# --- Database Schema (needed by create_tables_if_not_exist) ---
+DB_SCHEMA = [
+    'field1_agency TEXT',
+    'field2_name TEXT',
+    'field2_address TEXT',
+    'field2_city TEXT',
+    'field2_state TEXT',
+    'field2_zip TEXT',
+    'field3_type_employment TEXT',
+    'field_pdf_4_dob TEXT',
+    'field_pdf_5_marital_status TEXT',
+    'field6_checkbox_military TEXT',
+    'field7_checkbox_civilian TEXT',
+    'field8_basis_of_claim TEXT',
+    'field9_property_damage_description TEXT',
+    'field10_nature_of_injury TEXT',
+    'field11_witness_name_1 TEXT',
+    'field11_witness_address_1 TEXT',
+    'field11_witness_name_2 TEXT',
+    'field11_witness_address_2 TEXT',
+    'field12a_property_damage_amount TEXT',
+    'field12b_personal_injury_amount TEXT',
+    'field12c_wrongful_death_amount TEXT',
+    'field12d_total_claim_amount TEXT',
+    'field13a_signature TEXT',
+    'field_pdf_13b_phone TEXT',
+    'field14_date_signed TEXT',
+    'user_email_address TEXT',
+    'supplemental_question_1_capitol_experience TEXT',
+    'supplemental_question_2_injuries_damages TEXT',
+    'supplemental_question_3_entry_exit_time TEXT',
+    'supplemental_question_4_inside_capitol_details TEXT',
+    'filled_pdf_filename TEXT UNIQUE NOT NULL',
+    'field17_signature_of_claimant TEXT',
+    'field18_date_of_signature TEXT',
+    'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+    'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP'
+]
+
+# Ensure the data directory exists before DB access
+_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data')
+if not os.path.exists(_data_dir):
+    os.makedirs(_data_dir, exist_ok=True)
+
+# Force drop and recreate the claims table for debugging
+with app.app_context():
+    try:
+        force_recreate_claims_table(DB_SCHEMA, app.logger)
+        app.logger.info("force_recreate_claims_table called at startup with full DB_SCHEMA.")
+    except Exception as e:
+        print(f"Error calling force_recreate_claims_table: {e}")
+        app.logger.error(f"Error calling force_recreate_claims_table: {e}")
+
+# Ensure unique constraint for filled_pdf_filename (must be in app context)
+def enforce_unique_constraint():
+    with app.app_context():
+        ensure_filled_pdf_filename_unique()
+enforce_unique_constraint()
 # Ensure session directory exists
 if not os.path.exists(app.config['SESSION_FILE_DIR']):
     try:
@@ -74,7 +134,8 @@ init_app_db(app)
 Session(app) # Initialize Flask-Session
 
 # --- Configuration (Constants needed before initialization logic) ---
-DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'form_data.db')
+from utils.helpers import DATABASE_PATH
+DATABASE = DATABASE_PATH
 PDF_TEMPLATE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'sf95.pdf') # Corrected template filename
 
 # --- Database Schema (needed by create_tables_if_not_exist) ---
@@ -1004,6 +1065,9 @@ def submit_form():
 
     # --- Step 1: Map form data to PDF/DB keys ---
     form_data = dict(request.form)
+    # Normalize phone before saving to DB
+    if 'field_pdf_13b_phone' in form_data:
+        form_data['field_pdf_13b_phone'] = normalize_phone(form_data['field_pdf_13b_phone'])
     # Save latest form data to session for persistence
     session['form_data'] = form_data.copy()
     # Explicitly extract and store the email address in the session
@@ -1073,7 +1137,9 @@ def submit_form():
                 vals_for_insert_list.append(data_to_save_for_db_stage1[col_name])
                 placeholders_for_insert_sql.append('?')
         if cols_for_insert_sql:
-            insert_sql = f"INSERT INTO claims ({', '.join(cols_for_insert_sql)}) VALUES ({', '.join(placeholders_for_insert_sql)})"
+            # Upsert: Replace if filled_pdf_filename already exists
+            insert_sql = f"INSERT INTO claims ({', '.join(cols_for_insert_sql)}) VALUES ({', '.join(placeholders_for_insert_sql)}) ON CONFLICT(filled_pdf_filename) DO UPDATE SET " + \
+                ', '.join([f"{col}=excluded.{col}" for col in cols_for_insert_sql if col != 'filled_pdf_filename'])
             cursor.execute(insert_sql, tuple(vals_for_insert_list))
             db.commit()
             session['submission_id_in_progress'] = cursor.lastrowid
@@ -1320,6 +1386,8 @@ def admin_view():
                     processed_row[display_header] = raw_value if raw_value else "Pending Signature"
                 elif db_col == 'filled_pdf_filename': # This is the 'ID' column in display
                     processed_row[display_header] = raw_value if raw_value else "N/A"
+                elif db_col == 'field_pdf_13b_phone':
+                    processed_row[display_header] = format_phone(raw_value) if raw_value else "N/A"
                 else:
                     processed_row[display_header] = raw_value if raw_value is not None else ''
             claims_list_for_template.append(processed_row)
@@ -1432,6 +1500,8 @@ def download_csv():
                     row_data_for_csv.append(raw_value if raw_value else "Pending Signature")
                 elif db_col == 'filled_pdf_filename': # This is the 'ID' column in display
                     row_data_for_csv.append(raw_value if raw_value else "N/A")
+                elif db_col == 'field_pdf_13b_phone':
+                    row_data_for_csv.append(format_phone(raw_value))
                 else:
                     row_data_for_csv.append(raw_value if raw_value is not None else '')
             csv_writer.writerow(row_data_for_csv)

@@ -71,7 +71,12 @@ def fill_sf95_pdf(form_data, pdf_template_path_param, output_pdf_full_path_param
             field_value = submitted_value
 
         if field_value is not None: # Only add if there's a value (from form or default)
-            final_json_value = field_value # Value that will actually be put into the JSON
+            # Format phone number for PDF if this is the phone field
+            if app_field_key == 'field_pdf_13b_phone':
+                from utils.helpers import format_phone
+                final_json_value = format_phone(field_value)
+            else:
+                final_json_value = field_value # Value that will actually be put into the JSON
 
             # Monetary field formatting for section 12
             monetary_fields = [

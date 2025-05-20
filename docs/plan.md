@@ -40,8 +40,8 @@ We are currently synthesizing three key codebase states/commits to achieve relia
 
 After completing the PDF logic/codebase reconciliation, the following enhancements are planned:
 
-- [🔲] Change the blue instructional text on the form to dark gray or black ("Briefly list any additional facts...Attorney Use...")
-- [🔲] Format signatures as "/s/ Jane Doe" (e.g., "/s/ Jane Doe")
+- [✅] Change the blue instructional text on the form to dark gray or black ("Briefly list any additional facts...Attorney Use...")
+- [✅] Format signatures as "/s/ Jane Doe" (e.g., "/s/ Jane Doe")
 - [🔲] Store phone numbers as digits only in the database, and display as (XXX) XXX-XXXX
 - [🔲] Add an Edit button to the admin screen's Actions column, which loads the form with the selected row's data for editing
 - [🔲] Hyperlink email addresses in the admin screen with `mailto:`
