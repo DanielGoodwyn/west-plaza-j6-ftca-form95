@@ -158,8 +158,11 @@
 
                     <fieldset class="mb-3">
                         <legend>8. Basis of Claim</legend>
-                        <p class="form-text">State in detail the known facts and circumstances attending the damage, injury, or death, identifying persons and property involved, the place of occurrence and the cause thereof. Use additional sheet(s) if necessary. (See instructions on reverse).</p>
-                        <textarea id="field8_basis_of_claim" name="field8_basis_of_claim" class="form-control" rows="5" required>{{ form_data.get('field8_basis_of_claim', '') }}</textarea>
+                        <div class="form-text text-muted bg-light p-2 mb-2" style="border-radius: 4px;">
+                            On January 6, 2021, at the U.S. Capitol, claimant was subjected to excessive force by federal officers, including tear gas and rubber bullets, leading to physical injury and emotional distress.
+                        </div>
+                        <label for="field8_basis_of_claim" class="form-label">Add any additional facts or details (optional):</label>
+                        <textarea id="field8_basis_of_claim" name="field8_basis_of_claim" class="form-control" rows="5">{{ form_data.get('field8_basis_of_claim', '') }}</textarea>
                     </fieldset>
 
                     <fieldset class="mb-3 d-none">
@@ -170,8 +173,11 @@
 
                     <fieldset class="mb-3">
                         <legend>10. Personal Injury/Wrongful Death</legend>
-                        <p class="form-text">State the nature and extent of each injury or cause of death, which forms the basis of the claim. If other than claimant, state the name of the injured person or decedent.</p>
-                        <textarea id="field10_nature_of_injury" name="field10_nature_of_injury" class="form-control" rows="5" required>{{ form_data.get('field10_nature_of_injury', '') }}</textarea>
+                        <div class="form-text text-muted bg-light p-2 mb-2" style="border-radius: 4px;">
+                            Respiratory distress from tear gas, contusions from rubber bullets, and severe emotional distress.
+                        </div>
+                        <label for="field10_nature_of_injury" class="form-label">Add any additional injury details (optional):</label>
+                        <textarea id="field10_nature_of_injury" name="field10_nature_of_injury" class="form-control" rows="5">{{ form_data.get('field10_nature_of_injury', '') }}</textarea>
                     </fieldset>
 
                     <fieldset class="mb-3 d-none">
@@ -243,6 +249,7 @@
     </div>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/theme-toggle.js') }}"></script>
     <script>
         // Set default date for field14_date_signed to today
         document.addEventListener('DOMContentLoaded', function() {
