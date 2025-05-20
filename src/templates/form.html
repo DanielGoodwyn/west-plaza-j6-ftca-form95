@@ -24,12 +24,15 @@
 
     <div class="container">
         <header>
-            <h1>J6 West Plaza Civil Action Form</h1>
+            <h1>{% if editing %}Edit Claim{% else %}J6 West Plaza Civil Action Form{% endif %}</h1>
         </header>
+        {% if editing %}
+        <input type="hidden" name="claim_id" value="{{ claim_id }}">
+        {% endif %}
 
         
 
-        <form action="{{ url_for('submit_form') }}" method="POST">
+        <form action="{% if editing %}{{ url_for('edit_claim', claim_id=claim_id) }}{% else %}{{ url_for('submit_form') }}{% endif %}" method="POST">
             <div class="card mb-4">
                 <div class="card-body">
                     <!-- Preliminary Information Section -->

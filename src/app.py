@@ -28,8 +28,9 @@ from werkzeug.utils import secure_filename
 import pytz # Added for timezone conversion
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user # Added for Flask-Login
 from werkzeug.security import generate_password_hash, check_password_hash # Ensuring this is present
+from werkzeug.exceptions import abort
 
-from .forms import LoginForm # Import the LoginForm (relative import for Flask CLI compatibility)
+from .forms import LoginForm, ClaimForm # Import the LoginForm (relative import for Flask CLI compatibility)
 from dotenv import load_dotenv # Added
 
 load_dotenv() # Added: Load .env file from project root
@@ -517,6 +518,51 @@ def format_datetime_for_display(utc_datetime_input, target_tz_str='America/New_Y
         return str(utc_datetime_input) # Return string representation of original on error
 
 # --- Routes ---
+
+@app.route('/admin/edit/<int:claim_id>', methods=['GET', 'POST'])
+@login_required
+def edit_claim(claim_id):
+    db = get_db()
+    cursor = db.cursor()
+    # Fetch the claim data by ID
+    claim = cursor.execute('SELECT * FROM claims WHERE id = ?', (claim_id,)).fetchone()
+    if not claim:
+        abort(404, description="Claim not found.")
+    if request.method == 'POST':
+        # Update claim with submitted data
+        form_data = dict(request.form)
+        # Normalize phone number if present
+        if 'field_pdf_13b_phone' in form_data:
+            form_data['field_pdf_13b_phone'] = normalize_phone(form_data['field_pdf_13b_phone'])
+        update_fields = []
+        update_values = []
+        for key in claim.keys():
+            if key == 'id':
+                continue
+            if key in form_data:
+                update_fields.append(f"{key} = ?")
+                update_values.append(form_data[key])
+            else:
+                update_fields.append(f"{key} = ?")
+                update_values.append(claim[key])
+        update_values.append(claim_id)
+        update_sql = f"UPDATE claims SET {', '.join(update_fields)} WHERE id = ?"
+        cursor.execute(update_sql, tuple(update_values))
+        db.commit()
+        flash('Claim updated successfully.', 'success')
+        return redirect(url_for('admin_view'))
+    # GET: Render form with claim data
+    # Map DB row to form_data dict expected by form.html
+    form_data = dict(claim)
+    # If phone number, format for display
+    if 'field_pdf_13b_phone' in form_data:
+        form_data['field_pdf_13b_phone'] = format_phone(form_data['field_pdf_13b_phone'])
+    # Pass form_data to template
+    states_and_territories = [
+        'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY', 'DC', 'AS', 'GU', 'MP', 'PR', 'VI'
+    ]
+    return render_template('form.html', form_data=form_data, title="Edit Claim", states_list=states_and_territories, editing=True, claim_id=claim_id)
+
 @app.route('/')
 def form():
     import traceback
