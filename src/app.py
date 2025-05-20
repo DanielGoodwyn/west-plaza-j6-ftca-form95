@@ -30,7 +30,7 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, login_
 from werkzeug.security import generate_password_hash, check_password_hash # Ensuring this is present
 from werkzeug.exceptions import abort
 
-from .forms import LoginForm, ClaimForm # Import the LoginForm (relative import for Flask CLI compatibility)
+from forms import LoginForm # Import the LoginForm (absolute import for direct execution)
 from dotenv import load_dotenv # Added
 
 load_dotenv() # Added: Load .env file from project root
@@ -97,14 +97,6 @@ _data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data
 if not os.path.exists(_data_dir):
     os.makedirs(_data_dir, exist_ok=True)
 
-# Force drop and recreate the claims table for debugging
-with app.app_context():
-    try:
-        force_recreate_claims_table(DB_SCHEMA, app.logger)
-        app.logger.info("force_recreate_claims_table called at startup with full DB_SCHEMA.")
-    except Exception as e:
-        print(f"Error calling force_recreate_claims_table: {e}")
-        app.logger.error(f"Error calling force_recreate_claims_table: {e}")
 
 # Ensure unique constraint for filled_pdf_filename (must be in app context)
 def enforce_unique_constraint():
