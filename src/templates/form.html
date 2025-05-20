@@ -39,7 +39,7 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="user_email_address" class="form-label">Your Email Address</label>
-                            <input type="email" class="form-control {% if validation_errors and validation_errors.get('user_email_address') %}is-invalid{% endif %}" id="user_email_address" name="user_email_address" value="{{ form_data.get('user_email_address', '') }}" placeholder="you@example.com">
+                            <input type="email" class="form-control {% if validation_errors and validation_errors.get('user_email_address') %}is-invalid{% endif %}" id="user_email_address" name="user_email_address" value="{{ form_data.get('user_email_address', '') }}" placeholder="you@example.com" required>
                             {% if validation_errors and validation_errors.get('user_email_address') %}
                                 <div class="invalid-feedback">{{ validation_errors['user_email_address'] }}</div>
                             {% endif %}

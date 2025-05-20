@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SF-95 Claim - Step 2: Signature</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 </head>
 <body>
@@ -27,7 +27,11 @@
 
         <form action="{{ url_for('signature') }}" method="post" id="signatureForm">
             <h2 class="mb-3">Claimant Signature</h2>
-            
+            <div class="form-group mb-3">
+                <label for="user_email_address">Your Email Address (used for PDF filename)</label>
+                <input type="email" class="form-control" id="user_email_address" name="user_email_address" value="{{ form_data.get('user_email_address', session.get('user_email_address', '')) }}" readonly required>
+                <small class="form-text text-muted">This email will be used as your unique identifier and for the PDF filename.</small>
+            </div>
             <div class="form-group mb-3">
                 <label for="field17_signature_of_claimant">17. Signature of Claimant (Required)</label>
                 <input type="text" class="form-control {% if validation_errors and validation_errors.get('field17_signature_of_claimant') %}is-invalid{% endif %}" id="field17_signature_of_claimant" name="field17_signature_of_claimant" value="{{ form_data.get('field17_signature_of_claimant', '') }}" required>

@@ -2,10 +2,9 @@ import os
 import json
 import subprocess
 import tempfile
-import datetime
+from datetime import datetime
 import logging
 import traceback
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -47,24 +46,6 @@ def fill_sf95_pdf(form_data, pdf_template_path_param, output_pdf_full_path_param
     logger.info(f"PDF Template Path: {pdf_template_path_param}")
     logger.info(f"Output PDF Path: {output_pdf_full_path_param}")
     logger.debug(f'Raw form_data received by fill_sf95_pdf: {form_data}')
-
-    # --- Diagnostics: Check template file and output dir permissions ---
-    import os
-    if not os.path.isfile(pdf_template_path_param):
-        logger.error(f"[PDF FILLER] Template file does not exist: {pdf_template_path_param}")
-    elif not os.access(pdf_template_path_param, os.R_OK):
-        logger.error(f"[PDF FILLER] Template file is not readable: {pdf_template_path_param}")
-    else:
-        logger.info(f"[PDF FILLER] Template file is present and readable.")
-
-    output_dir = os.path.dirname(output_pdf_full_path_param)
-    if not os.path.isdir(output_dir):
-        logger.error(f"[PDF FILLER] Output directory does not exist: {output_dir}")
-    elif not os.access(output_dir, os.W_OK):
-        logger.error(f"[PDF FILLER] Output directory is not writable: {output_dir}")
-    else:
-        logger.info(f"[PDF FILLER] Output directory is present and writable: {output_dir}")
-    # --- End diagnostics ---
 
     # Initialize pdfcpu_data to match the structure from 'pdfcpu form export'
     pdfcpu_data = {
@@ -176,18 +157,9 @@ def fill_sf95_pdf(form_data, pdf_template_path_param, output_pdf_full_path_param
         logger.info(f"Output directory confirmed to exist: {os.path.isdir(output_dir)}")
         logger.info(f"Write permissions for output directory ({output_dir}): {os.access(output_dir, os.W_OK)}")
 
-        import shutil
-        pdfcpu_path = shutil.which('pdfcpu')
-        logger.info(f"Resolved pdfcpu path: {pdfcpu_path}")
-        if not pdfcpu_path:
-            logger.error("pdfcpu binary not found in PATH. Please install pdfcpu and ensure it is executable.")
-            return None
-        if not os.access(pdfcpu_path, os.X_OK):
-            logger.error(f"pdfcpu binary at {pdfcpu_path} is not executable. Run 'chmod +x {pdfcpu_path}' on the server.")
-            return None
-
+        # Corrected pdfcpu command arguments and added -mode xfa
         pdfcpu_command = [
-            pdfcpu_path,
+            'pdfcpu',
             'form','fill',
             '-mode', 'xfa',             # Specify XFA mode
             resolved_template_path,     # 1. Input PDF path (resolved)
@@ -197,40 +169,17 @@ def fill_sf95_pdf(form_data, pdf_template_path_param, output_pdf_full_path_param
         logger.info(f"Executing pdfcpu command: {' '.join(pdfcpu_command)}")
 
         process_result = subprocess.run(pdfcpu_command, capture_output=True, text=True, check=False)
-        logger.info(f"[POST_PDFCPU] Subprocess finished with return code: {process_result.returncode}")
         if process_result.returncode == 0:
             logger.info(f"PDF filled successfully: {resolved_output_pdf_path}")
-            # Confirm the file exists and is readable
-            if os.path.isfile(resolved_output_pdf_path):
-                logger.info(f"[POST_PDFCPU] Confirmed PDF exists at: {resolved_output_pdf_path}")
-                if os.access(resolved_output_pdf_path, os.R_OK):
-                    logger.info(f"[POST_PDFCPU] PDF is readable: {resolved_output_pdf_path}")
-                else:
-                    logger.error(f"[POST_PDFCPU] PDF exists but is NOT readable: {resolved_output_pdf_path}")
-            else:
-                logger.error(f"[POST_PDFCPU] PDF was expected at {resolved_output_pdf_path}, but file does NOT exist!")
             return resolved_output_pdf_path
         else:
             logger.error(f"Error filling PDF with pdfcpu. Return code: {process_result.returncode}")
             logger.error(f"pdfcpu error details: {process_result.stderr}")
-            # Check if a file was created anyway
-            if os.path.isfile(resolved_output_pdf_path):
-                logger.warning(f"[POST_PDFCPU] PDF file exists at {resolved_output_pdf_path} even though pdfcpu failed.")
-            else:
-                logger.info(f"[POST_PDFCPU] No PDF file created at {resolved_output_pdf_path} after pdfcpu failure.")
             return None
 
     except Exception as e:
         logger.error(f"Exception during PDF filling: {e}")
         logger.error(f"Traceback: {traceback.format_exc()}")
-        logger.error(f"PDF Template Path: {pdf_template_path_param}")
-        logger.error(f"Output PDF Path: {output_pdf_full_path_param}")
-        logger.error(f"pdfcpu command: {pdfcpu_command if 'pdfcpu_command' in locals() else 'Not constructed'}")
-        logger.error(f"Environment PATH: {os.environ.get('PATH')}")
-        logger.error(f"Environment variables: {os.environ}")
-        if 'process_result' in locals():
-            logger.error(f"Process stdout: {process_result.stdout}")
-            logger.error(f"Process stderr: {process_result.stderr}")
         return None
     finally:
         if temp_json_file_path and os.path.exists(temp_json_file_path):
@@ -249,7 +198,7 @@ if __name__ == '__main__':
         'field1_agency': 'Test Agency',
     }
     # Simulate ImmutableMultiDict for direct call if needed, or just pass dict
-    from src.utils.werkzeug.datastructures import ImmutableMultiDict
+    from werkzeug.datastructures import ImmutableMultiDict
     sample_form_data_imm = ImmutableMultiDict(sample_form_data)
 
     pdf_template_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'data', 'sf95.pdf') # Corrected filename
