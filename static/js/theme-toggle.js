@@ -3,8 +3,8 @@
     const MODES = ['day', 'night', 'system'];
     const ICONS = { day: '☀️', night: '🌙', system: '⚙️' };
     const CSS = {
-        day: '/static/css/day.css',
-        night: '/static/css/night.css',
+        day: '/west-plaza-lawsuit/static/css/day.css',
+        night: '/west-plaza-lawsuit/static/css/night.css',
         system: '' // Will be set dynamically
     };
     const STORAGE_KEY = 'theme-mode';
