@@ -11,7 +11,7 @@
 #     # This block is primarily for the temporary direct execution for DB setup.
 #     __package__ = "src"
 
-from utils.logging_config import setup_logging
+from src.utils.logging_config import setup_logging
 setup_logging(log_file='app.log')
 import sqlite3
 import os
@@ -36,9 +36,9 @@ from dotenv import load_dotenv # Added
 load_dotenv() # Added: Load .env file from project root
 
 # Import utility functions
-from utils.pdf_filler import fill_sf95_pdf, DEFAULT_VALUES as PDF_FILLER_DEFAULTS
-from utils.helpers import get_db, create_tables_if_not_exist, is_safe_url, init_db, init_app_db, normalize_phone, format_phone, ensure_filled_pdf_filename_unique, force_recreate_claims_table # Added phone helpers and unique constraint
-from utils.logging_config import setup_logging
+from src.utils.pdf_filler import fill_sf95_pdf, DEFAULT_VALUES as PDF_FILLER_DEFAULTS
+from src.utils.helpers import get_db, create_tables_if_not_exist, is_safe_url, init_db, init_app_db, normalize_phone, format_phone, ensure_filled_pdf_filename_unique, force_recreate_claims_table # Added phone helpers and unique constraint
+from src.utils.logging_config import setup_logging
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8') # Use environment variable or default
@@ -689,7 +689,7 @@ def map_form_data_to_pdf_fields(form_data):
     Handles all fields in pdf_field_map.json, including concatenation, formatting, and defaulting.
     Logs any missing or blank fields for debugging.
     '''
-    from utils.pdf_filler import PDF_FIELD_MAP, DEFAULT_VALUES
+    from src.utils.pdf_filler import PDF_FIELD_MAP, DEFAULT_VALUES
     pdf_data = {}
     # Claimant info combined
     name = form_data.get('field2_name', '')
