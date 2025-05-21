@@ -11,7 +11,8 @@
 <body class="admin-page">
 <!-- Theme toggle icon will be injected in the top right by JS -->
     <div class="container">
-        <nav class="admin-navbar mx-auto my-4 py-3 px-4" style="max-width: 900px; text-align: center;">
+    {% block navbar %}
+<nav class="admin-navbar mx-auto my-4 py-3 px-4" style="max-width: 900px; text-align: center;">
     <div class="nav-btns justify-content-center w-100">
         <a href="{{ url_for('download_csv') }}" class="btn btn-success">Download CSV</a>
         <a href="{{ url_for('form') }}" class="btn btn-primary">Go to Form</a>
@@ -22,6 +23,7 @@
     </div>
     <span class="user-info-bubble">{{ current_user.email or current_user.username }}</span>
 </nav>
+{% endblock %}
 
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
