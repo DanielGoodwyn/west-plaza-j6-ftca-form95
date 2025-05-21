@@ -289,7 +289,8 @@ class User(UserMixin):
         username_lower = username.lower()
         user_data = cursor.execute('SELECT * FROM users WHERE LOWER(username) = ?', (username_lower,)).fetchone()
         if user_data:
-            return User(id=user_data['id'], username=user_data['username'], password_hash=user_data['password_hash'], role=user_data.get('role', 'user'))
+            role = user_data['role'] if 'role' in user_data.keys() else 'user'
+            return User(id=user_data['id'], username=user_data['username'], password_hash=user_data['password_hash'], role=role)
         return None
 
     @staticmethod
@@ -298,7 +299,8 @@ class User(UserMixin):
         cursor = db.cursor()
         user_data = cursor.execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
         if user_data:
-            return User(id=user_data['id'], username=user_data['username'], password_hash=user_data['password_hash'], role=user_data.get('role', 'user'))
+            role = user_data['role'] if 'role' in user_data.keys() else 'user'
+            return User(id=user_data['id'], username=user_data['username'], password_hash=user_data['password_hash'], role=role)
         return None
 
     @staticmethod
