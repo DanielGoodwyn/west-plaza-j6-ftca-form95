@@ -2,9 +2,8 @@
 {% block content %}
 
 <div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-3" style="margin-right:120px;padding-right:16px;">
-    <a href="{{ url_for('admin') }}" class="btn btn-secondary ms-2">Admin Panel</a>
-    
+    <div class="mb-3">
+    <a href="{{ url_for('admin_view') }}" class="btn btn-secondary">Admin Panel</a>
 </div>
 <h2>Superadmin</h2>
     {% if current_user.is_superadmin() %}
