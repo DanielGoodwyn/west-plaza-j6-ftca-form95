@@ -22,6 +22,28 @@ body {
     pointer-events: none;
 }
 
+
+/* Unified admin/superadmin header navigation bar styles */
+.admin-navbar {
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    padding: 0.75rem 1.5rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    min-height: 60px;
+    border-radius: 0.5rem;
+}
+
+.admin-navbar .nav-btns {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+}
+
 /* General container styling, might conflict with Bootstrap's .container if not careful.
    Bootstrap's .container sets max-width at different breakpoints.
    This .container style from admin.html is more restrictive.

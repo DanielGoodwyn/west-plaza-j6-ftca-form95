@@ -11,18 +11,18 @@
 <body class="admin-page">
 <!-- Theme toggle icon will be injected in the top right by JS -->
     <div class="container">
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 position-relative">
-    <h1 class="mb-0">{{ title }}</h1>
-    <div class="d-flex flex-nowrap gap-3">
-        <a href="{{ url_for('form') }}" class="btn btn-primary">Go to Form</a>
+        <nav class="admin-navbar">
+    <div class="nav-btns">
         <a href="{{ url_for('download_csv') }}" class="btn btn-success">Download CSV</a>
-        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">Log Out</a>
+        <a href="{{ url_for('form') }}" class="btn btn-primary">Go to Form</a>
         {% if current_user.is_superadmin() and request.endpoint != 'superadmin' %}
         <a href="{{ url_for('superadmin') }}" class="btn btn-warning">Superadmin Panel</a>
         {% endif %}
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">Log Out</a>
     </div>
-    <span class="user-info-bubble px-4 py-2 ms-4 mt-2">{{ current_user.email or current_user.username }}</span>
-</div>
+    <span class="user-info-bubble">{{ current_user.email or current_user.username }}</span>
+</nav>
+<h1 class="mb-3">{{ title }}</h1>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
