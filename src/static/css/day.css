@@ -1,0 +1,31 @@
+body {
+    background: #fff;
+    color: #222;
+}
+
+.container, .card, .alert, .btn, .form-control, .form-select {
+    background: #fff;
+    color: #222;
+    border-color: #ccc;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: #fff;
+}
+
+.btn-success {
+    background: #28a745;
+    color: #fff;
+}
+
+.btn-outline-secondary {
+    background: #fff;
+    color: #222;
+    border-color: #ccc;
+}
+
+input, textarea, select {
+    background: #fff;
+    color: #222;
+}
