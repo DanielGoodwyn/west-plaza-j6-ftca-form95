@@ -1751,3 +1751,10 @@ def health_check():
 if __name__ == '__main__':
     app.logger.info("Starting Flask development server.") # Use app.logger here
     app.run(debug=True, port=61663)
+
+# --- ROUTE DEBUGGING SNIPPET ---
+print("=== FLASK APP.PY STARTED ===")
+print("REGISTERED ROUTES:")
+for rule in app.url_map.iter_rules():
+    print(rule, rule.endpoint)
+# --- END ROUTE DEBUGGING SNIPPET ---
