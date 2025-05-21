@@ -532,15 +532,15 @@ def admin_required(f):
 
 # --- Routes ---
 
-@app.route('/user_management')
+@app.route('/superadmin')
 @login_required
 @admin_required
-def user_management():
+def superadmin():
     db = get_db()
     cursor = db.cursor()
     users = cursor.execute('SELECT id, username, role FROM users').fetchall()
     users = [dict(user) for user in users]
-    return render_template('user_management.html', users=users)
+    return render_template('superadmin.html', users=users)
 
 @app.route('/add_user', methods=['GET', 'POST'])
 @login_required
@@ -560,7 +560,7 @@ def add_user():
             return redirect(url_for('add_user'))
         User.create_user(username, password, role)
         flash('User created.', 'success')
-        return redirect(url_for('user_management'))
+        return redirect(url_for('superadmin'))
     return render_template('edit_user.html', user=None, action='Add')
 
 @app.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
@@ -574,7 +574,7 @@ def edit_user(user_id):
     user_data = cursor.execute('SELECT id, username, role FROM users WHERE id=?', (user_id,)).fetchone()
     if not user_data:
         flash('User not found.', 'danger')
-        return redirect(url_for('user_management'))
+        return redirect(url_for('superadmin'))
     if request.method == 'POST':
         role = request.form['role']
         if role not in ('user', 'admin', 'superadmin'):
@@ -583,7 +583,7 @@ def edit_user(user_id):
         cursor.execute('UPDATE users SET role=? WHERE id=?', (role, user_id))
         db.commit()
         flash('User updated.', 'success')
-        return redirect(url_for('user_management'))
+        return redirect(url_for('superadmin'))
     return render_template('edit_user.html', user=user_data, action='Edit')
 
 @app.route('/delete_user/<int:user_id>', methods=['POST', 'GET'])
@@ -597,11 +597,11 @@ def delete_user(user_id):
     user_data = cursor.execute('SELECT username FROM users WHERE id=?', (user_id,)).fetchone()
     if not user_data or user_data['username'] == current_user.username:
         flash('Cannot delete this user.', 'danger')
-        return redirect(url_for('user_management'))
+        return redirect(url_for('superadmin'))
     cursor.execute('DELETE FROM users WHERE id=?', (user_id,))
     db.commit()
     flash('User deleted.', 'success')
-    return redirect(url_for('user_management'))
+    return redirect(url_for('superadmin'))
 
 
 def admin_required(f):
