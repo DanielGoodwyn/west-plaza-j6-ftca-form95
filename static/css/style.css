@@ -24,17 +24,15 @@ input:focus, textarea:focus, select:focus {
 /* Admin table cell sizing and scroll */
 
 .admin-page .table tbody tr {
-    height: 40px;
-    max-height: 40px;
-    min-height: 40px;
+    min-height: 50px;
+    max-height: 100px;
     overflow: hidden;
 }
 .admin-page .table td, .admin-page .table th {
-    min-width: 120px;
-    max-width: 200px;
-    height: 40px;
-    max-height: 40px;
-    min-height: 40px;
+    min-width: 200px;
+    max-width: 300px;
+    min-height: 50px;
+    max-height: 100px;
     overflow-y: auto;
     overflow-x: auto;
     vertical-align: middle;
@@ -47,9 +45,8 @@ input:focus, textarea:focus, select:focus {
 
 .admin-cell-content {
     display: block;
-    height: 40px;
-    max-height: 40px;
-    min-height: 40px;
+    min-height: 50px;
+    max-height: 100px;
     overflow-y: auto;
     overflow-x: auto;
     white-space: normal;
