@@ -3,8 +3,8 @@
 .form-control, .form-select, input, textarea, select {
     border-radius: 0.3rem;
     border: 1px solid #bbb;
-    background: #fff;
-    color: #222;
+    background: #fff !important;
+    color: #222 !important;
     transition: border-color 0.2s, box-shadow 0.2s;
     box-shadow: none;
 }
@@ -21,9 +21,9 @@ body.night-mode .form-select,
 body.night-mode input,
 body.night-mode textarea,
 body.night-mode select {
-    background: #222426;
-    color: #f1f1f1;
-    border: 1px solid #444;
+    background: #222426 !important;
+    color: #f1f1f1 !important;
+    border: 1px solid #444 !important;
 }
 body.night-mode input:focus, body.night-mode textarea:focus, body.night-mode select:focus {
     border-color: #3399ff;
