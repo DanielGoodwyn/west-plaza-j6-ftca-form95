@@ -3,6 +3,30 @@ from flask import g, current_app, request
 import os
 from urllib.parse import urlparse, urljoin
 
+# --- Robust SQLite timestamp converter ---
+def robust_timestamp(val):
+    val = val.decode() if isinstance(val, bytes) else str(val)
+    # Handle 'YYYY-MM-DD HH:MM:SS[.SSSSSS]' (default)
+    if ' ' in val:
+        try:
+            return sqlite3.dbapi2.convert_timestamp(val.encode())
+        except Exception:
+            pass
+    # Handle ISO8601 'YYYY-MM-DDTHH:MM:SS' (with or without timezone)
+    if 'T' in val:
+        try:
+            # Remove timezone if present
+            main = val.split('T')
+            if len(main) == 2:
+                datepart, timepart = main
+                timepart = timepart.split('+')[0].split('-')[0]
+                return sqlite3.dbapi2.convert_timestamp(f"{datepart} {timepart}".encode())
+        except Exception:
+            pass
+    return val  # fallback as string
+
+sqlite3.register_converter("timestamp", robust_timestamp)
+
 from src.utils.logging_config import logger
 
 # DATABASE_PATH points to 'database.db' located in the 'src' directory,
