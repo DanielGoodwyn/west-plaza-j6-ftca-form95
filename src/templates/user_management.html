@@ -1,7 +1,7 @@
-<p>THIS IS THE LIVE SERVER TEMPLATE - {{ 42 * 42 }}</p>
+
 {% extends "admin.html" %}
 {% block content %}
-<p style="color:red;font-size:2em;">DEBUG: users = {{ users|length }} - {{ users }}</p>
+
 <div class="container mt-5">
     <h2>User Management</h2>
     {% if current_user.is_superadmin() %}
