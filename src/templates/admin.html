@@ -11,18 +11,17 @@
 <body class="admin-page">
 <!-- Theme toggle icon will be injected in the top right by JS -->
     <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-3" style="margin-right:120px;padding-right:16px;">
-
-            <h1>{{ title }}</h1>
-            <div>
-                <a href="{{ url_for('form') }}" class="btn btn-primary me-2">Go to Form</a>
-<a href="{{ url_for('download_csv') }}" class="btn btn-success me-2">Download CSV</a>
-<a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">Log Out</a>
-{% if current_user.is_superadmin() and request.endpoint != 'superadmin' %}
-<a href="{{ url_for('superadmin') }}" class="btn btn-warning ms-2">Superadmin Panel</a>
-{% endif %}
-            </div>
-        </div>
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="mb-0">{{ title }}</h1>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{{ url_for('form') }}" class="btn btn-primary">Go to Form</a>
+        <a href="{{ url_for('download_csv') }}" class="btn btn-success">Download CSV</a>
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">Log Out</a>
+        {% if current_user.is_superadmin() and request.endpoint != 'superadmin' %}
+        <a href="{{ url_for('superadmin') }}" class="btn btn-warning">Superadmin Panel</a>
+        {% endif %}
+    </div>
+</div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
