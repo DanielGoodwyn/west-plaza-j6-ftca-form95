@@ -24,12 +24,13 @@ input:focus, textarea:focus, select:focus {
 /* Admin table cell sizing and scroll */
 
 .admin-page .table tbody tr {
-    height: 100px;
-    max-height: 100px;
+    height: 60px;
+    max-height: 60px;
     overflow: hidden;
 }
 .admin-page .table td, .admin-page .table th {
-    max-height: 100px;
+    height: 60px;
+    max-height: 60px;
     min-width: 200px;
     max-width: 300px;
     overflow-y: auto;
