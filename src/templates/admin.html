@@ -256,31 +256,5 @@
     <script src="{{ url_for('static', filename='js/theme-toggle.js') }}"></script>
     <script src="{{ url_for('static', filename='js/admin_sort.js') }}"></script>
     <script src="/west-plaza-lawsuit/static/js/theme-toggle.js"></script>
-{% if current_user.is_authenticated %}
-<style>
-    .user-info-topright {
-        position: fixed;
-        top: 18px;
-        right: 60px;
-        z-index: 999;
-        font-size: 0.97em;
-        color: #bbb;
-        background: rgba(30,30,30,0.92);
-        padding: 4px 14px;
-        border-radius: 16px;
-        pointer-events: none;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-    }
-    @media (max-width: 600px) {
-        .user-info-topright {
-            font-size: 0.85em;
-            padding: 3px 7px;
-            right: 44px;
-        }
-    }
-</style>
-<div class="user-info-topright">{{ current_user.username }}</div>
-{% endif %}
-
 </body>
 </html>
