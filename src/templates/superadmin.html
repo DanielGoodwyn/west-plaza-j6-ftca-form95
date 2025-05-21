@@ -1,8 +1,5 @@
 {% extends "admin.html" %}
-{% block content %}
-
-<div class="container">
-    {% block navbar %}
+{% block navbar %}
 <nav class="admin-navbar mx-auto my-4 py-3 px-4" style="max-width: 900px; text-align: center;">
     <div class="nav-btns justify-content-center w-100">
         <a href="{{ url_for('add_user') }}" class="btn btn-success">Add New User</a>
@@ -13,6 +10,8 @@
     <span class="user-info-bubble">{{ current_user.email }}</span>
 </nav>
 {% endblock %}
+{% block content %}
+<div class="container">
 <h1 class="mb-4 text-center">Superadmin</h1>
     <table class="table table-striped">
         <thead>
