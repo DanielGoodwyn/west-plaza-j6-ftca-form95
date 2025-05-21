@@ -604,6 +604,7 @@ def delete_user(user_id):
 
 
 def admin_required(f):
+    @wraps(f)
     def decorated_function(*args, **kws):
         if not current_user.is_admin:
             abort(403)
