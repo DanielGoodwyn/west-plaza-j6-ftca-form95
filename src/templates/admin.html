@@ -10,19 +10,8 @@
 </head>
 <body class="admin-page">
 <!-- Theme toggle icon will be injected in the top right by JS -->
-    <div class="container" style="margin-right:140px;">
+    <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-3">
-    <div></div>
-    <div class="d-flex align-items-center">
-        {% if current_user.is_authenticated %}
-            <span class="me-3 text-muted">{{ current_user.username }}</span>
-        {% endif %}
-
-    <div></div>
-    <div class="d-flex align-items-center">
-        {% if current_user.is_authenticated %}
-            <span class="me-3 text-muted">{{ current_user.username }}</span>
-        {% endif %}
 
             <h1>{{ title }}</h1>
             <div>
