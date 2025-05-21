@@ -24,36 +24,37 @@ input:focus, textarea:focus, select:focus {
 /* Admin table cell sizing and scroll */
 
 .admin-page .table tbody tr {
-    height: 32px;
-    max-height: 32px;
-    min-height: 32px;
+    height: 40px;
+    max-height: 40px;
+    min-height: 40px;
     overflow: hidden;
 }
 .admin-page .table td, .admin-page .table th {
     min-width: 120px;
     max-width: 200px;
-    height: 32px;
-    max-height: 32px;
-    min-height: 32px;
+    height: 40px;
+    max-height: 40px;
+    min-height: 40px;
     overflow-y: auto;
     overflow-x: auto;
     vertical-align: middle;
     white-space: normal;
     box-sizing: border-box;
     border: 1px solid #444;
-    padding: 2px 6px;
+    padding: 1px 2px;
 }
 
 
 .admin-cell-content {
     display: block;
-    height: 32px;
-    max-height: 32px;
-    min-height: 32px;
+    height: 40px;
+    max-height: 40px;
+    min-height: 40px;
     overflow-y: auto;
     overflow-x: auto;
     white-space: normal;
     box-sizing: border-box;
+    padding: 0;
 }
 
 /* Night mode override */
