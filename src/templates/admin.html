@@ -18,7 +18,7 @@
                 <a href="{{ url_for('form') }}" class="btn btn-primary me-2">Go to Form</a>
 <a href="{{ url_for('download_csv') }}" class="btn btn-success me-2">Download CSV</a>
 <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">Log Out</a>
-{% if current_user.is_superadmin() %}
+{% if current_user.is_superadmin() and request.endpoint != 'superadmin' %}
 <a href="{{ url_for('superadmin') }}" class="btn btn-warning ms-2">Superadmin Panel</a>
 {% endif %}
             </div>
