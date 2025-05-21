@@ -29,15 +29,17 @@ input:focus, textarea:focus, select:focus {
     overflow: hidden;
 }
 .admin-page .table td, .admin-page .table th {
+    min-width: 120px;
+    max-width: 200px;
     height: 32px;
     max-height: 32px;
-    max-width: 300px;
     overflow-y: auto;
     overflow-x: auto;
-    vertical-align: top;
+    vertical-align: middle;
     white-space: normal;
     box-sizing: border-box;
-    padding: 4px 8px;
+    border: 1px solid #444;
+    padding: 2px 6px;
 }
 
 
