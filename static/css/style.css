@@ -1,14 +1,14 @@
 /* Unified, professional form field styling (subtle, modern, for both day and night modes) */
 
-input, textarea, select {
+.form-control, .form-select, input, textarea, select {
     border-radius: 0.3rem;
     border: 1px solid #bbb;
     background: #fff;
     color: #222;
-    padding: 0.5rem 0.75rem;
     transition: border-color 0.2s, box-shadow 0.2s;
     box-shadow: none;
 }
+
 input:focus, textarea:focus, select:focus {
     border-color: #3399ff;
     outline: none;
@@ -16,7 +16,11 @@ input:focus, textarea:focus, select:focus {
 }
 
 /* Night mode override */
-body.night-mode input, body.night-mode textarea, body.night-mode select {
+body.night-mode .form-control,
+body.night-mode .form-select,
+body.night-mode input,
+body.night-mode textarea,
+body.night-mode select {
     background: #222426;
     color: #f1f1f1;
     border: 1px solid #444;
