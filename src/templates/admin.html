@@ -37,6 +37,8 @@
             </div>
         {% endif %}
 
+        {% block content %}{% endblock %}
+
         {% if claims %}
             <div class="table-responsive">
                 <table id="admin-table" class="table table-striped table-hover">
