@@ -1332,6 +1332,19 @@ def submit_form():
         session['form_step1_data'] = form_data
         return redirect(url_for('form'))
 
+    # --- Step 3.5: Create user if not exists ---
+    from werkzeug.security import generate_password_hash
+    import secrets
+    from src.app import User
+    
+    if user_email_address:
+        if not User.get_by_username(user_email_address):
+            temp_password = secrets.token_urlsafe(10)
+            User.create_user(user_email_address, temp_password, role='user')
+            current_app.logger.info(f"SUBMIT_FORM: Created new user {user_email_address} with temp password (not shown in logs)")
+        else:
+            current_app.logger.info(f"SUBMIT_FORM: User {user_email_address} already exists, not creating.")
+
     # --- Step 4: Redirect to signature page ---
     current_app.logger.info(f"SUBMIT_FORM: Redirecting to signature page with session: {dict(session)}")
     trim_debug_log()
