@@ -31,11 +31,11 @@ input:focus, textarea:focus, select:focus {
 .admin-page .table td, .admin-page .table th {
     height: 32px;
     max-height: 32px;
+    max-width: 300px;
     overflow-y: auto;
     overflow-x: auto;
     vertical-align: top;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    white-space: normal;
     box-sizing: border-box;
     padding: 4px 8px;
 }
