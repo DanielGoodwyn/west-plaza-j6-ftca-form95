@@ -90,9 +90,9 @@
                                 <input type="text" id="field2_name" name="field2_name" class="form-control" value="{{ form_data.get('field2_name', '') }}" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="field2_address" class="form-label">Street Address</label>
-                                <textarea id="field2_address" name="field2_address" rows="3" required>{{ form_data.get('field2_address', '') }}</textarea>
-                            </div>
+    <label for="field2_address" class="form-label">Street Address</label>
+    <textarea id="field2_address" name="field2_address" class="form-control w-100" rows="3" required>{{ form_data.get('field2_address', '') }}</textarea>
+</div>
                         </div>
                         <div class="row">
                             <div class="col-md-4 mb-3">
