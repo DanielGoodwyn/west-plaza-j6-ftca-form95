@@ -23,6 +23,11 @@ input:focus, textarea:focus, select:focus {
 
 /* Admin table cell sizing and scroll */
 
+.admin-page .table tbody tr {
+    height: 100px;
+    max-height: 100px;
+    overflow: hidden;
+}
 .admin-page .table td, .admin-page .table th {
     max-height: 100px;
     min-width: 200px;
