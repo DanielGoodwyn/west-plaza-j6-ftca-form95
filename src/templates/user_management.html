@@ -1,0 +1,36 @@
+{% extends "admin.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>User Management</h2>
+    {% if current_user.is_superadmin() %}
+    <a href="{{ url_for('add_user') }}" class="btn btn-success mb-3">Add New User</a>
+    {% endif %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.role }}</td>
+                <td>
+                    {% if current_user.is_superadmin() and user.username != current_user.username %}
+                    <a href="{{ url_for('edit_user', user_id=user.id) }}" class="btn btn-primary btn-sm">Edit</a>
+                    <a href="{{ url_for('delete_user', user_id=user.id) }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?');">Delete</a>
+                    {% else %}
+                    <span class="text-muted">No Actions</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "admin.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ action }} User</h2>
+    <form method="post">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" class="form-control" id="username" name="username" value="{{ user.username if user }}" {% if user %}readonly{% endif %} required>
+        </div>
+        {% if not user %}
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        {% endif %}
+        <div class="form-group">
+            <label for="role">Role</label>
+            <select class="form-control" id="role" name="role" required>
+                <option value="user" {% if user and user.role == 'user' %}selected{% endif %}>User</option>
+                <option value="admin" {% if user and user.role == 'admin' %}selected{% endif %}>Admin</option>
+                <option value="superadmin" {% if user and user.role == 'superadmin' %}selected{% endif %}>Superadmin</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">{{ action }}</button>
+        <a href="{{ url_for('user_management') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

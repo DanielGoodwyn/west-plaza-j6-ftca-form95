@@ -267,10 +267,17 @@ def create_tables_if_not_exist(logger): # Accept logger
 
 # --- User Model ---
 class User(UserMixin):
-    def __init__(self, id, username, password_hash):
+    def __init__(self, id, username, password_hash, role='user'):
         self.id = id
         self.username = username
         self.password_hash = password_hash
+        self.role = role
+
+    def is_admin(self):
+        return self.role in ('admin', 'superadmin')
+
+    def is_superadmin(self):
+        return self.role == 'superadmin'
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
@@ -282,7 +289,7 @@ class User(UserMixin):
         username_lower = username.lower()
         user_data = cursor.execute('SELECT * FROM users WHERE LOWER(username) = ?', (username_lower,)).fetchone()
         if user_data:
-            return User(id=user_data['id'], username=user_data['username'], password_hash=user_data['password_hash'])
+            return User(id=user_data['id'], username=user_data['username'], password_hash=user_data['password_hash'], role=user_data.get('role', 'user'))
         return None
 
     @staticmethod
@@ -291,14 +298,14 @@ class User(UserMixin):
         cursor = db.cursor()
         user_data = cursor.execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
         if user_data:
-            return User(id=user_data['id'], username=user_data['username'], password_hash=user_data['password_hash'])
+            return User(id=user_data['id'], username=user_data['username'], password_hash=user_data['password_hash'], role=user_data.get('role', 'user'))
         return None
 
     @staticmethod
-    def create_user(username, password):
+    def create_user(username, password, role='user'):
         db = get_db()
         cursor = db.cursor()
-        cursor.execute('INSERT INTO users (username, password_hash) VALUES (?, ?)', (username, generate_password_hash(password)))
+        cursor.execute('INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)', (username, generate_password_hash(password), role))
         db.commit()
 
 # --- Flask-Login Setup ---
@@ -511,8 +518,87 @@ def format_datetime_for_display(utc_datetime_input, target_tz_str='America/New_Y
 
 # --- Routes ---
 
+@app.route('/user_management')
+@login_required
+@admin_required
+def user_management():
+    db = get_db()
+    cursor = db.cursor()
+    users = cursor.execute('SELECT id, username, role FROM users').fetchall()
+    return render_template('user_management.html', users=users)
+
+@app.route('/add_user', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def add_user():
+    if not current_user.is_superadmin():
+        abort(403)
+    if request.method == 'POST':
+        username = request.form['username'].strip().lower()
+        password = request.form['password']
+        role = request.form['role']
+        if not username or not password or role not in ('user', 'admin', 'superadmin'):
+            flash('Invalid input.', 'danger')
+            return redirect(url_for('add_user'))
+        if User.get_by_username(username):
+            flash('Username already exists.', 'danger')
+            return redirect(url_for('add_user'))
+        User.create_user(username, password, role)
+        flash('User created.', 'success')
+        return redirect(url_for('user_management'))
+    return render_template('edit_user.html', user=None, action='Add')
+
+@app.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def edit_user(user_id):
+    if not current_user.is_superadmin():
+        abort(403)
+    db = get_db()
+    cursor = db.cursor()
+    user_data = cursor.execute('SELECT id, username, role FROM users WHERE id=?', (user_id,)).fetchone()
+    if not user_data:
+        flash('User not found.', 'danger')
+        return redirect(url_for('user_management'))
+    if request.method == 'POST':
+        role = request.form['role']
+        if role not in ('user', 'admin', 'superadmin'):
+            flash('Invalid role.', 'danger')
+            return redirect(url_for('edit_user', user_id=user_id))
+        cursor.execute('UPDATE users SET role=? WHERE id=?', (role, user_id))
+        db.commit()
+        flash('User updated.', 'success')
+        return redirect(url_for('user_management'))
+    return render_template('edit_user.html', user=user_data, action='Edit')
+
+@app.route('/delete_user/<int:user_id>', methods=['POST', 'GET'])
+@login_required
+@admin_required
+def delete_user(user_id):
+    if not current_user.is_superadmin():
+        abort(403)
+    db = get_db()
+    cursor = db.cursor()
+    user_data = cursor.execute('SELECT username FROM users WHERE id=?', (user_id,)).fetchone()
+    if not user_data or user_data['username'] == current_user.username:
+        flash('Cannot delete this user.', 'danger')
+        return redirect(url_for('user_management'))
+    cursor.execute('DELETE FROM users WHERE id=?', (user_id,))
+    db.commit()
+    flash('User deleted.', 'success')
+    return redirect(url_for('user_management'))
+
+
+def admin_required(f):
+    def decorated_function(*args, **kws):
+        if not current_user.is_admin:
+            abort(403)
+        return f(*args, **kws)
+    return decorated_function
+
 @app.route('/admin/edit/<int:claim_id>', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def edit_claim(claim_id):
     db = get_db()
     cursor = db.cursor()
@@ -1396,7 +1482,18 @@ def success_page(submission_id):
 
     return render_template('success.html', submission_id=submission_id, pdf_filename=pdf_filename)
 
-from flask_login import login_required
+from flask_login import login_required, current_user
+from functools import wraps
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or not getattr(current_user, 'is_admin', lambda: False)():
+            flash('Admin access required.', 'danger')
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 
 @app.route('/download_filled_pdf/<filename>')
 @login_required
