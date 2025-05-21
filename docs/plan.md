@@ -14,6 +14,8 @@
 [✅] Include input fields for user-filled and pre-filled sections
 [✅] Add 'Email Address' and supplemental essay questions (store in DB, not PDF)
 [✅] Pre-populate fields with specified defaults
+[🔲] Ensure text in Field 8 resizes appropriately to fit the PDF field
+[🔲] Ensure text in Field 10 resizes appropriately to fit the PDF field
 [🔲] Basic styling with static/css/style.css for usability
 [✅] Flask route (/submit) to handle POST requests
 [✅] Basic server-side validation for submitted data
