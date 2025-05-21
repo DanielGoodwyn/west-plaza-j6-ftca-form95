@@ -52,6 +52,39 @@ Werkzeug
   - Confirm the binary is in your `$PATH`.
 
 ## 4. Permissions
+
+---
+
+## 4a. Python Import Paths and Deployment Caveats
+
+**Absolute Imports Required:**
+
+When running your Flask app on shared hosting (e.g., FastComet with Passenger/cPanel), the application is often started from the project root, not from within the `src/` directory. This changes how Python resolves imports for your own modules.
+
+- **Correct way:**
+  ```python
+  from src.utils.logging_config import setup_logging
+  ```
+- **Incorrect way (works locally, but not on server):**
+  ```python
+  from utils.logging_config import setup_logging
+  ```
+
+If you see errors like `ModuleNotFoundError: No module named 'utils'`, update your imports to use the absolute path from the project root (i.e., `src.utils`).
+
+**Always Restart the App:**
+After pulling updates or changing dependencies, always restart your application from the hosting control panel or with your process manager. This ensures all code and dependency changes take effect.
+
+**Passenger/WSGI Specifics:**
+- Passenger/cPanel may run your app from a different working directory than you expect. Always use absolute imports for your own modules.
+- If you have a custom `passenger_wsgi.py`, ensure it imports your Flask app using the correct path (e.g., `from src.app import app as application`).
+
+**Troubleshooting:**
+- If you see import errors, check your import statements and ensure you are using the correct absolute path.
+- Check your logs (e.g., `~/logs/passenger_west_plaza.log`) for any Python errors after restarting the app.
+
+---
+
 - Ensure the following directories are writable by your application:
   - `data/filled_forms/`
   - `data/uploads/`
