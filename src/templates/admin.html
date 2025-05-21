@@ -12,11 +12,26 @@
 <!-- Theme toggle icon will be injected in the top right by JS -->
     <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-3">
+    <div></div>
+    <div class="d-flex align-items-center">
+        {% if current_user.is_authenticated %}
+            <span class="me-3 text-muted">{{ current_user.username }}</span>
+        {% endif %}
+
+    <div></div>
+    <div class="d-flex align-items-center">
+        {% if current_user.is_authenticated %}
+            <span class="me-3 text-muted">{{ current_user.username }}</span>
+        {% endif %}
+
             <h1>{{ title }}</h1>
             <div>
                 <a href="{{ url_for('form') }}" class="btn btn-primary me-2">Go to Form</a>
 <a href="{{ url_for('download_csv') }}" class="btn btn-success me-2">Download CSV</a>
 <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">Log Out</a>
+{% if current_user.is_superadmin() %}
+<a href="{{ url_for('superadmin') }}" class="btn btn-warning ms-2">Superadmin Panel</a>
+{% endif %}
             </div>
         </div>
 
