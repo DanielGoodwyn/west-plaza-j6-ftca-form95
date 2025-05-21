@@ -526,6 +526,17 @@ def edit_claim(claim_id):
         # Normalize phone number if present
         if 'field_pdf_13b_phone' in form_data:
             form_data['field_pdf_13b_phone'] = normalize_phone(form_data['field_pdf_13b_phone'])
+        # --- Recalculate total claim amount (12d) from 12a, 12b, 12c ---
+        try:
+            prop_dam = float(form_data.get('field12a_property_damage_amount', 0) or 0)
+            pers_inj = float(form_data.get('field12b_personal_injury_amount', 0) or 0)
+            wrong_death = float(form_data.get('field12c_wrongful_death_amount', 0) or 0)
+            total_claim = prop_dam + pers_inj + wrong_death
+            form_data['field12d_total_claim_amount'] = f"{total_claim:.2f}"
+        except Exception as e:
+            current_app.logger.error(f"EDIT_CLAIM: Error recalculating total claim amount: {e}")
+            # Optionally: fallback to original value or clear
+            form_data['field12d_total_claim_amount'] = form_data.get('field12d_total_claim_amount', '')
         update_fields = []
         update_values = []
         for key in claim.keys():
@@ -541,6 +552,15 @@ def edit_claim(claim_id):
         update_sql = f"UPDATE claims SET {', '.join(update_fields)} WHERE id = ?"
         cursor.execute(update_sql, tuple(update_values))
         db.commit()
+        # --- Optionally regenerate PDF here if needed ---
+        # from src.utils.pdf_filler import fill_sf95_pdf
+        # pdf_data_for_filling = map_form_data_to_pdf_fields(form_data)
+        # output_pdf_path = os.path.join(current_app.config['FILLED_FORMS_DIR'], claim['filled_pdf_filename'])
+        # try:
+        #     fill_sf95_pdf(pdf_data_for_filling, PDF_TEMPLATE_PATH, output_pdf_path)
+        #     current_app.logger.info(f"EDIT_CLAIM: PDF regenerated after edit: {output_pdf_path}")
+        # except Exception as e:
+        #     current_app.logger.error(f"EDIT_CLAIM: Error regenerating PDF: {e}")
         flash('Claim updated successfully.', 'success')
         return redirect(url_for('admin_view'))
     # GET: Render form with claim data
@@ -1112,6 +1132,17 @@ def submit_form():
     # Normalize phone before saving to DB
     if 'field_pdf_13b_phone' in form_data:
         form_data['field_pdf_13b_phone'] = normalize_phone(form_data['field_pdf_13b_phone'])
+    # --- Recalculate total claim amount (12d) from 12a, 12b, 12c ---
+    try:
+        prop_dam = float(form_data.get('field12a_property_damage_amount', 0) or 0)
+        pers_inj = float(form_data.get('field12b_personal_injury_amount', 0) or 0)
+        wrong_death = float(form_data.get('field12c_wrongful_death_amount', 0) or 0)
+        total_claim = prop_dam + pers_inj + wrong_death
+        form_data['field12d_total_claim_amount'] = f"{total_claim:.2f}"
+    except Exception as e:
+        current_app.logger.error(f"SUBMIT_FORM: Error recalculating total claim amount: {e}")
+        # Optionally: fallback to original value or clear
+        form_data['field12d_total_claim_amount'] = form_data.get('field12d_total_claim_amount', '')
     # Save latest form data to session for persistence
     session['form_data'] = form_data.copy()
     # Explicitly extract and store the email address in the session
