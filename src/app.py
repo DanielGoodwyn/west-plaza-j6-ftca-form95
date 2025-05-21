@@ -516,6 +516,18 @@ def format_datetime_for_display(utc_datetime_input, target_tz_str='America/New_Y
         current_app.logger.error(f"format_datetime_for_display: General error converting datetime input '{utc_datetime_input}': {e}")
         return str(utc_datetime_input) # Return string representation of original on error
 
+# --- Admin Required Decorator ---
+from flask_login import login_required, current_user
+from functools import wraps
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kws):
+        if not current_user.is_admin:
+            abort(403)
+        return f(*args, **kws)
+    return decorated_function
+
 # --- Routes ---
 
 @app.route('/user_management')
