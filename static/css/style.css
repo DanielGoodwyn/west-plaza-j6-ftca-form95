@@ -26,6 +26,7 @@ input:focus, textarea:focus, select:focus {
 .admin-page .table tbody tr {
     height: 32px;
     max-height: 32px;
+    min-height: 32px;
     overflow: hidden;
 }
 .admin-page .table td, .admin-page .table th {
@@ -33,6 +34,7 @@ input:focus, textarea:focus, select:focus {
     max-width: 200px;
     height: 32px;
     max-height: 32px;
+    min-height: 32px;
     overflow-y: auto;
     overflow-x: auto;
     vertical-align: middle;
