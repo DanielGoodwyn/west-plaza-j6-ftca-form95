@@ -539,6 +539,7 @@ def user_management():
     db = get_db()
     cursor = db.cursor()
     users = cursor.execute('SELECT id, username, role FROM users').fetchall()
+    users = [dict(user) for user in users]
     return render_template('user_management.html', users=users)
 
 @app.route('/add_user', methods=['GET', 'POST'])
