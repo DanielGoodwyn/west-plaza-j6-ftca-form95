@@ -21,6 +21,18 @@ input:focus, textarea:focus, select:focus {
     box-shadow: 0 0 0 2px #3399ff33;
 }
 
+/* Admin table cell sizing and scroll */
+.admin-page .table td, .admin-page .table th {
+    min-height: 50px;
+    max-height: 100px;
+    min-width: 200px;
+    max-width: 300px;
+    overflow-y: auto;
+    overflow-x: auto;
+    vertical-align: top;
+    white-space: pre-line;
+}
+
 /* Night mode override */
 body.night-mode .form-control,
 body.night-mode .form-select,
