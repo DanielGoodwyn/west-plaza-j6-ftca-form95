@@ -5,6 +5,23 @@ body {
     font-family: sans-serif; /* Adding a basic font */
 }
 
+.user-info-bubble {
+    background: #f8f9fa;
+    border-radius: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    font-size: 1rem;
+    color: #333;
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 10;
+    margin-left: 1.5rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem 1.5rem;
+    pointer-events: none;
+}
+
 /* General container styling, might conflict with Bootstrap's .container if not careful.
    Bootstrap's .container sets max-width at different breakpoints.
    This .container style from admin.html is more restrictive.
