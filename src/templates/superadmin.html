@@ -9,9 +9,9 @@
         <a href="{{ url_for('admin_view') }}" class="btn btn-secondary">Admin Panel</a>
         <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">Log Out</a>
     </div>
-    <span class="user-info-bubble">{{ current_user.email or current_user.username }}</span>
+    <span class="user-info-bubble">{{ current_user.email }}</span>
 </nav>
-<h1 class="mb-4">Superadmin</h1>
+<h1 class="mb-4 text-center">Superadmin</h1>
     <table class="table table-striped">
         <thead>
             <tr>
