@@ -1,5 +1,6 @@
 {% extends "admin.html" %}
 {% block content %}
+<p>DEBUG: users = {{ users|length }} - {{ users }}</p>
 <div class="container mt-5">
     <h2>User Management</h2>
     {% if current_user.is_superadmin() %}
