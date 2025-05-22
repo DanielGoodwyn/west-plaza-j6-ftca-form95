@@ -742,7 +742,7 @@ def form():
         ]
         validation_errors = session.pop('validation_errors_step1', {})
         current_app.logger.info(f"FORM PAGE: Rendering with form_data: {form_data}")
-        return render_template('form.html', form_data=form_data, title="SF-95 Claim Form - Step 1", validation_errors=validation_errors, states_list=states_and_territories)
+        return render_template('form.html', form_data=form_data, title="SF-95 Claim Form - Step 1", validation_errors=validation_errors, states_list=states_and_territories, current_user=current_user)
     except Exception as e:
         with open('/home3/investi9/public_html/west-plaza-lawsuit/debugging-logs.txt', 'a') as f:
             f.write('\n--- Exception during form submission ---\n')
@@ -1801,6 +1801,8 @@ def login():
                         login_user(user)
                         flash('Login successful!', 'success')
                         next_page = request.args.get('next')
+                        if user.role == 'user':
+                            return redirect(url_for('form'))
                         return redirect(next_page or url_for('admin_view'))
                     else:
                         current_app.logger.warning(f"LOGIN: Incorrect password for {email}.")
@@ -1820,7 +1822,7 @@ def login():
                         login_user(new_user)
                         flash('Account created and logged in!', 'success')
                         next_page = request.args.get('next')
-                        return redirect(next_page or url_for('admin_view'))
+                        return redirect(url_for('form'))
                     else:
                         current_app.logger.error(f"LOGIN: Failed to create user for {email}")
                         flash('Account creation failed. Please try again or contact support.', 'danger')
