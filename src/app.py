@@ -1570,8 +1570,14 @@ def download_filled_pdf(filename):
     user_email = (getattr(current_user, 'email', None) or '').strip().lower()
     user_username = (getattr(current_user, 'username', None) or '').strip().lower()
     claim_email = (claim['user_email_address'] or '').strip().lower() if claim else ''
-    if not claim or (current_user.role == 'user' and claim_email not in [user_email, user_username]):
+    current_app.logger.warning(f"[PDF ACCESS DEBUG] filename={filename}, claim_email={claim_email}, user_email={user_email}, user_username={user_username}, role={current_user.role}")
+    if not claim:
+        current_app.logger.error(f"[PDF ACCESS DENIED] No claim found for filename {filename}")
         abort(403)
+    if current_user.role == 'user' and claim_email not in [user_email, user_username]:
+        current_app.logger.error(f"[PDF ACCESS DENIED] User does not own PDF. claim_email={claim_email}, user_email={user_email}, user_username={user_username}")
+        abort(403)
+    current_app.logger.info(f"[PDF ACCESS GRANTED] User {user_email or user_username} downloading {filename}")
     try:
         return send_from_directory(current_app.config['FILLED_FORMS_DIR'], filename, as_attachment=True)
     except FileNotFoundError:
