@@ -31,7 +31,10 @@
             }
         }
     </style>
-    <div class="user-info-topright">{{ current_user.email or current_user.username }}</div>
+    <div class="user-info-topright d-flex align-items-center" style="gap: 0.75em;">
+        <span>{{ current_user.email or current_user.username }}</span>
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary btn-sm" style="padding: 2px 12px; font-size: 0.97em;">Log Out</a>
+    </div>
     {% endif %}
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
