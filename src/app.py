@@ -1580,7 +1580,6 @@ def download_filled_pdf(filename):
         current_app.logger.warning(f"[PDF ACCESS DENIED] filename={filename}, claim_email={claim_email}, user_email={user_email}, username={username}, role={getattr(current_user, 'role', None)}")
         abort(403)
     current_app.logger.info(f"[PDF ACCESS GRANTED] filename={filename}, claim_email={claim_email}, user_email={user_email}, username={username}, role={getattr(current_user, 'role', None)}")
-        abort(403)
     if current_user.role == 'user' and claim_email not in [user_email, user_username]:
         current_app.logger.error(f"[PDF ACCESS DENIED] User does not own PDF. claim_email={claim_email}, user_email={user_email}, user_username={user_username}")
         abort(403)
