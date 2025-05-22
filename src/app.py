@@ -1787,6 +1787,11 @@ def login():
     form = LoginForm()
     if request.method == 'POST':
         current_app.logger.info(f"LOGIN POST: form.username={form.username.data}, form.password={'*' * len(form.password.data) if form.password.data else ''}")
+        current_app.logger.info("LOGIN: About to validate form")
+        if not form.validate_on_submit():
+            current_app.logger.warning(f"LOGIN: Form did not validate. Errors: {form.errors}")
+            return render_template('login.html', title='Login', form=form)
+        current_app.logger.info("LOGIN: Form validated successfully")
         email = form.username.data.lower().strip()
         password = form.password.data
         # Validate email format
