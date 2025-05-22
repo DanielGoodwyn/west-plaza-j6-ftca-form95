@@ -540,9 +540,18 @@ def admin_required(f):
 
 # --- Routes ---
 
+def superadmin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or not getattr(current_user, 'is_superadmin', lambda: False)():
+            flash('Superadmin access required.', 'danger')
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 @app.route('/superadmin')
 @login_required
-@admin_required
+@superadmin_required
 def superadmin():
     db = get_db()
     cursor = db.cursor()
@@ -552,10 +561,8 @@ def superadmin():
 
 @app.route('/add_user', methods=['GET', 'POST'])
 @login_required
-@admin_required
+@superadmin_required
 def add_user():
-    if not current_user.is_superadmin():
-        abort(403)
     if request.method == 'POST':
         username = request.form['username'].strip().lower()
         password = request.form['password']
@@ -573,10 +580,8 @@ def add_user():
 
 @app.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
 @login_required
-@admin_required
+@superadmin_required
 def edit_user(user_id):
-    if not current_user.is_superadmin():
-        abort(403)
     db = get_db()
     cursor = db.cursor()
     user_data = cursor.execute('SELECT id, username, role FROM users WHERE id=?', (user_id,)).fetchone()
@@ -596,10 +601,8 @@ def edit_user(user_id):
 
 @app.route('/delete_user/<int:user_id>', methods=['POST', 'GET'])
 @login_required
-@admin_required
+@superadmin_required
 def delete_user(user_id):
-    if not current_user.is_superadmin():
-        abort(403)
     db = get_db()
     cursor = db.cursor()
     user_data = cursor.execute('SELECT username FROM users WHERE id=?', (user_id,)).fetchone()
@@ -1556,21 +1559,26 @@ def admin_required(f):
 @login_required
 def download_filled_pdf(filename):
     current_app.logger.info(f"--- download_filled_pdf --- Attempting to send file: {filename}")
+    db = get_db()
+    cursor = db.cursor()
+    claim = cursor.execute('SELECT user_email_address FROM claims WHERE filled_pdf_filename = ?', (filename,)).fetchone()
+    # Only allow download if current user is the owner, or is admin/superadmin
+    if not claim or (current_user.role == 'user' and claim['user_email_address'] != current_user.username):
+        abort(403)
     try:
         return send_from_directory(current_app.config['FILLED_FORMS_DIR'], filename, as_attachment=True)
     except FileNotFoundError:
         current_app.logger.error(f"--- download_filled_pdf --- File not found: {filename} in directory {current_app.config['FILLED_FORMS_DIR']}")
         flash(f"Error: Could not find the PDF file '{filename}'.", "danger")
-        # Redirect to admin or a generic error page, or back to where they came from if possible
-        # For simplicity, redirecting to admin view. Consider referrer if more context is needed.
-        return redirect(url_for('admin_view')) # Or perhaps 'form' or a dedicated error page
+        return redirect(url_for('admin_view'))
     except Exception as e:
         current_app.logger.error(f"--- download_filled_pdf --- Unexpected error sending file {filename}: {e}", exc_info=True)
         flash(f"An unexpected error occurred while trying to download the PDF '{filename}'.", "danger")
-        return redirect(url_for('admin_view')) # Or 'form'
+        return redirect(url_for('admin_view'))
 
 @app.route('/admin', methods=['GET'])
-@login_required # Protect the admin route
+@login_required
+@admin_required
 def admin_view():
     db = get_db()
     cursor = db.cursor()
