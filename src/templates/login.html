@@ -36,12 +36,12 @@
     </style>
 </head>
 <body>
-    {% if current_user.is_authenticated %}
-    <div style="position: fixed; top: 18px; right: 60px; z-index: 999; font-size: 0.97em;">
-        <span style="color: #bbb; background: rgba(30,30,30,0.92); padding: 4px 14px; border-radius: 16px;">{{ current_user.email or current_user.username }}</span>
-        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary btn-sm" style="margin-left: 0.5em;">Log Out</a>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a href="{{ url_for('form') }}" class="btn btn-primary btn-sm">Go to Form</a>
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary btn-sm">Log Out</a>
+        {% endif %}
     </div>
-    {% endif %}
     <div class="login-container">
         <h2>Login</h2>
         {% with messages = get_flashed_messages(with_categories=true) %}
