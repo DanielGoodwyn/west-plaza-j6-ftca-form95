@@ -36,7 +36,6 @@
         <!-- Emoji icon remains here -->
     </div>
     {% endif %}
-    {% if current_user.is_authenticated %}
     <div class="container-fluid">
       <div class="row">
         <div class="col-12">
@@ -46,7 +45,6 @@
         </div>
       </div>
     </div>
-    {% endif %}
     {% endif %}
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
