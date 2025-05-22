@@ -1537,29 +1537,7 @@ def reset_password():
                 error = "No account found for that email address. If you just submitted a form, please use the same email address you entered on the form."
     return render_template('reset_password.html', error=error, message=message)
 
-@app.route('/set_password/<int:user_id>', methods=['GET', 'POST'])
-def set_password(user_id):
-    db = get_db()
-    cursor = db.cursor()
-    user_row = cursor.execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
-    if not user_row:
-        return "User not found", 404
-    error = None
-    if request.method == 'POST':
-        password = request.form.get('password', '')
-        confirm_password = request.form.get('confirm_password', '')
-        if len(password) < 6:
-            error = "Password must be at least 6 characters."
-        elif password != confirm_password:
-            error = "Passwords do not match."
-        else:
-            from werkzeug.security import generate_password_hash
-            cursor.execute('UPDATE users SET password_hash = ? WHERE id = ?', (generate_password_hash(password), user_id))
-            db.commit()
-            flash('Password set successfully! You can now log in.', 'success')
-            return redirect(url_for('login'))
-    return render_template('set_password.html', user_id=user_id, error=error)
-    return render_template('success.html', submission_id=submission_id, pdf_filename=pdf_filename)
+
 
 from flask_login import login_required, current_user
 from functools import wraps
