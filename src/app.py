@@ -1781,6 +1781,8 @@ def init_db_command():
         db = get_db()
     print('Initialized the database defined in app.config[DATABASE].')
 
+print('APP.PY: Registering /login route')
+current_app.logger.info('APP.PY: Registering /login route')
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     current_app.logger.info(f"LOGIN ROUTE: Method={request.method}, Form data={request.form}")
@@ -1819,16 +1821,20 @@ def login():
                         flash('Login Unsuccessful. Please check email and password.', 'danger')
                 else:
                     current_app.logger.info(f"LOGIN: No user found for {email}, attempting user creation.")
-                    # No user exists: create account and redirect to set password
-                    import secrets
-                    temp_password = secrets.token_urlsafe(10)
-                    created = User.create_user(email, temp_password, role='user')
+                    # No user exists: create account with password from form
+                    if not password or len(password) < 6:
+                        current_app.logger.warning(f"LOGIN: Password required for signup and must be at least 6 characters.")
+                        flash('Password is required and must be at least 6 characters.', 'danger')
+                        return render_template('login.html', title='Login', form=form)
+                    created = User.create_user(email, password, role='user')
                     current_app.logger.info(f"LOGIN: User.create_user returned: {created}")
                     if created:
                         new_user = User.get_by_username(email)
                         current_app.logger.info(f"LOGIN: Successfully created user {email}, id={new_user.id if new_user else None}")
-                        flash('Account created! Please set your password.', 'success')
-                        return redirect(url_for('set_password', user_id=new_user.id))
+                        login_user(new_user)
+                        flash('Account created and logged in!', 'success')
+                        next_page = request.args.get('next')
+                        return redirect(next_page or url_for('admin_view'))
                     else:
                         current_app.logger.error(f"LOGIN: Failed to create user for {email}")
                         flash('Account creation failed. Please try again or contact support.', 'danger')

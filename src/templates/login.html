@@ -63,7 +63,7 @@
             </div>
             <div class="mb-3">
                 {{ form.password.label(class="form-label") }}
-                {{ form.password(class="form-control form-control-lg", placeholder="Enter your password") }}
+                {{ form.password(class="form-control form-control-lg", placeholder="Enter your password", required=True) }}
                 {% if form.password.errors %}
                     <div class="invalid-feedback d-block">
                         {% for error in form.password.errors %}

@@ -2074,3 +2074,763 @@ Washington, DC 20510' to final PDF data as it was missing.
 2025-05-21 04:05:18,949 - app - INFO - Exiting create_tables_if_not_exist function.
 2025-05-21 04:05:18,949 - app - INFO - Database schema checked/initialized successfully (within app context).
 2025-05-21 04:05:18,951 - app - INFO - Starting Flask development server.
+2025-05-21 06:08:18,733 - app - INFO - Custom logging initialized for file and console.
+2025-05-21 06:08:18,734 - app - INFO - Entered create_tables_if_not_exist function.
+2025-05-21 06:08:18,734 - app - INFO - Successfully obtained DB cursor.
+2025-05-21 06:08:18,734 - app - INFO - Checking 'claims' table. Exists: True
+2025-05-21 06:08:18,734 - app - INFO - 'claims' table exists. Checking for missing columns based on DB_SCHEMA.
+2025-05-21 06:08:18,734 - app - INFO - Existing columns in 'claims': ['id', 'field1_agency', 'field2_name', 'field2_address', 'field2_city', 'field2_state', 'field2_zip', 'field3_type_employment', 'field_pdf_4_dob', 'field_pdf_5_marital_status', 'field6_checkbox_military', 'field7_checkbox_civilian', 'field8_basis_of_claim', 'field9_property_damage_description', 'field10_nature_of_injury', 'field11_witness_name_1', 'field11_witness_address_1', 'field11_witness_name_2', 'field11_witness_address_2', 'field12a_property_damage_amount', 'field12b_personal_injury_amount', 'field12c_wrongful_death_amount', 'field12d_total_claim_amount', 'field13a_signature', 'field_pdf_13b_phone', 'field14_date_signed', 'user_email_address', 'supplemental_question_1_capitol_experience', 'supplemental_question_2_injuries_damages', 'supplemental_question_3_entry_exit_time', 'supplemental_question_4_inside_capitol_details', 'filled_pdf_filename', 'field17_signature_of_claimant', 'field18_date_of_signature', 'created_at', 'updated_at']
+2025-05-21 06:08:18,734 - app - INFO - DB_SCHEMA to check against: ['field1_agency TEXT', 'field2_name TEXT', 'field2_address TEXT', 'field2_city TEXT', 'field2_state TEXT', 'field2_zip TEXT', 'field3_type_employment TEXT', 'field_pdf_4_dob TEXT', 'field_pdf_5_marital_status TEXT', 'field6_checkbox_military TEXT', 'field7_checkbox_civilian TEXT', 'field8_basis_of_claim TEXT', 'field9_property_damage_description TEXT', 'field10_nature_of_injury TEXT', 'field11_witness_name_1 TEXT', 'field11_witness_address_1 TEXT', 'field11_witness_name_2 TEXT', 'field11_witness_address_2 TEXT', 'field12a_property_damage_amount TEXT', 'field12b_personal_injury_amount TEXT', 'field12c_wrongful_death_amount TEXT', 'field12d_total_claim_amount TEXT', 'field13a_signature TEXT', 'field_pdf_13b_phone TEXT', 'field14_date_signed TEXT', 'user_email_address TEXT', 'supplemental_question_1_capitol_experience TEXT', 'supplemental_question_2_injuries_damages TEXT', 'supplemental_question_3_entry_exit_time TEXT', 'supplemental_question_4_inside_capitol_details TEXT', 'filled_pdf_filename TEXT', 'field17_signature_of_claimant TEXT', 'field18_date_of_signature TEXT', 'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP']
+2025-05-21 06:08:18,734 - app - INFO - Parsed schema column definitions from DB_SCHEMA: {'field1_agency': 'field1_agency TEXT', 'field2_name': 'field2_name TEXT', 'field2_address': 'field2_address TEXT', 'field2_city': 'field2_city TEXT', 'field2_state': 'field2_state TEXT', 'field2_zip': 'field2_zip TEXT', 'field3_type_employment': 'field3_type_employment TEXT', 'field_pdf_4_dob': 'field_pdf_4_dob TEXT', 'field_pdf_5_marital_status': 'field_pdf_5_marital_status TEXT', 'field6_checkbox_military': 'field6_checkbox_military TEXT', 'field7_checkbox_civilian': 'field7_checkbox_civilian TEXT', 'field8_basis_of_claim': 'field8_basis_of_claim TEXT', 'field9_property_damage_description': 'field9_property_damage_description TEXT', 'field10_nature_of_injury': 'field10_nature_of_injury TEXT', 'field11_witness_name_1': 'field11_witness_name_1 TEXT', 'field11_witness_address_1': 'field11_witness_address_1 TEXT', 'field11_witness_name_2': 'field11_witness_name_2 TEXT', 'field11_witness_address_2': 'field11_witness_address_2 TEXT', 'field12a_property_damage_amount': 'field12a_property_damage_amount TEXT', 'field12b_personal_injury_amount': 'field12b_personal_injury_amount TEXT', 'field12c_wrongful_death_amount': 'field12c_wrongful_death_amount TEXT', 'field12d_total_claim_amount': 'field12d_total_claim_amount TEXT', 'field13a_signature': 'field13a_signature TEXT', 'field_pdf_13b_phone': 'field_pdf_13b_phone TEXT', 'field14_date_signed': 'field14_date_signed TEXT', 'user_email_address': 'user_email_address TEXT', 'supplemental_question_1_capitol_experience': 'supplemental_question_1_capitol_experience TEXT', 'supplemental_question_2_injuries_damages': 'supplemental_question_2_injuries_damages TEXT', 'supplemental_question_3_entry_exit_time': 'supplemental_question_3_entry_exit_time TEXT', 'supplemental_question_4_inside_capitol_details': 'supplemental_question_4_inside_capitol_details TEXT', 'filled_pdf_filename': 'filled_pdf_filename TEXT', 'field17_signature_of_claimant': 'field17_signature_of_claimant TEXT', 'field18_date_of_signature': 'field18_date_of_signature TEXT', 'created_at': 'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'updated_at': 'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP'}
+2025-05-21 06:08:18,734 - app - INFO - 'claims' table schema appears up to date with DB_SCHEMA. No columns were added.
+2025-05-21 06:08:18,734 - app - INFO - 'users' table already exists.
+2025-05-21 06:08:18,734 - app - INFO - Exiting create_tables_if_not_exist function.
+2025-05-21 06:08:18,734 - app - INFO - Database schema checked/initialized successfully (within app context).
+2025-05-21 06:08:18,736 - app - INFO - Starting Flask development server.
+2025-05-21 17:04:17,028 - app - INFO - Custom logging initialized for file and console.
+2025-05-21 17:04:17,029 - app - INFO - Entered create_tables_if_not_exist function.
+2025-05-21 17:04:17,029 - app - INFO - Successfully obtained DB cursor.
+2025-05-21 17:04:17,029 - app - INFO - Checking 'claims' table. Exists: True
+2025-05-21 17:04:17,029 - app - INFO - 'claims' table exists. Checking for missing columns based on DB_SCHEMA.
+2025-05-21 17:04:17,029 - app - INFO - Existing columns in 'claims': ['id', 'field1_agency', 'field2_name', 'field2_address', 'field2_city', 'field2_state', 'field2_zip', 'field3_type_employment', 'field_pdf_4_dob', 'field_pdf_5_marital_status', 'field6_checkbox_military', 'field7_checkbox_civilian', 'field8_basis_of_claim', 'field9_property_damage_description', 'field10_nature_of_injury', 'field11_witness_name_1', 'field11_witness_address_1', 'field11_witness_name_2', 'field11_witness_address_2', 'field12a_property_damage_amount', 'field12b_personal_injury_amount', 'field12c_wrongful_death_amount', 'field12d_total_claim_amount', 'field13a_signature', 'field_pdf_13b_phone', 'field14_date_signed', 'user_email_address', 'supplemental_question_1_capitol_experience', 'supplemental_question_2_injuries_damages', 'supplemental_question_3_entry_exit_time', 'supplemental_question_4_inside_capitol_details', 'filled_pdf_filename', 'field17_signature_of_claimant', 'field18_date_of_signature', 'created_at', 'updated_at']
+2025-05-21 17:04:17,029 - app - INFO - DB_SCHEMA to check against: ['field1_agency TEXT', 'field2_name TEXT', 'field2_address TEXT', 'field2_city TEXT', 'field2_state TEXT', 'field2_zip TEXT', 'field3_type_employment TEXT', 'field_pdf_4_dob TEXT', 'field_pdf_5_marital_status TEXT', 'field6_checkbox_military TEXT', 'field7_checkbox_civilian TEXT', 'field8_basis_of_claim TEXT', 'field9_property_damage_description TEXT', 'field10_nature_of_injury TEXT', 'field11_witness_name_1 TEXT', 'field11_witness_address_1 TEXT', 'field11_witness_name_2 TEXT', 'field11_witness_address_2 TEXT', 'field12a_property_damage_amount TEXT', 'field12b_personal_injury_amount TEXT', 'field12c_wrongful_death_amount TEXT', 'field12d_total_claim_amount TEXT', 'field13a_signature TEXT', 'field_pdf_13b_phone TEXT', 'field14_date_signed TEXT', 'user_email_address TEXT', 'supplemental_question_1_capitol_experience TEXT', 'supplemental_question_2_injuries_damages TEXT', 'supplemental_question_3_entry_exit_time TEXT', 'supplemental_question_4_inside_capitol_details TEXT', 'filled_pdf_filename TEXT', 'field17_signature_of_claimant TEXT', 'field18_date_of_signature TEXT', 'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP']
+2025-05-21 17:04:17,029 - app - INFO - Parsed schema column definitions from DB_SCHEMA: {'field1_agency': 'field1_agency TEXT', 'field2_name': 'field2_name TEXT', 'field2_address': 'field2_address TEXT', 'field2_city': 'field2_city TEXT', 'field2_state': 'field2_state TEXT', 'field2_zip': 'field2_zip TEXT', 'field3_type_employment': 'field3_type_employment TEXT', 'field_pdf_4_dob': 'field_pdf_4_dob TEXT', 'field_pdf_5_marital_status': 'field_pdf_5_marital_status TEXT', 'field6_checkbox_military': 'field6_checkbox_military TEXT', 'field7_checkbox_civilian': 'field7_checkbox_civilian TEXT', 'field8_basis_of_claim': 'field8_basis_of_claim TEXT', 'field9_property_damage_description': 'field9_property_damage_description TEXT', 'field10_nature_of_injury': 'field10_nature_of_injury TEXT', 'field11_witness_name_1': 'field11_witness_name_1 TEXT', 'field11_witness_address_1': 'field11_witness_address_1 TEXT', 'field11_witness_name_2': 'field11_witness_name_2 TEXT', 'field11_witness_address_2': 'field11_witness_address_2 TEXT', 'field12a_property_damage_amount': 'field12a_property_damage_amount TEXT', 'field12b_personal_injury_amount': 'field12b_personal_injury_amount TEXT', 'field12c_wrongful_death_amount': 'field12c_wrongful_death_amount TEXT', 'field12d_total_claim_amount': 'field12d_total_claim_amount TEXT', 'field13a_signature': 'field13a_signature TEXT', 'field_pdf_13b_phone': 'field_pdf_13b_phone TEXT', 'field14_date_signed': 'field14_date_signed TEXT', 'user_email_address': 'user_email_address TEXT', 'supplemental_question_1_capitol_experience': 'supplemental_question_1_capitol_experience TEXT', 'supplemental_question_2_injuries_damages': 'supplemental_question_2_injuries_damages TEXT', 'supplemental_question_3_entry_exit_time': 'supplemental_question_3_entry_exit_time TEXT', 'supplemental_question_4_inside_capitol_details': 'supplemental_question_4_inside_capitol_details TEXT', 'filled_pdf_filename': 'filled_pdf_filename TEXT', 'field17_signature_of_claimant': 'field17_signature_of_claimant TEXT', 'field18_date_of_signature': 'field18_date_of_signature TEXT', 'created_at': 'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'updated_at': 'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP'}
+2025-05-21 17:04:17,029 - app - INFO - 'claims' table schema appears up to date with DB_SCHEMA. No columns were added.
+2025-05-21 17:04:17,029 - app - INFO - 'users' table already exists.
+2025-05-21 17:04:17,029 - app - INFO - Exiting create_tables_if_not_exist function.
+2025-05-21 17:04:17,029 - app - INFO - Database schema checked/initialized successfully (within app context).
+2025-05-21 17:04:17,031 - app - INFO - Starting Flask development server.
+2025-05-21 18:18:54,888 - app - INFO - FORM PAGE: Loaded form_data from session: {'field1_agency': '', 'field2_name': '', 'field2_address': '', 'field2_city': '', 'field2_state': '', 'field2_zip': '', 'field3_type_employment': 'Civilian', 'field_pdf_4_dob': '', 'field_pdf_5_marital_status': '', 'field_pdf_13b_phone': '', 'field8_basis_of_claim': '', 'field9_property_damage_description': '', 'field10_nature_of_injury': '', 'field11_witness_name_1': '', 'field11_witness_address_1': '', 'field11_witness_name_2': '', 'field11_witness_address_2': '', 'field12a_property_damage_amount': '0', 'field12b_personal_injury_amount': '90000', 'field12c_wrongful_death_amount': '0', 'field12d_total_claim_amount': '0', 'user_email_address': '', 'supplemental_question_1_capitol_experience': '', 'supplemental_question_2_injuries_damages': '', 'supplemental_question_3_entry_exit_time': '', 'supplemental_question_4_inside_capitol_details': ''}
+2025-05-21 18:18:54,888 - app - INFO - FORM PAGE: Rendering with form_data: {'field1_agency': '', 'field2_name': '', 'field2_address': '', 'field2_city': '', 'field2_state': '', 'field2_zip': '', 'field3_type_employment': 'Civilian', 'field_pdf_4_dob': '', 'field_pdf_5_marital_status': '', 'field_pdf_13b_phone': '', 'field8_basis_of_claim': '', 'field9_property_damage_description': '', 'field10_nature_of_injury': '', 'field11_witness_name_1': '', 'field11_witness_address_1': '', 'field11_witness_name_2': '', 'field11_witness_address_2': '', 'field12a_property_damage_amount': '0', 'field12b_personal_injury_amount': '90000', 'field12c_wrongful_death_amount': '0', 'field12d_total_claim_amount': '0', 'user_email_address': '', 'supplemental_question_1_capitol_experience': '', 'supplemental_question_2_injuries_damages': '', 'supplemental_question_3_entry_exit_time': '', 'supplemental_question_4_inside_capitol_details': ''}
+2025-05-21 18:18:54,916 - app - ERROR - [GLOBAL ERROR HANDLER] Unhandled Exception: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2025-05-21 18:18:58,576 - app - INFO - LOGIN ROUTE: Method=GET, Form data=ImmutableMultiDict([])
+2025-05-21 18:18:58,589 - app - ERROR - [GLOBAL ERROR HANDLER] Unhandled Exception: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2025-05-21 18:19:00,628 - app - INFO - LOGIN ROUTE: Method=POST, Form data=ImmutableMultiDict([('csrf_token', 'ImZlMzVlMmIzMmM0MDY4YTJlNzUwODY1NTZiMGJhYWJiOTFhYTJjYzUi.aC5fYg.dCo_DfLPJ6UmCVH-ZkJ5PiwbdsQ'), ('username', 'admin'), ('password', 'SuperSecret123!'), ('submit', 'Login')])
+2025-05-21 18:19:00,629 - app - INFO - LOGIN ATTEMPT: Username=admin
+2025-05-21 18:19:00,704 - app - INFO - LOGIN SUCCESS: Username=admin
+2025-05-21 18:19:00,710 - app - INFO - --- admin_view --- DEBUG: FINAL state list passed to template: ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
+2025-05-21 18:19:00,710 - app - INFO - format_datetime_for_display: Received input '2025-05-20 18:45:43.715672+00:00' of type <class 'str'>
+2025-05-21 18:19:00,710 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 18:45:43.715672+00:00', attempting non-T parsing.
+2025-05-21 18:19:00,710 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 18:45:43.715672+00:00' with milliseconds...
+2025-05-21 18:19:00,712 - app - INFO - format_datetime_for_display: Failed non-T with milliseconds for '2025-05-20 18:45:43.715672+00:00': unconverted data remains: +00:00. Trying without milliseconds...
+2025-05-21 18:19:00,713 - app - ERROR - format_datetime_for_display: Failed to parse non-T ('2025-05-20 18:45:43.715672+00:00') without milliseconds either: unconverted data remains: .715672+00:00
+2025-05-21 18:19:00,713 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-20 18:45:43.715672+00:00': unconverted data remains: .715672+00:00
+2025-05-21 18:19:00,713 - app - INFO - format_datetime_for_display: Received input '2025-05-19T20:42:56-05:00' of type <class 'str'>
+2025-05-21 18:19:00,713 - app - INFO - format_datetime_for_display: Detected 'T' in '2025-05-19T20:42:56-05:00', attempting T-specific parsing.
+2025-05-21 18:19:00,713 - app - INFO - format_datetime_for_display: Failed 'T' with seconds, trying 'T' without seconds for '2025-05-19T20:42:56-05:00'.
+2025-05-21 18:19:00,713 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-19T20:42:56-05:00': unconverted data remains: :56-05:00
+2025-05-21 18:19:00,713 - app - INFO - format_datetime_for_display: Received input '2025-05-20 18:42:15.095409+00:00' of type <class 'str'>
+2025-05-21 18:19:00,713 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 18:42:15.095409+00:00', attempting non-T parsing.
+2025-05-21 18:19:00,713 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 18:42:15.095409+00:00' with milliseconds...
+2025-05-21 18:19:00,713 - app - INFO - format_datetime_for_display: Failed non-T with milliseconds for '2025-05-20 18:42:15.095409+00:00': unconverted data remains: +00:00. Trying without milliseconds...
+2025-05-21 18:19:00,713 - app - ERROR - format_datetime_for_display: Failed to parse non-T ('2025-05-20 18:42:15.095409+00:00') without milliseconds either: unconverted data remains: .095409+00:00
+2025-05-21 18:19:00,713 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-20 18:42:15.095409+00:00': unconverted data remains: .095409+00:00
+2025-05-21 18:19:00,713 - app - INFO - format_datetime_for_display: Received input '2025-05-20 18:38:43.039183+00:00' of type <class 'str'>
+2025-05-21 18:19:00,713 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 18:38:43.039183+00:00', attempting non-T parsing.
+2025-05-21 18:19:00,713 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 18:38:43.039183+00:00' with milliseconds...
+2025-05-21 18:19:00,713 - app - INFO - format_datetime_for_display: Failed non-T with milliseconds for '2025-05-20 18:38:43.039183+00:00': unconverted data remains: +00:00. Trying without milliseconds...
+2025-05-21 18:19:00,713 - app - ERROR - format_datetime_for_display: Failed to parse non-T ('2025-05-20 18:38:43.039183+00:00') without milliseconds either: unconverted data remains: .039183+00:00
+2025-05-21 18:19:00,713 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-20 18:38:43.039183+00:00': unconverted data remains: .039183+00:00
+2025-05-21 18:19:00,713 - app - INFO - format_datetime_for_display: Received input '2025-05-20 09:16:40.978059+00:00' of type <class 'str'>
+2025-05-21 18:19:00,713 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 09:16:40.978059+00:00', attempting non-T parsing.
+2025-05-21 18:19:00,713 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 09:16:40.978059+00:00' with milliseconds...
+2025-05-21 18:19:00,714 - app - INFO - format_datetime_for_display: Failed non-T with milliseconds for '2025-05-20 09:16:40.978059+00:00': unconverted data remains: +00:00. Trying without milliseconds...
+2025-05-21 18:19:00,714 - app - ERROR - format_datetime_for_display: Failed to parse non-T ('2025-05-20 09:16:40.978059+00:00') without milliseconds either: unconverted data remains: .978059+00:00
+2025-05-21 18:19:00,714 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-20 09:16:40.978059+00:00': unconverted data remains: .978059+00:00
+2025-05-21 18:19:00,714 - app - INFO - format_datetime_for_display: Received input '2025-05-19T20:42:56-05:00' of type <class 'str'>
+2025-05-21 18:19:00,714 - app - INFO - format_datetime_for_display: Detected 'T' in '2025-05-19T20:42:56-05:00', attempting T-specific parsing.
+2025-05-21 18:19:00,714 - app - INFO - format_datetime_for_display: Failed 'T' with seconds, trying 'T' without seconds for '2025-05-19T20:42:56-05:00'.
+2025-05-21 18:19:00,714 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-19T20:42:56-05:00': unconverted data remains: :56-05:00
+2025-05-21 18:19:00,714 - app - INFO - format_datetime_for_display: Received input '2025-05-20 09:11:19.549011+00:00' of type <class 'str'>
+2025-05-21 18:19:00,714 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 09:11:19.549011+00:00', attempting non-T parsing.
+2025-05-21 18:19:00,714 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 09:11:19.549011+00:00' with milliseconds...
+2025-05-21 18:19:00,714 - app - INFO - format_datetime_for_display: Failed non-T with milliseconds for '2025-05-20 09:11:19.549011+00:00': unconverted data remains: +00:00. Trying without milliseconds...
+2025-05-21 18:19:00,714 - app - ERROR - format_datetime_for_display: Failed to parse non-T ('2025-05-20 09:11:19.549011+00:00') without milliseconds either: unconverted data remains: .549011+00:00
+2025-05-21 18:19:00,714 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-20 09:11:19.549011+00:00': unconverted data remains: .549011+00:00
+2025-05-21 18:19:00,714 - app - INFO - format_datetime_for_display: Received input '2025-05-20 08:05:11.151699+00:00' of type <class 'str'>
+2025-05-21 18:19:00,714 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 08:05:11.151699+00:00', attempting non-T parsing.
+2025-05-21 18:19:00,714 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 08:05:11.151699+00:00' with milliseconds...
+2025-05-21 18:19:00,714 - app - INFO - format_datetime_for_display: Failed non-T with milliseconds for '2025-05-20 08:05:11.151699+00:00': unconverted data remains: +00:00. Trying without milliseconds...
+2025-05-21 18:19:00,714 - app - ERROR - format_datetime_for_display: Failed to parse non-T ('2025-05-20 08:05:11.151699+00:00') without milliseconds either: unconverted data remains: .151699+00:00
+2025-05-21 18:19:00,714 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-20 08:05:11.151699+00:00': unconverted data remains: .151699+00:00
+2025-05-21 18:19:00,714 - app - INFO - format_datetime_for_display: Received input '2025-05-20 07:41:19.792505' of type <class 'str'>
+2025-05-21 18:19:00,714 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 07:41:19.792505', attempting non-T parsing.
+2025-05-21 18:19:00,714 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 07:41:19.792505' with milliseconds...
+2025-05-21 18:19:00,714 - app - INFO - format_datetime_for_display: Parsed non-T with milliseconds: 2025-05-20 07:41:19.792505
+2025-05-21 18:19:00,714 - app - INFO - format_datetime_for_display: Successfully processed input. Parsed datetime: 2025-05-20 07:41:19.792505. Localizing to UTC.
+2025-05-21 18:19:00,714 - app - INFO - format_datetime_for_display: Localized to UTC: 2025-05-20 07:41:19.792505+00:00. Converting to target timezone 'America/New_York'.
+2025-05-21 18:19:00,736 - app - INFO - format_datetime_for_display: Converted to target timezone: 2025-05-20 03:41:19.792505-04:00. Formatted output: 05/20/2025 03:41 AM
+2025-05-21 18:19:00,736 - app - INFO - Fetched 7 claims for admin view.
+2025-05-21 18:19:00,752 - app - ERROR - [GLOBAL ERROR HANDLER] Unhandled Exception: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2025-05-21 18:19:00,903 - app - ERROR - [GLOBAL ERROR HANDLER] Unhandled Exception: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2025-05-21 18:19:00,904 - app - ERROR - [GLOBAL ERROR HANDLER] Unhandled Exception: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2025-05-21 18:19:00,904 - app - ERROR - [GLOBAL ERROR HANDLER] Unhandled Exception: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2025-05-21 18:19:07,768 - app - INFO - --- admin_view --- DEBUG: FINAL state list passed to template: ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
+2025-05-21 18:19:07,770 - app - INFO - format_datetime_for_display: Received input '2025-05-20 18:45:43.715672+00:00' of type <class 'str'>
+2025-05-21 18:19:07,770 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 18:45:43.715672+00:00', attempting non-T parsing.
+2025-05-21 18:19:07,770 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 18:45:43.715672+00:00' with milliseconds...
+2025-05-21 18:19:07,770 - app - INFO - format_datetime_for_display: Failed non-T with milliseconds for '2025-05-20 18:45:43.715672+00:00': unconverted data remains: +00:00. Trying without milliseconds...
+2025-05-21 18:19:07,770 - app - ERROR - format_datetime_for_display: Failed to parse non-T ('2025-05-20 18:45:43.715672+00:00') without milliseconds either: unconverted data remains: .715672+00:00
+2025-05-21 18:19:07,770 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-20 18:45:43.715672+00:00': unconverted data remains: .715672+00:00
+2025-05-21 18:19:07,770 - app - INFO - format_datetime_for_display: Received input '2025-05-19T20:42:56-05:00' of type <class 'str'>
+2025-05-21 18:19:07,771 - app - INFO - format_datetime_for_display: Detected 'T' in '2025-05-19T20:42:56-05:00', attempting T-specific parsing.
+2025-05-21 18:19:07,771 - app - INFO - format_datetime_for_display: Failed 'T' with seconds, trying 'T' without seconds for '2025-05-19T20:42:56-05:00'.
+2025-05-21 18:19:07,771 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-19T20:42:56-05:00': unconverted data remains: :56-05:00
+2025-05-21 18:19:07,771 - app - INFO - format_datetime_for_display: Received input '2025-05-20 18:42:15.095409+00:00' of type <class 'str'>
+2025-05-21 18:19:07,771 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 18:42:15.095409+00:00', attempting non-T parsing.
+2025-05-21 18:19:07,771 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 18:42:15.095409+00:00' with milliseconds...
+2025-05-21 18:19:07,771 - app - INFO - format_datetime_for_display: Failed non-T with milliseconds for '2025-05-20 18:42:15.095409+00:00': unconverted data remains: +00:00. Trying without milliseconds...
+2025-05-21 18:19:07,771 - app - ERROR - format_datetime_for_display: Failed to parse non-T ('2025-05-20 18:42:15.095409+00:00') without milliseconds either: unconverted data remains: .095409+00:00
+2025-05-21 18:19:07,771 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-20 18:42:15.095409+00:00': unconverted data remains: .095409+00:00
+2025-05-21 18:19:07,772 - app - INFO - format_datetime_for_display: Received input '2025-05-20 18:38:43.039183+00:00' of type <class 'str'>
+2025-05-21 18:19:07,772 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 18:38:43.039183+00:00', attempting non-T parsing.
+2025-05-21 18:19:07,772 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 18:38:43.039183+00:00' with milliseconds...
+2025-05-21 18:19:07,772 - app - INFO - format_datetime_for_display: Failed non-T with milliseconds for '2025-05-20 18:38:43.039183+00:00': unconverted data remains: +00:00. Trying without milliseconds...
+2025-05-21 18:19:07,772 - app - ERROR - format_datetime_for_display: Failed to parse non-T ('2025-05-20 18:38:43.039183+00:00') without milliseconds either: unconverted data remains: .039183+00:00
+2025-05-21 18:19:07,772 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-20 18:38:43.039183+00:00': unconverted data remains: .039183+00:00
+2025-05-21 18:19:07,772 - app - INFO - format_datetime_for_display: Received input '2025-05-20 09:16:40.978059+00:00' of type <class 'str'>
+2025-05-21 18:19:07,772 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 09:16:40.978059+00:00', attempting non-T parsing.
+2025-05-21 18:19:07,772 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 09:16:40.978059+00:00' with milliseconds...
+2025-05-21 18:19:07,772 - app - INFO - format_datetime_for_display: Failed non-T with milliseconds for '2025-05-20 09:16:40.978059+00:00': unconverted data remains: +00:00. Trying without milliseconds...
+2025-05-21 18:19:07,773 - app - ERROR - format_datetime_for_display: Failed to parse non-T ('2025-05-20 09:16:40.978059+00:00') without milliseconds either: unconverted data remains: .978059+00:00
+2025-05-21 18:19:07,773 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-20 09:16:40.978059+00:00': unconverted data remains: .978059+00:00
+2025-05-21 18:19:07,773 - app - INFO - format_datetime_for_display: Received input '2025-05-19T20:42:56-05:00' of type <class 'str'>
+2025-05-21 18:19:07,773 - app - INFO - format_datetime_for_display: Detected 'T' in '2025-05-19T20:42:56-05:00', attempting T-specific parsing.
+2025-05-21 18:19:07,773 - app - INFO - format_datetime_for_display: Failed 'T' with seconds, trying 'T' without seconds for '2025-05-19T20:42:56-05:00'.
+2025-05-21 18:19:07,773 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-19T20:42:56-05:00': unconverted data remains: :56-05:00
+2025-05-21 18:19:07,773 - app - INFO - format_datetime_for_display: Received input '2025-05-20 09:11:19.549011+00:00' of type <class 'str'>
+2025-05-21 18:19:07,773 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 09:11:19.549011+00:00', attempting non-T parsing.
+2025-05-21 18:19:07,773 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 09:11:19.549011+00:00' with milliseconds...
+2025-05-21 18:19:07,773 - app - INFO - format_datetime_for_display: Failed non-T with milliseconds for '2025-05-20 09:11:19.549011+00:00': unconverted data remains: +00:00. Trying without milliseconds...
+2025-05-21 18:19:07,773 - app - ERROR - format_datetime_for_display: Failed to parse non-T ('2025-05-20 09:11:19.549011+00:00') without milliseconds either: unconverted data remains: .549011+00:00
+2025-05-21 18:19:07,773 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-20 09:11:19.549011+00:00': unconverted data remains: .549011+00:00
+2025-05-21 18:19:07,774 - app - INFO - format_datetime_for_display: Received input '2025-05-20 08:05:11.151699+00:00' of type <class 'str'>
+2025-05-21 18:19:07,774 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 08:05:11.151699+00:00', attempting non-T parsing.
+2025-05-21 18:19:07,774 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 08:05:11.151699+00:00' with milliseconds...
+2025-05-21 18:19:07,774 - app - INFO - format_datetime_for_display: Failed non-T with milliseconds for '2025-05-20 08:05:11.151699+00:00': unconverted data remains: +00:00. Trying without milliseconds...
+2025-05-21 18:19:07,774 - app - ERROR - format_datetime_for_display: Failed to parse non-T ('2025-05-20 08:05:11.151699+00:00') without milliseconds either: unconverted data remains: .151699+00:00
+2025-05-21 18:19:07,774 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-20 08:05:11.151699+00:00': unconverted data remains: .151699+00:00
+2025-05-21 18:19:07,774 - app - INFO - format_datetime_for_display: Received input '2025-05-20 07:41:19.792505' of type <class 'str'>
+2025-05-21 18:19:07,774 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 07:41:19.792505', attempting non-T parsing.
+2025-05-21 18:19:07,774 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 07:41:19.792505' with milliseconds...
+2025-05-21 18:19:07,774 - app - INFO - format_datetime_for_display: Parsed non-T with milliseconds: 2025-05-20 07:41:19.792505
+2025-05-21 18:19:07,774 - app - INFO - format_datetime_for_display: Successfully processed input. Parsed datetime: 2025-05-20 07:41:19.792505. Localizing to UTC.
+2025-05-21 18:19:07,774 - app - INFO - format_datetime_for_display: Localized to UTC: 2025-05-20 07:41:19.792505+00:00. Converting to target timezone 'America/New_York'.
+2025-05-21 18:19:07,775 - app - INFO - format_datetime_for_display: Converted to target timezone: 2025-05-20 03:41:19.792505-04:00. Formatted output: 05/20/2025 03:41 AM
+2025-05-21 18:19:07,775 - app - INFO - Fetched 7 claims for admin view.
+2025-05-21 18:19:07,790 - app - ERROR - [GLOBAL ERROR HANDLER] Unhandled Exception: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2025-05-21 18:19:07,814 - app - ERROR - [GLOBAL ERROR HANDLER] Unhandled Exception: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2025-05-21 18:19:07,815 - app - ERROR - [GLOBAL ERROR HANDLER] Unhandled Exception: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2025-05-21 18:19:07,815 - app - ERROR - [GLOBAL ERROR HANDLER] Unhandled Exception: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2025-05-21 18:19:13,406 - app - INFO - --- admin_view --- DEBUG: FINAL state list passed to template: ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
+2025-05-21 18:19:13,407 - app - INFO - format_datetime_for_display: Received input '2025-05-20 18:45:43.715672+00:00' of type <class 'str'>
+2025-05-21 18:19:13,407 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 18:45:43.715672+00:00', attempting non-T parsing.
+2025-05-21 18:19:13,407 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 18:45:43.715672+00:00' with milliseconds...
+2025-05-21 18:19:13,407 - app - INFO - format_datetime_for_display: Failed non-T with milliseconds for '2025-05-20 18:45:43.715672+00:00': unconverted data remains: +00:00. Trying without milliseconds...
+2025-05-21 18:19:13,408 - app - ERROR - format_datetime_for_display: Failed to parse non-T ('2025-05-20 18:45:43.715672+00:00') without milliseconds either: unconverted data remains: .715672+00:00
+2025-05-21 18:19:13,408 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-20 18:45:43.715672+00:00': unconverted data remains: .715672+00:00
+2025-05-21 18:19:13,408 - app - INFO - format_datetime_for_display: Received input '2025-05-19T20:42:56-05:00' of type <class 'str'>
+2025-05-21 18:19:13,408 - app - INFO - format_datetime_for_display: Detected 'T' in '2025-05-19T20:42:56-05:00', attempting T-specific parsing.
+2025-05-21 18:19:13,408 - app - INFO - format_datetime_for_display: Failed 'T' with seconds, trying 'T' without seconds for '2025-05-19T20:42:56-05:00'.
+2025-05-21 18:19:13,408 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-19T20:42:56-05:00': unconverted data remains: :56-05:00
+2025-05-21 18:19:13,408 - app - INFO - format_datetime_for_display: Received input '2025-05-20 18:42:15.095409+00:00' of type <class 'str'>
+2025-05-21 18:19:13,409 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 18:42:15.095409+00:00', attempting non-T parsing.
+2025-05-21 18:19:13,409 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 18:42:15.095409+00:00' with milliseconds...
+2025-05-21 18:19:13,409 - app - INFO - format_datetime_for_display: Failed non-T with milliseconds for '2025-05-20 18:42:15.095409+00:00': unconverted data remains: +00:00. Trying without milliseconds...
+2025-05-21 18:19:13,409 - app - ERROR - format_datetime_for_display: Failed to parse non-T ('2025-05-20 18:42:15.095409+00:00') without milliseconds either: unconverted data remains: .095409+00:00
+2025-05-21 18:19:13,409 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-20 18:42:15.095409+00:00': unconverted data remains: .095409+00:00
+2025-05-21 18:19:13,409 - app - INFO - format_datetime_for_display: Received input '2025-05-20 18:38:43.039183+00:00' of type <class 'str'>
+2025-05-21 18:19:13,409 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 18:38:43.039183+00:00', attempting non-T parsing.
+2025-05-21 18:19:13,409 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 18:38:43.039183+00:00' with milliseconds...
+2025-05-21 18:19:13,409 - app - INFO - format_datetime_for_display: Failed non-T with milliseconds for '2025-05-20 18:38:43.039183+00:00': unconverted data remains: +00:00. Trying without milliseconds...
+2025-05-21 18:19:13,410 - app - ERROR - format_datetime_for_display: Failed to parse non-T ('2025-05-20 18:38:43.039183+00:00') without milliseconds either: unconverted data remains: .039183+00:00
+2025-05-21 18:19:13,410 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-20 18:38:43.039183+00:00': unconverted data remains: .039183+00:00
+2025-05-21 18:19:13,410 - app - INFO - format_datetime_for_display: Received input '2025-05-20 09:16:40.978059+00:00' of type <class 'str'>
+2025-05-21 18:19:13,410 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 09:16:40.978059+00:00', attempting non-T parsing.
+2025-05-21 18:19:13,410 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 09:16:40.978059+00:00' with milliseconds...
+2025-05-21 18:19:13,410 - app - INFO - format_datetime_for_display: Failed non-T with milliseconds for '2025-05-20 09:16:40.978059+00:00': unconverted data remains: +00:00. Trying without milliseconds...
+2025-05-21 18:19:13,410 - app - ERROR - format_datetime_for_display: Failed to parse non-T ('2025-05-20 09:16:40.978059+00:00') without milliseconds either: unconverted data remains: .978059+00:00
+2025-05-21 18:19:13,410 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-20 09:16:40.978059+00:00': unconverted data remains: .978059+00:00
+2025-05-21 18:19:13,410 - app - INFO - format_datetime_for_display: Received input '2025-05-19T20:42:56-05:00' of type <class 'str'>
+2025-05-21 18:19:13,410 - app - INFO - format_datetime_for_display: Detected 'T' in '2025-05-19T20:42:56-05:00', attempting T-specific parsing.
+2025-05-21 18:19:13,411 - app - INFO - format_datetime_for_display: Failed 'T' with seconds, trying 'T' without seconds for '2025-05-19T20:42:56-05:00'.
+2025-05-21 18:19:13,411 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-19T20:42:56-05:00': unconverted data remains: :56-05:00
+2025-05-21 18:19:13,411 - app - INFO - format_datetime_for_display: Received input '2025-05-20 09:11:19.549011+00:00' of type <class 'str'>
+2025-05-21 18:19:13,411 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 09:11:19.549011+00:00', attempting non-T parsing.
+2025-05-21 18:19:13,411 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 09:11:19.549011+00:00' with milliseconds...
+2025-05-21 18:19:13,411 - app - INFO - format_datetime_for_display: Failed non-T with milliseconds for '2025-05-20 09:11:19.549011+00:00': unconverted data remains: +00:00. Trying without milliseconds...
+2025-05-21 18:19:13,411 - app - ERROR - format_datetime_for_display: Failed to parse non-T ('2025-05-20 09:11:19.549011+00:00') without milliseconds either: unconverted data remains: .549011+00:00
+2025-05-21 18:19:13,411 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-20 09:11:19.549011+00:00': unconverted data remains: .549011+00:00
+2025-05-21 18:19:13,411 - app - INFO - format_datetime_for_display: Received input '2025-05-20 08:05:11.151699+00:00' of type <class 'str'>
+2025-05-21 18:19:13,411 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 08:05:11.151699+00:00', attempting non-T parsing.
+2025-05-21 18:19:13,411 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 08:05:11.151699+00:00' with milliseconds...
+2025-05-21 18:19:13,412 - app - INFO - format_datetime_for_display: Failed non-T with milliseconds for '2025-05-20 08:05:11.151699+00:00': unconverted data remains: +00:00. Trying without milliseconds...
+2025-05-21 18:19:13,412 - app - ERROR - format_datetime_for_display: Failed to parse non-T ('2025-05-20 08:05:11.151699+00:00') without milliseconds either: unconverted data remains: .151699+00:00
+2025-05-21 18:19:13,412 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-20 08:05:11.151699+00:00': unconverted data remains: .151699+00:00
+2025-05-21 18:19:13,412 - app - INFO - format_datetime_for_display: Received input '2025-05-20 07:41:19.792505' of type <class 'str'>
+2025-05-21 18:19:13,412 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 07:41:19.792505', attempting non-T parsing.
+2025-05-21 18:19:13,412 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 07:41:19.792505' with milliseconds...
+2025-05-21 18:19:13,412 - app - INFO - format_datetime_for_display: Parsed non-T with milliseconds: 2025-05-20 07:41:19.792505
+2025-05-21 18:19:13,412 - app - INFO - format_datetime_for_display: Successfully processed input. Parsed datetime: 2025-05-20 07:41:19.792505. Localizing to UTC.
+2025-05-21 18:19:13,412 - app - INFO - format_datetime_for_display: Localized to UTC: 2025-05-20 07:41:19.792505+00:00. Converting to target timezone 'America/New_York'.
+2025-05-21 18:19:13,412 - app - INFO - format_datetime_for_display: Converted to target timezone: 2025-05-20 03:41:19.792505-04:00. Formatted output: 05/20/2025 03:41 AM
+2025-05-21 18:19:13,412 - app - INFO - Fetched 7 claims for admin view.
+2025-05-21 18:19:13,430 - app - ERROR - [GLOBAL ERROR HANDLER] Unhandled Exception: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2025-05-21 18:19:13,464 - app - ERROR - [GLOBAL ERROR HANDLER] Unhandled Exception: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2025-05-21 18:19:13,465 - app - ERROR - [GLOBAL ERROR HANDLER] Unhandled Exception: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2025-05-21 18:19:13,466 - app - ERROR - [GLOBAL ERROR HANDLER] Unhandled Exception: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2025-05-21 18:19:21,017 - app - ERROR - [GLOBAL ERROR HANDLER] Unhandled Exception: no such column: role
+Traceback (most recent call last):
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/src/app.py", line 530, in decorated_function
+    return f(*args, **kws)
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/src/app.py", line 541, in superadmin
+    users = cursor.execute('SELECT id, username, role FROM users').fetchall()
+            ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: role
+
+2025-05-21 18:19:22,023 - app - ERROR - [GLOBAL ERROR HANDLER] Unhandled Exception: no such column: role
+Traceback (most recent call last):
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/src/app.py", line 530, in decorated_function
+    return f(*args, **kws)
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/src/app.py", line 541, in superadmin
+    users = cursor.execute('SELECT id, username, role FROM users').fetchall()
+            ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: role
+
+2025-05-21 18:19:22,827 - app - ERROR - [GLOBAL ERROR HANDLER] Unhandled Exception: no such column: role
+Traceback (most recent call last):
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/src/app.py", line 530, in decorated_function
+    return f(*args, **kws)
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/src/app.py", line 541, in superadmin
+    users = cursor.execute('SELECT id, username, role FROM users').fetchall()
+            ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.OperationalError: no such column: role
+
+2025-05-21 18:19:23,631 - app - INFO - --- admin_view --- DEBUG: FINAL state list passed to template: ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY']
+2025-05-21 18:19:23,632 - app - INFO - format_datetime_for_display: Received input '2025-05-20 18:45:43.715672+00:00' of type <class 'str'>
+2025-05-21 18:19:23,632 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 18:45:43.715672+00:00', attempting non-T parsing.
+2025-05-21 18:19:23,632 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 18:45:43.715672+00:00' with milliseconds...
+2025-05-21 18:19:23,632 - app - INFO - format_datetime_for_display: Failed non-T with milliseconds for '2025-05-20 18:45:43.715672+00:00': unconverted data remains: +00:00. Trying without milliseconds...
+2025-05-21 18:19:23,632 - app - ERROR - format_datetime_for_display: Failed to parse non-T ('2025-05-20 18:45:43.715672+00:00') without milliseconds either: unconverted data remains: .715672+00:00
+2025-05-21 18:19:23,632 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-20 18:45:43.715672+00:00': unconverted data remains: .715672+00:00
+2025-05-21 18:19:23,633 - app - INFO - format_datetime_for_display: Received input '2025-05-19T20:42:56-05:00' of type <class 'str'>
+2025-05-21 18:19:23,633 - app - INFO - format_datetime_for_display: Detected 'T' in '2025-05-19T20:42:56-05:00', attempting T-specific parsing.
+2025-05-21 18:19:23,633 - app - INFO - format_datetime_for_display: Failed 'T' with seconds, trying 'T' without seconds for '2025-05-19T20:42:56-05:00'.
+2025-05-21 18:19:23,633 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-19T20:42:56-05:00': unconverted data remains: :56-05:00
+2025-05-21 18:19:23,633 - app - INFO - format_datetime_for_display: Received input '2025-05-20 18:42:15.095409+00:00' of type <class 'str'>
+2025-05-21 18:19:23,633 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 18:42:15.095409+00:00', attempting non-T parsing.
+2025-05-21 18:19:23,633 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 18:42:15.095409+00:00' with milliseconds...
+2025-05-21 18:19:23,633 - app - INFO - format_datetime_for_display: Failed non-T with milliseconds for '2025-05-20 18:42:15.095409+00:00': unconverted data remains: +00:00. Trying without milliseconds...
+2025-05-21 18:19:23,633 - app - ERROR - format_datetime_for_display: Failed to parse non-T ('2025-05-20 18:42:15.095409+00:00') without milliseconds either: unconverted data remains: .095409+00:00
+2025-05-21 18:19:23,634 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-20 18:42:15.095409+00:00': unconverted data remains: .095409+00:00
+2025-05-21 18:19:23,634 - app - INFO - format_datetime_for_display: Received input '2025-05-20 18:38:43.039183+00:00' of type <class 'str'>
+2025-05-21 18:19:23,634 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 18:38:43.039183+00:00', attempting non-T parsing.
+2025-05-21 18:19:23,634 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 18:38:43.039183+00:00' with milliseconds...
+2025-05-21 18:19:23,634 - app - INFO - format_datetime_for_display: Failed non-T with milliseconds for '2025-05-20 18:38:43.039183+00:00': unconverted data remains: +00:00. Trying without milliseconds...
+2025-05-21 18:19:23,634 - app - ERROR - format_datetime_for_display: Failed to parse non-T ('2025-05-20 18:38:43.039183+00:00') without milliseconds either: unconverted data remains: .039183+00:00
+2025-05-21 18:19:23,634 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-20 18:38:43.039183+00:00': unconverted data remains: .039183+00:00
+2025-05-21 18:19:23,634 - app - INFO - format_datetime_for_display: Received input '2025-05-20 09:16:40.978059+00:00' of type <class 'str'>
+2025-05-21 18:19:23,634 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 09:16:40.978059+00:00', attempting non-T parsing.
+2025-05-21 18:19:23,634 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 09:16:40.978059+00:00' with milliseconds...
+2025-05-21 18:19:23,634 - app - INFO - format_datetime_for_display: Failed non-T with milliseconds for '2025-05-20 09:16:40.978059+00:00': unconverted data remains: +00:00. Trying without milliseconds...
+2025-05-21 18:19:23,635 - app - ERROR - format_datetime_for_display: Failed to parse non-T ('2025-05-20 09:16:40.978059+00:00') without milliseconds either: unconverted data remains: .978059+00:00
+2025-05-21 18:19:23,635 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-20 09:16:40.978059+00:00': unconverted data remains: .978059+00:00
+2025-05-21 18:19:23,635 - app - INFO - format_datetime_for_display: Received input '2025-05-19T20:42:56-05:00' of type <class 'str'>
+2025-05-21 18:19:23,635 - app - INFO - format_datetime_for_display: Detected 'T' in '2025-05-19T20:42:56-05:00', attempting T-specific parsing.
+2025-05-21 18:19:23,635 - app - INFO - format_datetime_for_display: Failed 'T' with seconds, trying 'T' without seconds for '2025-05-19T20:42:56-05:00'.
+2025-05-21 18:19:23,635 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-19T20:42:56-05:00': unconverted data remains: :56-05:00
+2025-05-21 18:19:23,635 - app - INFO - format_datetime_for_display: Received input '2025-05-20 09:11:19.549011+00:00' of type <class 'str'>
+2025-05-21 18:19:23,635 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 09:11:19.549011+00:00', attempting non-T parsing.
+2025-05-21 18:19:23,635 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 09:11:19.549011+00:00' with milliseconds...
+2025-05-21 18:19:23,635 - app - INFO - format_datetime_for_display: Failed non-T with milliseconds for '2025-05-20 09:11:19.549011+00:00': unconverted data remains: +00:00. Trying without milliseconds...
+2025-05-21 18:19:23,635 - app - ERROR - format_datetime_for_display: Failed to parse non-T ('2025-05-20 09:11:19.549011+00:00') without milliseconds either: unconverted data remains: .549011+00:00
+2025-05-21 18:19:23,635 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-20 09:11:19.549011+00:00': unconverted data remains: .549011+00:00
+2025-05-21 18:19:23,635 - app - INFO - format_datetime_for_display: Received input '2025-05-20 08:05:11.151699+00:00' of type <class 'str'>
+2025-05-21 18:19:23,636 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 08:05:11.151699+00:00', attempting non-T parsing.
+2025-05-21 18:19:23,636 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 08:05:11.151699+00:00' with milliseconds...
+2025-05-21 18:19:23,636 - app - INFO - format_datetime_for_display: Failed non-T with milliseconds for '2025-05-20 08:05:11.151699+00:00': unconverted data remains: +00:00. Trying without milliseconds...
+2025-05-21 18:19:23,636 - app - ERROR - format_datetime_for_display: Failed to parse non-T ('2025-05-20 08:05:11.151699+00:00') without milliseconds either: unconverted data remains: .151699+00:00
+2025-05-21 18:19:23,636 - app - ERROR - format_datetime_for_display: General error converting datetime input '2025-05-20 08:05:11.151699+00:00': unconverted data remains: .151699+00:00
+2025-05-21 18:19:23,636 - app - INFO - format_datetime_for_display: Received input '2025-05-20 07:41:19.792505' of type <class 'str'>
+2025-05-21 18:19:23,636 - app - INFO - format_datetime_for_display: No 'T' in '2025-05-20 07:41:19.792505', attempting non-T parsing.
+2025-05-21 18:19:23,636 - app - INFO - format_datetime_for_display: Trying to parse '2025-05-20 07:41:19.792505' with milliseconds...
+2025-05-21 18:19:23,636 - app - INFO - format_datetime_for_display: Parsed non-T with milliseconds: 2025-05-20 07:41:19.792505
+2025-05-21 18:19:23,636 - app - INFO - format_datetime_for_display: Successfully processed input. Parsed datetime: 2025-05-20 07:41:19.792505. Localizing to UTC.
+2025-05-21 18:19:23,636 - app - INFO - format_datetime_for_display: Localized to UTC: 2025-05-20 07:41:19.792505+00:00. Converting to target timezone 'America/New_York'.
+2025-05-21 18:19:23,636 - app - INFO - format_datetime_for_display: Converted to target timezone: 2025-05-20 03:41:19.792505-04:00. Formatted output: 05/20/2025 03:41 AM
+2025-05-21 18:19:23,637 - app - INFO - Fetched 7 claims for admin view.
+2025-05-21 18:19:23,650 - app - ERROR - [GLOBAL ERROR HANDLER] Unhandled Exception: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2025-05-21 18:19:23,769 - app - ERROR - [GLOBAL ERROR HANDLER] Unhandled Exception: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2025-05-21 18:19:23,770 - app - ERROR - [GLOBAL ERROR HANDLER] Unhandled Exception: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2025-05-21 18:19:23,770 - app - ERROR - [GLOBAL ERROR HANDLER] Unhandled Exception: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2025-05-21 18:19:55,624 - app - ERROR - [GLOBAL ERROR HANDLER] Unhandled Exception: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2025-05-21 18:19:55,624 - app - ERROR - [GLOBAL ERROR HANDLER] Unhandled Exception: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2025-05-21 18:19:55,625 - app - ERROR - [GLOBAL ERROR HANDLER] Unhandled Exception: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+Traceback (most recent call last):
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/flask/ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+  File "/Users/danielgoodwyn/src/west-plaza-j6-ftca-form95/venv/lib/python3.13/site-packages/werkzeug/routing/map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2025-05-21 18:56:01,149 - app - INFO - Custom logging initialized for file and console.
+2025-05-21 18:56:01,149 - app - INFO - Entered create_tables_if_not_exist function.
+2025-05-21 18:56:01,149 - app - INFO - Successfully obtained DB cursor.
+2025-05-21 18:56:01,149 - app - INFO - Checking 'claims' table. Exists: True
+2025-05-21 18:56:01,149 - app - INFO - 'claims' table exists. Checking for missing columns based on DB_SCHEMA.
+2025-05-21 18:56:01,150 - app - INFO - Existing columns in 'claims': ['id', 'field1_agency', 'field2_name', 'field2_address', 'field2_city', 'field2_state', 'field2_zip', 'field3_type_employment', 'field_pdf_4_dob', 'field_pdf_5_marital_status', 'field6_checkbox_military', 'field7_checkbox_civilian', 'field8_basis_of_claim', 'field9_property_damage_description', 'field10_nature_of_injury', 'field11_witness_name_1', 'field11_witness_address_1', 'field11_witness_name_2', 'field11_witness_address_2', 'field12a_property_damage_amount', 'field12b_personal_injury_amount', 'field12c_wrongful_death_amount', 'field12d_total_claim_amount', 'field13a_signature', 'field_pdf_13b_phone', 'field14_date_signed', 'user_email_address', 'supplemental_question_1_capitol_experience', 'supplemental_question_2_injuries_damages', 'supplemental_question_3_entry_exit_time', 'supplemental_question_4_inside_capitol_details', 'filled_pdf_filename', 'field17_signature_of_claimant', 'field18_date_of_signature', 'created_at', 'updated_at']
+2025-05-21 18:56:01,150 - app - INFO - DB_SCHEMA to check against: ['field1_agency TEXT', 'field2_name TEXT', 'field2_address TEXT', 'field2_city TEXT', 'field2_state TEXT', 'field2_zip TEXT', 'field3_type_employment TEXT', 'field_pdf_4_dob TEXT', 'field_pdf_5_marital_status TEXT', 'field6_checkbox_military TEXT', 'field7_checkbox_civilian TEXT', 'field8_basis_of_claim TEXT', 'field9_property_damage_description TEXT', 'field10_nature_of_injury TEXT', 'field11_witness_name_1 TEXT', 'field11_witness_address_1 TEXT', 'field11_witness_name_2 TEXT', 'field11_witness_address_2 TEXT', 'field12a_property_damage_amount TEXT', 'field12b_personal_injury_amount TEXT', 'field12c_wrongful_death_amount TEXT', 'field12d_total_claim_amount TEXT', 'field13a_signature TEXT', 'field_pdf_13b_phone TEXT', 'field14_date_signed TEXT', 'user_email_address TEXT', 'supplemental_question_1_capitol_experience TEXT', 'supplemental_question_2_injuries_damages TEXT', 'supplemental_question_3_entry_exit_time TEXT', 'supplemental_question_4_inside_capitol_details TEXT', 'filled_pdf_filename TEXT', 'field17_signature_of_claimant TEXT', 'field18_date_of_signature TEXT', 'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP']
+2025-05-21 18:56:01,151 - app - INFO - Parsed schema column definitions from DB_SCHEMA: {'field1_agency': 'field1_agency TEXT', 'field2_name': 'field2_name TEXT', 'field2_address': 'field2_address TEXT', 'field2_city': 'field2_city TEXT', 'field2_state': 'field2_state TEXT', 'field2_zip': 'field2_zip TEXT', 'field3_type_employment': 'field3_type_employment TEXT', 'field_pdf_4_dob': 'field_pdf_4_dob TEXT', 'field_pdf_5_marital_status': 'field_pdf_5_marital_status TEXT', 'field6_checkbox_military': 'field6_checkbox_military TEXT', 'field7_checkbox_civilian': 'field7_checkbox_civilian TEXT', 'field8_basis_of_claim': 'field8_basis_of_claim TEXT', 'field9_property_damage_description': 'field9_property_damage_description TEXT', 'field10_nature_of_injury': 'field10_nature_of_injury TEXT', 'field11_witness_name_1': 'field11_witness_name_1 TEXT', 'field11_witness_address_1': 'field11_witness_address_1 TEXT', 'field11_witness_name_2': 'field11_witness_name_2 TEXT', 'field11_witness_address_2': 'field11_witness_address_2 TEXT', 'field12a_property_damage_amount': 'field12a_property_damage_amount TEXT', 'field12b_personal_injury_amount': 'field12b_personal_injury_amount TEXT', 'field12c_wrongful_death_amount': 'field12c_wrongful_death_amount TEXT', 'field12d_total_claim_amount': 'field12d_total_claim_amount TEXT', 'field13a_signature': 'field13a_signature TEXT', 'field_pdf_13b_phone': 'field_pdf_13b_phone TEXT', 'field14_date_signed': 'field14_date_signed TEXT', 'user_email_address': 'user_email_address TEXT', 'supplemental_question_1_capitol_experience': 'supplemental_question_1_capitol_experience TEXT', 'supplemental_question_2_injuries_damages': 'supplemental_question_2_injuries_damages TEXT', 'supplemental_question_3_entry_exit_time': 'supplemental_question_3_entry_exit_time TEXT', 'supplemental_question_4_inside_capitol_details': 'supplemental_question_4_inside_capitol_details TEXT', 'filled_pdf_filename': 'filled_pdf_filename TEXT', 'field17_signature_of_claimant': 'field17_signature_of_claimant TEXT', 'field18_date_of_signature': 'field18_date_of_signature TEXT', 'created_at': 'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'updated_at': 'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP'}
+2025-05-21 18:56:01,152 - app - INFO - 'claims' table schema appears up to date with DB_SCHEMA. No columns were added.
+2025-05-21 18:56:01,152 - app - INFO - 'users' table already exists.
+2025-05-21 18:56:01,152 - app - INFO - Exiting create_tables_if_not_exist function.
+2025-05-21 18:56:01,152 - app - INFO - Database schema checked/initialized successfully (within app context).
+2025-05-21 18:56:01,154 - app - INFO - Starting Flask development server.
+2025-05-21 19:00:16,636 - app - INFO - Custom logging initialized for file and console.
+2025-05-21 19:00:16,636 - app - INFO - Entered create_tables_if_not_exist function.
+2025-05-21 19:00:16,636 - app - INFO - Successfully obtained DB cursor.
+2025-05-21 19:00:16,636 - app - INFO - Checking 'claims' table. Exists: True
+2025-05-21 19:00:16,636 - app - INFO - 'claims' table exists. Checking for missing columns based on DB_SCHEMA.
+2025-05-21 19:00:16,636 - app - INFO - Existing columns in 'claims': ['id', 'field1_agency', 'field2_name', 'field2_address', 'field2_city', 'field2_state', 'field2_zip', 'field3_type_employment', 'field_pdf_4_dob', 'field_pdf_5_marital_status', 'field6_checkbox_military', 'field7_checkbox_civilian', 'field8_basis_of_claim', 'field9_property_damage_description', 'field10_nature_of_injury', 'field11_witness_name_1', 'field11_witness_address_1', 'field11_witness_name_2', 'field11_witness_address_2', 'field12a_property_damage_amount', 'field12b_personal_injury_amount', 'field12c_wrongful_death_amount', 'field12d_total_claim_amount', 'field13a_signature', 'field_pdf_13b_phone', 'field14_date_signed', 'user_email_address', 'supplemental_question_1_capitol_experience', 'supplemental_question_2_injuries_damages', 'supplemental_question_3_entry_exit_time', 'supplemental_question_4_inside_capitol_details', 'filled_pdf_filename', 'field17_signature_of_claimant', 'field18_date_of_signature', 'created_at', 'updated_at']
+2025-05-21 19:00:16,636 - app - INFO - DB_SCHEMA to check against: ['field1_agency TEXT', 'field2_name TEXT', 'field2_address TEXT', 'field2_city TEXT', 'field2_state TEXT', 'field2_zip TEXT', 'field3_type_employment TEXT', 'field_pdf_4_dob TEXT', 'field_pdf_5_marital_status TEXT', 'field6_checkbox_military TEXT', 'field7_checkbox_civilian TEXT', 'field8_basis_of_claim TEXT', 'field9_property_damage_description TEXT', 'field10_nature_of_injury TEXT', 'field11_witness_name_1 TEXT', 'field11_witness_address_1 TEXT', 'field11_witness_name_2 TEXT', 'field11_witness_address_2 TEXT', 'field12a_property_damage_amount TEXT', 'field12b_personal_injury_amount TEXT', 'field12c_wrongful_death_amount TEXT', 'field12d_total_claim_amount TEXT', 'field13a_signature TEXT', 'field_pdf_13b_phone TEXT', 'field14_date_signed TEXT', 'user_email_address TEXT', 'supplemental_question_1_capitol_experience TEXT', 'supplemental_question_2_injuries_damages TEXT', 'supplemental_question_3_entry_exit_time TEXT', 'supplemental_question_4_inside_capitol_details TEXT', 'filled_pdf_filename TEXT', 'field17_signature_of_claimant TEXT', 'field18_date_of_signature TEXT', 'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP']
+2025-05-21 19:00:16,636 - app - INFO - Parsed schema column definitions from DB_SCHEMA: {'field1_agency': 'field1_agency TEXT', 'field2_name': 'field2_name TEXT', 'field2_address': 'field2_address TEXT', 'field2_city': 'field2_city TEXT', 'field2_state': 'field2_state TEXT', 'field2_zip': 'field2_zip TEXT', 'field3_type_employment': 'field3_type_employment TEXT', 'field_pdf_4_dob': 'field_pdf_4_dob TEXT', 'field_pdf_5_marital_status': 'field_pdf_5_marital_status TEXT', 'field6_checkbox_military': 'field6_checkbox_military TEXT', 'field7_checkbox_civilian': 'field7_checkbox_civilian TEXT', 'field8_basis_of_claim': 'field8_basis_of_claim TEXT', 'field9_property_damage_description': 'field9_property_damage_description TEXT', 'field10_nature_of_injury': 'field10_nature_of_injury TEXT', 'field11_witness_name_1': 'field11_witness_name_1 TEXT', 'field11_witness_address_1': 'field11_witness_address_1 TEXT', 'field11_witness_name_2': 'field11_witness_name_2 TEXT', 'field11_witness_address_2': 'field11_witness_address_2 TEXT', 'field12a_property_damage_amount': 'field12a_property_damage_amount TEXT', 'field12b_personal_injury_amount': 'field12b_personal_injury_amount TEXT', 'field12c_wrongful_death_amount': 'field12c_wrongful_death_amount TEXT', 'field12d_total_claim_amount': 'field12d_total_claim_amount TEXT', 'field13a_signature': 'field13a_signature TEXT', 'field_pdf_13b_phone': 'field_pdf_13b_phone TEXT', 'field14_date_signed': 'field14_date_signed TEXT', 'user_email_address': 'user_email_address TEXT', 'supplemental_question_1_capitol_experience': 'supplemental_question_1_capitol_experience TEXT', 'supplemental_question_2_injuries_damages': 'supplemental_question_2_injuries_damages TEXT', 'supplemental_question_3_entry_exit_time': 'supplemental_question_3_entry_exit_time TEXT', 'supplemental_question_4_inside_capitol_details': 'supplemental_question_4_inside_capitol_details TEXT', 'filled_pdf_filename': 'filled_pdf_filename TEXT', 'field17_signature_of_claimant': 'field17_signature_of_claimant TEXT', 'field18_date_of_signature': 'field18_date_of_signature TEXT', 'created_at': 'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'updated_at': 'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP'}
+2025-05-21 19:00:16,637 - app - INFO - 'claims' table schema appears up to date with DB_SCHEMA. No columns were added.
+2025-05-21 19:00:16,637 - app - INFO - 'users' table already exists.
+2025-05-21 19:00:16,637 - app - INFO - Exiting create_tables_if_not_exist function.
+2025-05-21 19:00:16,637 - app - INFO - Database schema checked/initialized successfully (within app context).
+2025-05-21 19:00:16,639 - app - INFO - Starting Flask development server.
+2025-05-21 19:15:41,345 - app - INFO - Custom logging initialized for file and console.
+2025-05-21 19:15:41,345 - app - INFO - Entered create_tables_if_not_exist function.
+2025-05-21 19:15:41,345 - app - INFO - Successfully obtained DB cursor.
+2025-05-21 19:15:41,345 - app - INFO - Checking 'claims' table. Exists: True
+2025-05-21 19:15:41,345 - app - INFO - 'claims' table exists. Checking for missing columns based on DB_SCHEMA.
+2025-05-21 19:15:41,345 - app - INFO - Existing columns in 'claims': ['id', 'field1_agency', 'field2_name', 'field2_address', 'field2_city', 'field2_state', 'field2_zip', 'field3_type_employment', 'field_pdf_4_dob', 'field_pdf_5_marital_status', 'field6_checkbox_military', 'field7_checkbox_civilian', 'field8_basis_of_claim', 'field9_property_damage_description', 'field10_nature_of_injury', 'field11_witness_name_1', 'field11_witness_address_1', 'field11_witness_name_2', 'field11_witness_address_2', 'field12a_property_damage_amount', 'field12b_personal_injury_amount', 'field12c_wrongful_death_amount', 'field12d_total_claim_amount', 'field13a_signature', 'field_pdf_13b_phone', 'field14_date_signed', 'user_email_address', 'supplemental_question_1_capitol_experience', 'supplemental_question_2_injuries_damages', 'supplemental_question_3_entry_exit_time', 'supplemental_question_4_inside_capitol_details', 'filled_pdf_filename', 'field17_signature_of_claimant', 'field18_date_of_signature', 'created_at', 'updated_at']
+2025-05-21 19:15:41,345 - app - INFO - DB_SCHEMA to check against: ['field1_agency TEXT', 'field2_name TEXT', 'field2_address TEXT', 'field2_city TEXT', 'field2_state TEXT', 'field2_zip TEXT', 'field3_type_employment TEXT', 'field_pdf_4_dob TEXT', 'field_pdf_5_marital_status TEXT', 'field6_checkbox_military TEXT', 'field7_checkbox_civilian TEXT', 'field8_basis_of_claim TEXT', 'field9_property_damage_description TEXT', 'field10_nature_of_injury TEXT', 'field11_witness_name_1 TEXT', 'field11_witness_address_1 TEXT', 'field11_witness_name_2 TEXT', 'field11_witness_address_2 TEXT', 'field12a_property_damage_amount TEXT', 'field12b_personal_injury_amount TEXT', 'field12c_wrongful_death_amount TEXT', 'field12d_total_claim_amount TEXT', 'field13a_signature TEXT', 'field_pdf_13b_phone TEXT', 'field14_date_signed TEXT', 'user_email_address TEXT', 'supplemental_question_1_capitol_experience TEXT', 'supplemental_question_2_injuries_damages TEXT', 'supplemental_question_3_entry_exit_time TEXT', 'supplemental_question_4_inside_capitol_details TEXT', 'filled_pdf_filename TEXT', 'field17_signature_of_claimant TEXT', 'field18_date_of_signature TEXT', 'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP']
+2025-05-21 19:15:41,345 - app - INFO - Parsed schema column definitions from DB_SCHEMA: {'field1_agency': 'field1_agency TEXT', 'field2_name': 'field2_name TEXT', 'field2_address': 'field2_address TEXT', 'field2_city': 'field2_city TEXT', 'field2_state': 'field2_state TEXT', 'field2_zip': 'field2_zip TEXT', 'field3_type_employment': 'field3_type_employment TEXT', 'field_pdf_4_dob': 'field_pdf_4_dob TEXT', 'field_pdf_5_marital_status': 'field_pdf_5_marital_status TEXT', 'field6_checkbox_military': 'field6_checkbox_military TEXT', 'field7_checkbox_civilian': 'field7_checkbox_civilian TEXT', 'field8_basis_of_claim': 'field8_basis_of_claim TEXT', 'field9_property_damage_description': 'field9_property_damage_description TEXT', 'field10_nature_of_injury': 'field10_nature_of_injury TEXT', 'field11_witness_name_1': 'field11_witness_name_1 TEXT', 'field11_witness_address_1': 'field11_witness_address_1 TEXT', 'field11_witness_name_2': 'field11_witness_name_2 TEXT', 'field11_witness_address_2': 'field11_witness_address_2 TEXT', 'field12a_property_damage_amount': 'field12a_property_damage_amount TEXT', 'field12b_personal_injury_amount': 'field12b_personal_injury_amount TEXT', 'field12c_wrongful_death_amount': 'field12c_wrongful_death_amount TEXT', 'field12d_total_claim_amount': 'field12d_total_claim_amount TEXT', 'field13a_signature': 'field13a_signature TEXT', 'field_pdf_13b_phone': 'field_pdf_13b_phone TEXT', 'field14_date_signed': 'field14_date_signed TEXT', 'user_email_address': 'user_email_address TEXT', 'supplemental_question_1_capitol_experience': 'supplemental_question_1_capitol_experience TEXT', 'supplemental_question_2_injuries_damages': 'supplemental_question_2_injuries_damages TEXT', 'supplemental_question_3_entry_exit_time': 'supplemental_question_3_entry_exit_time TEXT', 'supplemental_question_4_inside_capitol_details': 'supplemental_question_4_inside_capitol_details TEXT', 'filled_pdf_filename': 'filled_pdf_filename TEXT', 'field17_signature_of_claimant': 'field17_signature_of_claimant TEXT', 'field18_date_of_signature': 'field18_date_of_signature TEXT', 'created_at': 'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'updated_at': 'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP'}
+2025-05-21 19:15:41,346 - app - INFO - 'claims' table schema appears up to date with DB_SCHEMA. No columns were added.
+2025-05-21 19:15:41,346 - app - INFO - 'users' table already exists.
+2025-05-21 19:15:41,346 - app - INFO - Exiting create_tables_if_not_exist function.
+2025-05-21 19:15:41,346 - app - INFO - Database schema checked/initialized successfully (within app context).
+2025-05-21 19:15:41,348 - app - INFO - Starting Flask development server.
+2025-05-21 19:19:45,810 - app - INFO - Custom logging initialized for file and console.
+2025-05-21 19:19:45,810 - app - INFO - Entered create_tables_if_not_exist function.
+2025-05-21 19:19:45,810 - app - INFO - Successfully obtained DB cursor.
+2025-05-21 19:19:45,810 - app - INFO - Checking 'claims' table. Exists: True
+2025-05-21 19:19:45,810 - app - INFO - 'claims' table exists. Checking for missing columns based on DB_SCHEMA.
+2025-05-21 19:19:45,810 - app - INFO - Existing columns in 'claims': ['id', 'field1_agency', 'field2_name', 'field2_address', 'field2_city', 'field2_state', 'field2_zip', 'field3_type_employment', 'field_pdf_4_dob', 'field_pdf_5_marital_status', 'field6_checkbox_military', 'field7_checkbox_civilian', 'field8_basis_of_claim', 'field9_property_damage_description', 'field10_nature_of_injury', 'field11_witness_name_1', 'field11_witness_address_1', 'field11_witness_name_2', 'field11_witness_address_2', 'field12a_property_damage_amount', 'field12b_personal_injury_amount', 'field12c_wrongful_death_amount', 'field12d_total_claim_amount', 'field13a_signature', 'field_pdf_13b_phone', 'field14_date_signed', 'user_email_address', 'supplemental_question_1_capitol_experience', 'supplemental_question_2_injuries_damages', 'supplemental_question_3_entry_exit_time', 'supplemental_question_4_inside_capitol_details', 'filled_pdf_filename', 'field17_signature_of_claimant', 'field18_date_of_signature', 'created_at', 'updated_at']
+2025-05-21 19:19:45,810 - app - INFO - DB_SCHEMA to check against: ['field1_agency TEXT', 'field2_name TEXT', 'field2_address TEXT', 'field2_city TEXT', 'field2_state TEXT', 'field2_zip TEXT', 'field3_type_employment TEXT', 'field_pdf_4_dob TEXT', 'field_pdf_5_marital_status TEXT', 'field6_checkbox_military TEXT', 'field7_checkbox_civilian TEXT', 'field8_basis_of_claim TEXT', 'field9_property_damage_description TEXT', 'field10_nature_of_injury TEXT', 'field11_witness_name_1 TEXT', 'field11_witness_address_1 TEXT', 'field11_witness_name_2 TEXT', 'field11_witness_address_2 TEXT', 'field12a_property_damage_amount TEXT', 'field12b_personal_injury_amount TEXT', 'field12c_wrongful_death_amount TEXT', 'field12d_total_claim_amount TEXT', 'field13a_signature TEXT', 'field_pdf_13b_phone TEXT', 'field14_date_signed TEXT', 'user_email_address TEXT', 'supplemental_question_1_capitol_experience TEXT', 'supplemental_question_2_injuries_damages TEXT', 'supplemental_question_3_entry_exit_time TEXT', 'supplemental_question_4_inside_capitol_details TEXT', 'filled_pdf_filename TEXT', 'field17_signature_of_claimant TEXT', 'field18_date_of_signature TEXT', 'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP']
+2025-05-21 19:19:45,810 - app - INFO - Parsed schema column definitions from DB_SCHEMA: {'field1_agency': 'field1_agency TEXT', 'field2_name': 'field2_name TEXT', 'field2_address': 'field2_address TEXT', 'field2_city': 'field2_city TEXT', 'field2_state': 'field2_state TEXT', 'field2_zip': 'field2_zip TEXT', 'field3_type_employment': 'field3_type_employment TEXT', 'field_pdf_4_dob': 'field_pdf_4_dob TEXT', 'field_pdf_5_marital_status': 'field_pdf_5_marital_status TEXT', 'field6_checkbox_military': 'field6_checkbox_military TEXT', 'field7_checkbox_civilian': 'field7_checkbox_civilian TEXT', 'field8_basis_of_claim': 'field8_basis_of_claim TEXT', 'field9_property_damage_description': 'field9_property_damage_description TEXT', 'field10_nature_of_injury': 'field10_nature_of_injury TEXT', 'field11_witness_name_1': 'field11_witness_name_1 TEXT', 'field11_witness_address_1': 'field11_witness_address_1 TEXT', 'field11_witness_name_2': 'field11_witness_name_2 TEXT', 'field11_witness_address_2': 'field11_witness_address_2 TEXT', 'field12a_property_damage_amount': 'field12a_property_damage_amount TEXT', 'field12b_personal_injury_amount': 'field12b_personal_injury_amount TEXT', 'field12c_wrongful_death_amount': 'field12c_wrongful_death_amount TEXT', 'field12d_total_claim_amount': 'field12d_total_claim_amount TEXT', 'field13a_signature': 'field13a_signature TEXT', 'field_pdf_13b_phone': 'field_pdf_13b_phone TEXT', 'field14_date_signed': 'field14_date_signed TEXT', 'user_email_address': 'user_email_address TEXT', 'supplemental_question_1_capitol_experience': 'supplemental_question_1_capitol_experience TEXT', 'supplemental_question_2_injuries_damages': 'supplemental_question_2_injuries_damages TEXT', 'supplemental_question_3_entry_exit_time': 'supplemental_question_3_entry_exit_time TEXT', 'supplemental_question_4_inside_capitol_details': 'supplemental_question_4_inside_capitol_details TEXT', 'filled_pdf_filename': 'filled_pdf_filename TEXT', 'field17_signature_of_claimant': 'field17_signature_of_claimant TEXT', 'field18_date_of_signature': 'field18_date_of_signature TEXT', 'created_at': 'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'updated_at': 'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP'}
+2025-05-21 19:19:45,810 - app - INFO - 'claims' table schema appears up to date with DB_SCHEMA. No columns were added.
+2025-05-21 19:19:45,810 - app - INFO - 'users' table already exists.
+2025-05-21 19:19:45,811 - app - INFO - Exiting create_tables_if_not_exist function.
+2025-05-21 19:19:45,811 - app - INFO - Database schema checked/initialized successfully (within app context).
+2025-05-21 19:19:45,813 - app - INFO - Starting Flask development server.
+2025-05-21 19:23:30,618 - app - INFO - Custom logging initialized for file and console.
+2025-05-21 19:23:30,619 - app - INFO - Entered create_tables_if_not_exist function.
+2025-05-21 19:23:30,619 - app - INFO - Successfully obtained DB cursor.
+2025-05-21 19:23:30,619 - app - INFO - Checking 'claims' table. Exists: True
+2025-05-21 19:23:30,619 - app - INFO - 'claims' table exists. Checking for missing columns based on DB_SCHEMA.
+2025-05-21 19:23:30,619 - app - INFO - Existing columns in 'claims': ['id', 'field1_agency', 'field2_name', 'field2_address', 'field2_city', 'field2_state', 'field2_zip', 'field3_type_employment', 'field_pdf_4_dob', 'field_pdf_5_marital_status', 'field6_checkbox_military', 'field7_checkbox_civilian', 'field8_basis_of_claim', 'field9_property_damage_description', 'field10_nature_of_injury', 'field11_witness_name_1', 'field11_witness_address_1', 'field11_witness_name_2', 'field11_witness_address_2', 'field12a_property_damage_amount', 'field12b_personal_injury_amount', 'field12c_wrongful_death_amount', 'field12d_total_claim_amount', 'field13a_signature', 'field_pdf_13b_phone', 'field14_date_signed', 'user_email_address', 'supplemental_question_1_capitol_experience', 'supplemental_question_2_injuries_damages', 'supplemental_question_3_entry_exit_time', 'supplemental_question_4_inside_capitol_details', 'filled_pdf_filename', 'field17_signature_of_claimant', 'field18_date_of_signature', 'created_at', 'updated_at']
+2025-05-21 19:23:30,619 - app - INFO - DB_SCHEMA to check against: ['field1_agency TEXT', 'field2_name TEXT', 'field2_address TEXT', 'field2_city TEXT', 'field2_state TEXT', 'field2_zip TEXT', 'field3_type_employment TEXT', 'field_pdf_4_dob TEXT', 'field_pdf_5_marital_status TEXT', 'field6_checkbox_military TEXT', 'field7_checkbox_civilian TEXT', 'field8_basis_of_claim TEXT', 'field9_property_damage_description TEXT', 'field10_nature_of_injury TEXT', 'field11_witness_name_1 TEXT', 'field11_witness_address_1 TEXT', 'field11_witness_name_2 TEXT', 'field11_witness_address_2 TEXT', 'field12a_property_damage_amount TEXT', 'field12b_personal_injury_amount TEXT', 'field12c_wrongful_death_amount TEXT', 'field12d_total_claim_amount TEXT', 'field13a_signature TEXT', 'field_pdf_13b_phone TEXT', 'field14_date_signed TEXT', 'user_email_address TEXT', 'supplemental_question_1_capitol_experience TEXT', 'supplemental_question_2_injuries_damages TEXT', 'supplemental_question_3_entry_exit_time TEXT', 'supplemental_question_4_inside_capitol_details TEXT', 'filled_pdf_filename TEXT', 'field17_signature_of_claimant TEXT', 'field18_date_of_signature TEXT', 'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP']
+2025-05-21 19:23:30,619 - app - INFO - Parsed schema column definitions from DB_SCHEMA: {'field1_agency': 'field1_agency TEXT', 'field2_name': 'field2_name TEXT', 'field2_address': 'field2_address TEXT', 'field2_city': 'field2_city TEXT', 'field2_state': 'field2_state TEXT', 'field2_zip': 'field2_zip TEXT', 'field3_type_employment': 'field3_type_employment TEXT', 'field_pdf_4_dob': 'field_pdf_4_dob TEXT', 'field_pdf_5_marital_status': 'field_pdf_5_marital_status TEXT', 'field6_checkbox_military': 'field6_checkbox_military TEXT', 'field7_checkbox_civilian': 'field7_checkbox_civilian TEXT', 'field8_basis_of_claim': 'field8_basis_of_claim TEXT', 'field9_property_damage_description': 'field9_property_damage_description TEXT', 'field10_nature_of_injury': 'field10_nature_of_injury TEXT', 'field11_witness_name_1': 'field11_witness_name_1 TEXT', 'field11_witness_address_1': 'field11_witness_address_1 TEXT', 'field11_witness_name_2': 'field11_witness_name_2 TEXT', 'field11_witness_address_2': 'field11_witness_address_2 TEXT', 'field12a_property_damage_amount': 'field12a_property_damage_amount TEXT', 'field12b_personal_injury_amount': 'field12b_personal_injury_amount TEXT', 'field12c_wrongful_death_amount': 'field12c_wrongful_death_amount TEXT', 'field12d_total_claim_amount': 'field12d_total_claim_amount TEXT', 'field13a_signature': 'field13a_signature TEXT', 'field_pdf_13b_phone': 'field_pdf_13b_phone TEXT', 'field14_date_signed': 'field14_date_signed TEXT', 'user_email_address': 'user_email_address TEXT', 'supplemental_question_1_capitol_experience': 'supplemental_question_1_capitol_experience TEXT', 'supplemental_question_2_injuries_damages': 'supplemental_question_2_injuries_damages TEXT', 'supplemental_question_3_entry_exit_time': 'supplemental_question_3_entry_exit_time TEXT', 'supplemental_question_4_inside_capitol_details': 'supplemental_question_4_inside_capitol_details TEXT', 'filled_pdf_filename': 'filled_pdf_filename TEXT', 'field17_signature_of_claimant': 'field17_signature_of_claimant TEXT', 'field18_date_of_signature': 'field18_date_of_signature TEXT', 'created_at': 'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'updated_at': 'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP'}
+2025-05-21 19:23:30,619 - app - INFO - 'claims' table schema appears up to date with DB_SCHEMA. No columns were added.
+2025-05-21 19:23:30,619 - app - INFO - 'users' table already exists.
+2025-05-21 19:23:30,619 - app - INFO - Exiting create_tables_if_not_exist function.
+2025-05-21 19:23:30,619 - app - INFO - Database schema checked/initialized successfully (within app context).
+2025-05-21 19:23:30,621 - app - INFO - Starting Flask development server.
+2025-05-21 19:27:14,415 - app - INFO - Custom logging initialized for file and console.
+2025-05-21 19:27:14,415 - app - INFO - Entered create_tables_if_not_exist function.
+2025-05-21 19:27:14,415 - app - INFO - Successfully obtained DB cursor.
+2025-05-21 19:27:14,416 - app - INFO - Checking 'claims' table. Exists: True
+2025-05-21 19:27:14,416 - app - INFO - 'claims' table exists. Checking for missing columns based on DB_SCHEMA.
+2025-05-21 19:27:14,416 - app - INFO - Existing columns in 'claims': ['id', 'field1_agency', 'field2_name', 'field2_address', 'field2_city', 'field2_state', 'field2_zip', 'field3_type_employment', 'field_pdf_4_dob', 'field_pdf_5_marital_status', 'field6_checkbox_military', 'field7_checkbox_civilian', 'field8_basis_of_claim', 'field9_property_damage_description', 'field10_nature_of_injury', 'field11_witness_name_1', 'field11_witness_address_1', 'field11_witness_name_2', 'field11_witness_address_2', 'field12a_property_damage_amount', 'field12b_personal_injury_amount', 'field12c_wrongful_death_amount', 'field12d_total_claim_amount', 'field13a_signature', 'field_pdf_13b_phone', 'field14_date_signed', 'user_email_address', 'supplemental_question_1_capitol_experience', 'supplemental_question_2_injuries_damages', 'supplemental_question_3_entry_exit_time', 'supplemental_question_4_inside_capitol_details', 'filled_pdf_filename', 'field17_signature_of_claimant', 'field18_date_of_signature', 'created_at', 'updated_at']
+2025-05-21 19:27:14,416 - app - INFO - DB_SCHEMA to check against: ['field1_agency TEXT', 'field2_name TEXT', 'field2_address TEXT', 'field2_city TEXT', 'field2_state TEXT', 'field2_zip TEXT', 'field3_type_employment TEXT', 'field_pdf_4_dob TEXT', 'field_pdf_5_marital_status TEXT', 'field6_checkbox_military TEXT', 'field7_checkbox_civilian TEXT', 'field8_basis_of_claim TEXT', 'field9_property_damage_description TEXT', 'field10_nature_of_injury TEXT', 'field11_witness_name_1 TEXT', 'field11_witness_address_1 TEXT', 'field11_witness_name_2 TEXT', 'field11_witness_address_2 TEXT', 'field12a_property_damage_amount TEXT', 'field12b_personal_injury_amount TEXT', 'field12c_wrongful_death_amount TEXT', 'field12d_total_claim_amount TEXT', 'field13a_signature TEXT', 'field_pdf_13b_phone TEXT', 'field14_date_signed TEXT', 'user_email_address TEXT', 'supplemental_question_1_capitol_experience TEXT', 'supplemental_question_2_injuries_damages TEXT', 'supplemental_question_3_entry_exit_time TEXT', 'supplemental_question_4_inside_capitol_details TEXT', 'filled_pdf_filename TEXT', 'field17_signature_of_claimant TEXT', 'field18_date_of_signature TEXT', 'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP']
+2025-05-21 19:27:14,416 - app - INFO - Parsed schema column definitions from DB_SCHEMA: {'field1_agency': 'field1_agency TEXT', 'field2_name': 'field2_name TEXT', 'field2_address': 'field2_address TEXT', 'field2_city': 'field2_city TEXT', 'field2_state': 'field2_state TEXT', 'field2_zip': 'field2_zip TEXT', 'field3_type_employment': 'field3_type_employment TEXT', 'field_pdf_4_dob': 'field_pdf_4_dob TEXT', 'field_pdf_5_marital_status': 'field_pdf_5_marital_status TEXT', 'field6_checkbox_military': 'field6_checkbox_military TEXT', 'field7_checkbox_civilian': 'field7_checkbox_civilian TEXT', 'field8_basis_of_claim': 'field8_basis_of_claim TEXT', 'field9_property_damage_description': 'field9_property_damage_description TEXT', 'field10_nature_of_injury': 'field10_nature_of_injury TEXT', 'field11_witness_name_1': 'field11_witness_name_1 TEXT', 'field11_witness_address_1': 'field11_witness_address_1 TEXT', 'field11_witness_name_2': 'field11_witness_name_2 TEXT', 'field11_witness_address_2': 'field11_witness_address_2 TEXT', 'field12a_property_damage_amount': 'field12a_property_damage_amount TEXT', 'field12b_personal_injury_amount': 'field12b_personal_injury_amount TEXT', 'field12c_wrongful_death_amount': 'field12c_wrongful_death_amount TEXT', 'field12d_total_claim_amount': 'field12d_total_claim_amount TEXT', 'field13a_signature': 'field13a_signature TEXT', 'field_pdf_13b_phone': 'field_pdf_13b_phone TEXT', 'field14_date_signed': 'field14_date_signed TEXT', 'user_email_address': 'user_email_address TEXT', 'supplemental_question_1_capitol_experience': 'supplemental_question_1_capitol_experience TEXT', 'supplemental_question_2_injuries_damages': 'supplemental_question_2_injuries_damages TEXT', 'supplemental_question_3_entry_exit_time': 'supplemental_question_3_entry_exit_time TEXT', 'supplemental_question_4_inside_capitol_details': 'supplemental_question_4_inside_capitol_details TEXT', 'filled_pdf_filename': 'filled_pdf_filename TEXT', 'field17_signature_of_claimant': 'field17_signature_of_claimant TEXT', 'field18_date_of_signature': 'field18_date_of_signature TEXT', 'created_at': 'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'updated_at': 'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP'}
+2025-05-21 19:27:14,416 - app - INFO - 'claims' table schema appears up to date with DB_SCHEMA. No columns were added.
+2025-05-21 19:27:14,416 - app - INFO - 'users' table already exists.
+2025-05-21 19:27:14,416 - app - INFO - Exiting create_tables_if_not_exist function.
+2025-05-21 19:27:14,416 - app - INFO - Database schema checked/initialized successfully (within app context).
+2025-05-21 19:27:14,418 - app - INFO - Starting Flask development server.
+2025-05-21 19:32:21,291 - app - INFO - Custom logging initialized for file and console.
+2025-05-21 19:32:21,291 - app - INFO - Entered create_tables_if_not_exist function.
+2025-05-21 19:32:21,291 - app - INFO - Successfully obtained DB cursor.
+2025-05-21 19:32:21,291 - app - INFO - Checking 'claims' table. Exists: True
+2025-05-21 19:32:21,292 - app - INFO - 'claims' table exists. Checking for missing columns based on DB_SCHEMA.
+2025-05-21 19:32:21,292 - app - INFO - Existing columns in 'claims': ['id', 'field1_agency', 'field2_name', 'field2_address', 'field2_city', 'field2_state', 'field2_zip', 'field3_type_employment', 'field_pdf_4_dob', 'field_pdf_5_marital_status', 'field6_checkbox_military', 'field7_checkbox_civilian', 'field8_basis_of_claim', 'field9_property_damage_description', 'field10_nature_of_injury', 'field11_witness_name_1', 'field11_witness_address_1', 'field11_witness_name_2', 'field11_witness_address_2', 'field12a_property_damage_amount', 'field12b_personal_injury_amount', 'field12c_wrongful_death_amount', 'field12d_total_claim_amount', 'field13a_signature', 'field_pdf_13b_phone', 'field14_date_signed', 'user_email_address', 'supplemental_question_1_capitol_experience', 'supplemental_question_2_injuries_damages', 'supplemental_question_3_entry_exit_time', 'supplemental_question_4_inside_capitol_details', 'filled_pdf_filename', 'field17_signature_of_claimant', 'field18_date_of_signature', 'created_at', 'updated_at']
+2025-05-21 19:32:21,292 - app - INFO - DB_SCHEMA to check against: ['field1_agency TEXT', 'field2_name TEXT', 'field2_address TEXT', 'field2_city TEXT', 'field2_state TEXT', 'field2_zip TEXT', 'field3_type_employment TEXT', 'field_pdf_4_dob TEXT', 'field_pdf_5_marital_status TEXT', 'field6_checkbox_military TEXT', 'field7_checkbox_civilian TEXT', 'field8_basis_of_claim TEXT', 'field9_property_damage_description TEXT', 'field10_nature_of_injury TEXT', 'field11_witness_name_1 TEXT', 'field11_witness_address_1 TEXT', 'field11_witness_name_2 TEXT', 'field11_witness_address_2 TEXT', 'field12a_property_damage_amount TEXT', 'field12b_personal_injury_amount TEXT', 'field12c_wrongful_death_amount TEXT', 'field12d_total_claim_amount TEXT', 'field13a_signature TEXT', 'field_pdf_13b_phone TEXT', 'field14_date_signed TEXT', 'user_email_address TEXT', 'supplemental_question_1_capitol_experience TEXT', 'supplemental_question_2_injuries_damages TEXT', 'supplemental_question_3_entry_exit_time TEXT', 'supplemental_question_4_inside_capitol_details TEXT', 'filled_pdf_filename TEXT', 'field17_signature_of_claimant TEXT', 'field18_date_of_signature TEXT', 'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP']
+2025-05-21 19:32:21,292 - app - INFO - Parsed schema column definitions from DB_SCHEMA: {'field1_agency': 'field1_agency TEXT', 'field2_name': 'field2_name TEXT', 'field2_address': 'field2_address TEXT', 'field2_city': 'field2_city TEXT', 'field2_state': 'field2_state TEXT', 'field2_zip': 'field2_zip TEXT', 'field3_type_employment': 'field3_type_employment TEXT', 'field_pdf_4_dob': 'field_pdf_4_dob TEXT', 'field_pdf_5_marital_status': 'field_pdf_5_marital_status TEXT', 'field6_checkbox_military': 'field6_checkbox_military TEXT', 'field7_checkbox_civilian': 'field7_checkbox_civilian TEXT', 'field8_basis_of_claim': 'field8_basis_of_claim TEXT', 'field9_property_damage_description': 'field9_property_damage_description TEXT', 'field10_nature_of_injury': 'field10_nature_of_injury TEXT', 'field11_witness_name_1': 'field11_witness_name_1 TEXT', 'field11_witness_address_1': 'field11_witness_address_1 TEXT', 'field11_witness_name_2': 'field11_witness_name_2 TEXT', 'field11_witness_address_2': 'field11_witness_address_2 TEXT', 'field12a_property_damage_amount': 'field12a_property_damage_amount TEXT', 'field12b_personal_injury_amount': 'field12b_personal_injury_amount TEXT', 'field12c_wrongful_death_amount': 'field12c_wrongful_death_amount TEXT', 'field12d_total_claim_amount': 'field12d_total_claim_amount TEXT', 'field13a_signature': 'field13a_signature TEXT', 'field_pdf_13b_phone': 'field_pdf_13b_phone TEXT', 'field14_date_signed': 'field14_date_signed TEXT', 'user_email_address': 'user_email_address TEXT', 'supplemental_question_1_capitol_experience': 'supplemental_question_1_capitol_experience TEXT', 'supplemental_question_2_injuries_damages': 'supplemental_question_2_injuries_damages TEXT', 'supplemental_question_3_entry_exit_time': 'supplemental_question_3_entry_exit_time TEXT', 'supplemental_question_4_inside_capitol_details': 'supplemental_question_4_inside_capitol_details TEXT', 'filled_pdf_filename': 'filled_pdf_filename TEXT', 'field17_signature_of_claimant': 'field17_signature_of_claimant TEXT', 'field18_date_of_signature': 'field18_date_of_signature TEXT', 'created_at': 'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'updated_at': 'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP'}
+2025-05-21 19:32:21,292 - app - INFO - 'claims' table schema appears up to date with DB_SCHEMA. No columns were added.
+2025-05-21 19:32:21,292 - app - INFO - 'users' table already exists.
+2025-05-21 19:32:21,292 - app - INFO - Exiting create_tables_if_not_exist function.
+2025-05-21 19:32:21,292 - app - INFO - Database schema checked/initialized successfully (within app context).
+2025-05-21 19:32:21,295 - app - INFO - Starting Flask development server.
+2025-05-21 19:35:17,873 - app - INFO - Custom logging initialized for file and console.
+2025-05-21 19:35:17,873 - app - INFO - Entered create_tables_if_not_exist function.
+2025-05-21 19:35:17,873 - app - INFO - Successfully obtained DB cursor.
+2025-05-21 19:35:17,873 - app - INFO - Checking 'claims' table. Exists: True
+2025-05-21 19:35:17,873 - app - INFO - 'claims' table exists. Checking for missing columns based on DB_SCHEMA.
+2025-05-21 19:35:17,873 - app - INFO - Existing columns in 'claims': ['id', 'field1_agency', 'field2_name', 'field2_address', 'field2_city', 'field2_state', 'field2_zip', 'field3_type_employment', 'field_pdf_4_dob', 'field_pdf_5_marital_status', 'field6_checkbox_military', 'field7_checkbox_civilian', 'field8_basis_of_claim', 'field9_property_damage_description', 'field10_nature_of_injury', 'field11_witness_name_1', 'field11_witness_address_1', 'field11_witness_name_2', 'field11_witness_address_2', 'field12a_property_damage_amount', 'field12b_personal_injury_amount', 'field12c_wrongful_death_amount', 'field12d_total_claim_amount', 'field13a_signature', 'field_pdf_13b_phone', 'field14_date_signed', 'user_email_address', 'supplemental_question_1_capitol_experience', 'supplemental_question_2_injuries_damages', 'supplemental_question_3_entry_exit_time', 'supplemental_question_4_inside_capitol_details', 'filled_pdf_filename', 'field17_signature_of_claimant', 'field18_date_of_signature', 'created_at', 'updated_at']
+2025-05-21 19:35:17,873 - app - INFO - DB_SCHEMA to check against: ['field1_agency TEXT', 'field2_name TEXT', 'field2_address TEXT', 'field2_city TEXT', 'field2_state TEXT', 'field2_zip TEXT', 'field3_type_employment TEXT', 'field_pdf_4_dob TEXT', 'field_pdf_5_marital_status TEXT', 'field6_checkbox_military TEXT', 'field7_checkbox_civilian TEXT', 'field8_basis_of_claim TEXT', 'field9_property_damage_description TEXT', 'field10_nature_of_injury TEXT', 'field11_witness_name_1 TEXT', 'field11_witness_address_1 TEXT', 'field11_witness_name_2 TEXT', 'field11_witness_address_2 TEXT', 'field12a_property_damage_amount TEXT', 'field12b_personal_injury_amount TEXT', 'field12c_wrongful_death_amount TEXT', 'field12d_total_claim_amount TEXT', 'field13a_signature TEXT', 'field_pdf_13b_phone TEXT', 'field14_date_signed TEXT', 'user_email_address TEXT', 'supplemental_question_1_capitol_experience TEXT', 'supplemental_question_2_injuries_damages TEXT', 'supplemental_question_3_entry_exit_time TEXT', 'supplemental_question_4_inside_capitol_details TEXT', 'filled_pdf_filename TEXT', 'field17_signature_of_claimant TEXT', 'field18_date_of_signature TEXT', 'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP']
+2025-05-21 19:35:17,874 - app - INFO - Parsed schema column definitions from DB_SCHEMA: {'field1_agency': 'field1_agency TEXT', 'field2_name': 'field2_name TEXT', 'field2_address': 'field2_address TEXT', 'field2_city': 'field2_city TEXT', 'field2_state': 'field2_state TEXT', 'field2_zip': 'field2_zip TEXT', 'field3_type_employment': 'field3_type_employment TEXT', 'field_pdf_4_dob': 'field_pdf_4_dob TEXT', 'field_pdf_5_marital_status': 'field_pdf_5_marital_status TEXT', 'field6_checkbox_military': 'field6_checkbox_military TEXT', 'field7_checkbox_civilian': 'field7_checkbox_civilian TEXT', 'field8_basis_of_claim': 'field8_basis_of_claim TEXT', 'field9_property_damage_description': 'field9_property_damage_description TEXT', 'field10_nature_of_injury': 'field10_nature_of_injury TEXT', 'field11_witness_name_1': 'field11_witness_name_1 TEXT', 'field11_witness_address_1': 'field11_witness_address_1 TEXT', 'field11_witness_name_2': 'field11_witness_name_2 TEXT', 'field11_witness_address_2': 'field11_witness_address_2 TEXT', 'field12a_property_damage_amount': 'field12a_property_damage_amount TEXT', 'field12b_personal_injury_amount': 'field12b_personal_injury_amount TEXT', 'field12c_wrongful_death_amount': 'field12c_wrongful_death_amount TEXT', 'field12d_total_claim_amount': 'field12d_total_claim_amount TEXT', 'field13a_signature': 'field13a_signature TEXT', 'field_pdf_13b_phone': 'field_pdf_13b_phone TEXT', 'field14_date_signed': 'field14_date_signed TEXT', 'user_email_address': 'user_email_address TEXT', 'supplemental_question_1_capitol_experience': 'supplemental_question_1_capitol_experience TEXT', 'supplemental_question_2_injuries_damages': 'supplemental_question_2_injuries_damages TEXT', 'supplemental_question_3_entry_exit_time': 'supplemental_question_3_entry_exit_time TEXT', 'supplemental_question_4_inside_capitol_details': 'supplemental_question_4_inside_capitol_details TEXT', 'filled_pdf_filename': 'filled_pdf_filename TEXT', 'field17_signature_of_claimant': 'field17_signature_of_claimant TEXT', 'field18_date_of_signature': 'field18_date_of_signature TEXT', 'created_at': 'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'updated_at': 'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP'}
+2025-05-21 19:35:17,874 - app - INFO - 'claims' table schema appears up to date with DB_SCHEMA. No columns were added.
+2025-05-21 19:35:17,874 - app - INFO - 'users' table already exists.
+2025-05-21 19:35:17,874 - app - INFO - Exiting create_tables_if_not_exist function.
+2025-05-21 19:35:17,874 - app - INFO - Database schema checked/initialized successfully (within app context).
+2025-05-21 19:35:17,876 - app - INFO - Starting Flask development server.
+2025-05-21 19:37:54,889 - app - INFO - Custom logging initialized for file and console.
+2025-05-21 19:37:54,890 - app - INFO - Entered create_tables_if_not_exist function.
+2025-05-21 19:37:54,890 - app - INFO - Successfully obtained DB cursor.
+2025-05-21 19:37:54,890 - app - INFO - Checking 'claims' table. Exists: True
+2025-05-21 19:37:54,890 - app - INFO - 'claims' table exists. Checking for missing columns based on DB_SCHEMA.
+2025-05-21 19:37:54,890 - app - INFO - Existing columns in 'claims': ['id', 'field1_agency', 'field2_name', 'field2_address', 'field2_city', 'field2_state', 'field2_zip', 'field3_type_employment', 'field_pdf_4_dob', 'field_pdf_5_marital_status', 'field6_checkbox_military', 'field7_checkbox_civilian', 'field8_basis_of_claim', 'field9_property_damage_description', 'field10_nature_of_injury', 'field11_witness_name_1', 'field11_witness_address_1', 'field11_witness_name_2', 'field11_witness_address_2', 'field12a_property_damage_amount', 'field12b_personal_injury_amount', 'field12c_wrongful_death_amount', 'field12d_total_claim_amount', 'field13a_signature', 'field_pdf_13b_phone', 'field14_date_signed', 'user_email_address', 'supplemental_question_1_capitol_experience', 'supplemental_question_2_injuries_damages', 'supplemental_question_3_entry_exit_time', 'supplemental_question_4_inside_capitol_details', 'filled_pdf_filename', 'field17_signature_of_claimant', 'field18_date_of_signature', 'created_at', 'updated_at']
+2025-05-21 19:37:54,890 - app - INFO - DB_SCHEMA to check against: ['field1_agency TEXT', 'field2_name TEXT', 'field2_address TEXT', 'field2_city TEXT', 'field2_state TEXT', 'field2_zip TEXT', 'field3_type_employment TEXT', 'field_pdf_4_dob TEXT', 'field_pdf_5_marital_status TEXT', 'field6_checkbox_military TEXT', 'field7_checkbox_civilian TEXT', 'field8_basis_of_claim TEXT', 'field9_property_damage_description TEXT', 'field10_nature_of_injury TEXT', 'field11_witness_name_1 TEXT', 'field11_witness_address_1 TEXT', 'field11_witness_name_2 TEXT', 'field11_witness_address_2 TEXT', 'field12a_property_damage_amount TEXT', 'field12b_personal_injury_amount TEXT', 'field12c_wrongful_death_amount TEXT', 'field12d_total_claim_amount TEXT', 'field13a_signature TEXT', 'field_pdf_13b_phone TEXT', 'field14_date_signed TEXT', 'user_email_address TEXT', 'supplemental_question_1_capitol_experience TEXT', 'supplemental_question_2_injuries_damages TEXT', 'supplemental_question_3_entry_exit_time TEXT', 'supplemental_question_4_inside_capitol_details TEXT', 'filled_pdf_filename TEXT', 'field17_signature_of_claimant TEXT', 'field18_date_of_signature TEXT', 'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP']
+2025-05-21 19:37:54,890 - app - INFO - Parsed schema column definitions from DB_SCHEMA: {'field1_agency': 'field1_agency TEXT', 'field2_name': 'field2_name TEXT', 'field2_address': 'field2_address TEXT', 'field2_city': 'field2_city TEXT', 'field2_state': 'field2_state TEXT', 'field2_zip': 'field2_zip TEXT', 'field3_type_employment': 'field3_type_employment TEXT', 'field_pdf_4_dob': 'field_pdf_4_dob TEXT', 'field_pdf_5_marital_status': 'field_pdf_5_marital_status TEXT', 'field6_checkbox_military': 'field6_checkbox_military TEXT', 'field7_checkbox_civilian': 'field7_checkbox_civilian TEXT', 'field8_basis_of_claim': 'field8_basis_of_claim TEXT', 'field9_property_damage_description': 'field9_property_damage_description TEXT', 'field10_nature_of_injury': 'field10_nature_of_injury TEXT', 'field11_witness_name_1': 'field11_witness_name_1 TEXT', 'field11_witness_address_1': 'field11_witness_address_1 TEXT', 'field11_witness_name_2': 'field11_witness_name_2 TEXT', 'field11_witness_address_2': 'field11_witness_address_2 TEXT', 'field12a_property_damage_amount': 'field12a_property_damage_amount TEXT', 'field12b_personal_injury_amount': 'field12b_personal_injury_amount TEXT', 'field12c_wrongful_death_amount': 'field12c_wrongful_death_amount TEXT', 'field12d_total_claim_amount': 'field12d_total_claim_amount TEXT', 'field13a_signature': 'field13a_signature TEXT', 'field_pdf_13b_phone': 'field_pdf_13b_phone TEXT', 'field14_date_signed': 'field14_date_signed TEXT', 'user_email_address': 'user_email_address TEXT', 'supplemental_question_1_capitol_experience': 'supplemental_question_1_capitol_experience TEXT', 'supplemental_question_2_injuries_damages': 'supplemental_question_2_injuries_damages TEXT', 'supplemental_question_3_entry_exit_time': 'supplemental_question_3_entry_exit_time TEXT', 'supplemental_question_4_inside_capitol_details': 'supplemental_question_4_inside_capitol_details TEXT', 'filled_pdf_filename': 'filled_pdf_filename TEXT', 'field17_signature_of_claimant': 'field17_signature_of_claimant TEXT', 'field18_date_of_signature': 'field18_date_of_signature TEXT', 'created_at': 'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'updated_at': 'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP'}
+2025-05-21 19:37:54,890 - app - INFO - 'claims' table schema appears up to date with DB_SCHEMA. No columns were added.
+2025-05-21 19:37:54,890 - app - INFO - 'users' table already exists.
+2025-05-21 19:37:54,890 - app - INFO - Exiting create_tables_if_not_exist function.
+2025-05-21 19:37:54,891 - app - INFO - Database schema checked/initialized successfully (within app context).
+2025-05-21 19:37:54,893 - app - INFO - Starting Flask development server.
+2025-05-21 19:41:47,928 - app - INFO - Custom logging initialized for file and console.
+2025-05-21 19:41:47,928 - app - INFO - Entered create_tables_if_not_exist function.
+2025-05-21 19:41:47,928 - app - INFO - Successfully obtained DB cursor.
+2025-05-21 19:41:47,929 - app - INFO - Checking 'claims' table. Exists: True
+2025-05-21 19:41:47,929 - app - INFO - 'claims' table exists. Checking for missing columns based on DB_SCHEMA.
+2025-05-21 19:41:47,929 - app - INFO - Existing columns in 'claims': ['id', 'field1_agency', 'field2_name', 'field2_address', 'field2_city', 'field2_state', 'field2_zip', 'field3_type_employment', 'field_pdf_4_dob', 'field_pdf_5_marital_status', 'field6_checkbox_military', 'field7_checkbox_civilian', 'field8_basis_of_claim', 'field9_property_damage_description', 'field10_nature_of_injury', 'field11_witness_name_1', 'field11_witness_address_1', 'field11_witness_name_2', 'field11_witness_address_2', 'field12a_property_damage_amount', 'field12b_personal_injury_amount', 'field12c_wrongful_death_amount', 'field12d_total_claim_amount', 'field13a_signature', 'field_pdf_13b_phone', 'field14_date_signed', 'user_email_address', 'supplemental_question_1_capitol_experience', 'supplemental_question_2_injuries_damages', 'supplemental_question_3_entry_exit_time', 'supplemental_question_4_inside_capitol_details', 'filled_pdf_filename', 'field17_signature_of_claimant', 'field18_date_of_signature', 'created_at', 'updated_at']
+2025-05-21 19:41:47,929 - app - INFO - DB_SCHEMA to check against: ['field1_agency TEXT', 'field2_name TEXT', 'field2_address TEXT', 'field2_city TEXT', 'field2_state TEXT', 'field2_zip TEXT', 'field3_type_employment TEXT', 'field_pdf_4_dob TEXT', 'field_pdf_5_marital_status TEXT', 'field6_checkbox_military TEXT', 'field7_checkbox_civilian TEXT', 'field8_basis_of_claim TEXT', 'field9_property_damage_description TEXT', 'field10_nature_of_injury TEXT', 'field11_witness_name_1 TEXT', 'field11_witness_address_1 TEXT', 'field11_witness_name_2 TEXT', 'field11_witness_address_2 TEXT', 'field12a_property_damage_amount TEXT', 'field12b_personal_injury_amount TEXT', 'field12c_wrongful_death_amount TEXT', 'field12d_total_claim_amount TEXT', 'field13a_signature TEXT', 'field_pdf_13b_phone TEXT', 'field14_date_signed TEXT', 'user_email_address TEXT', 'supplemental_question_1_capitol_experience TEXT', 'supplemental_question_2_injuries_damages TEXT', 'supplemental_question_3_entry_exit_time TEXT', 'supplemental_question_4_inside_capitol_details TEXT', 'filled_pdf_filename TEXT', 'field17_signature_of_claimant TEXT', 'field18_date_of_signature TEXT', 'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP']
+2025-05-21 19:41:47,929 - app - INFO - Parsed schema column definitions from DB_SCHEMA: {'field1_agency': 'field1_agency TEXT', 'field2_name': 'field2_name TEXT', 'field2_address': 'field2_address TEXT', 'field2_city': 'field2_city TEXT', 'field2_state': 'field2_state TEXT', 'field2_zip': 'field2_zip TEXT', 'field3_type_employment': 'field3_type_employment TEXT', 'field_pdf_4_dob': 'field_pdf_4_dob TEXT', 'field_pdf_5_marital_status': 'field_pdf_5_marital_status TEXT', 'field6_checkbox_military': 'field6_checkbox_military TEXT', 'field7_checkbox_civilian': 'field7_checkbox_civilian TEXT', 'field8_basis_of_claim': 'field8_basis_of_claim TEXT', 'field9_property_damage_description': 'field9_property_damage_description TEXT', 'field10_nature_of_injury': 'field10_nature_of_injury TEXT', 'field11_witness_name_1': 'field11_witness_name_1 TEXT', 'field11_witness_address_1': 'field11_witness_address_1 TEXT', 'field11_witness_name_2': 'field11_witness_name_2 TEXT', 'field11_witness_address_2': 'field11_witness_address_2 TEXT', 'field12a_property_damage_amount': 'field12a_property_damage_amount TEXT', 'field12b_personal_injury_amount': 'field12b_personal_injury_amount TEXT', 'field12c_wrongful_death_amount': 'field12c_wrongful_death_amount TEXT', 'field12d_total_claim_amount': 'field12d_total_claim_amount TEXT', 'field13a_signature': 'field13a_signature TEXT', 'field_pdf_13b_phone': 'field_pdf_13b_phone TEXT', 'field14_date_signed': 'field14_date_signed TEXT', 'user_email_address': 'user_email_address TEXT', 'supplemental_question_1_capitol_experience': 'supplemental_question_1_capitol_experience TEXT', 'supplemental_question_2_injuries_damages': 'supplemental_question_2_injuries_damages TEXT', 'supplemental_question_3_entry_exit_time': 'supplemental_question_3_entry_exit_time TEXT', 'supplemental_question_4_inside_capitol_details': 'supplemental_question_4_inside_capitol_details TEXT', 'filled_pdf_filename': 'filled_pdf_filename TEXT', 'field17_signature_of_claimant': 'field17_signature_of_claimant TEXT', 'field18_date_of_signature': 'field18_date_of_signature TEXT', 'created_at': 'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP', 'updated_at': 'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP'}
+2025-05-21 19:41:47,929 - app - INFO - 'claims' table schema appears up to date with DB_SCHEMA. No columns were added.
+2025-05-21 19:41:47,929 - app - INFO - 'users' table already exists.
+2025-05-21 19:41:47,929 - app - INFO - Exiting create_tables_if_not_exist function.
+2025-05-21 19:41:47,929 - app - INFO - Database schema checked/initialized successfully (within app context).
