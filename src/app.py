@@ -1561,18 +1561,25 @@ def admin_required(f):
 @app.route('/download_filled_pdf/<filename>')
 @login_required
 def download_filled_pdf(filename):
-    current_app.logger.info(f"--- download_filled_pdf --- Attempting to send file: {filename}")
+    # DEBUG: Log entry for every hit
+    current_app.logger.info(f"[PDF ACCESS DEBUG] Route hit. filename={filename}, user_email={getattr(current_user, 'email', None)}, username={getattr(current_user, 'username', None)}, role={getattr(current_user, 'role', None)}")
     db = get_db()
     cursor = db.cursor()
     claim = cursor.execute('SELECT user_email_address FROM claims WHERE filled_pdf_filename = ?', (filename,)).fetchone()
-    # Only allow download if current user is the owner, or is admin/superadmin
-    # Use current_user.email if available, else current_user.username
+    if not claim:
+        current_app.logger.warning(f"[PDF ACCESS DEBUG] No claim found for filename={filename}")
+        current_app.logger.error(f"[PDF ACCESS DENIED] No claim found for filename {filename}")
+        abort(404)
+    claim_email = (claim['user_email_address'] or '').strip().lower()
     user_email = (getattr(current_user, 'email', None) or '').strip().lower()
     user_username = (getattr(current_user, 'username', None) or '').strip().lower()
-    claim_email = (claim['user_email_address'] or '').strip().lower() if claim else ''
-    current_app.logger.warning(f"[PDF ACCESS DEBUG] filename={filename}, claim_email={claim_email}, user_email={user_email}, user_username={user_username}, role={current_user.role}")
-    if not claim:
-        current_app.logger.error(f"[PDF ACCESS DENIED] No claim found for filename {filename}")
+    is_admin = getattr(current_user, 'role', None) in ['admin', 'superadmin']
+    is_owner = (user_email == claim_email) or (user_username == claim_email)
+    current_app.logger.info(f"[PDF ACCESS DEBUG] claim_email={claim_email}, user_email={user_email}, username={username}, is_admin={is_admin}, is_owner={is_owner}")
+    if not (is_admin or is_owner):
+        current_app.logger.warning(f"[PDF ACCESS DENIED] filename={filename}, claim_email={claim_email}, user_email={user_email}, username={username}, role={getattr(current_user, 'role', None)}")
+        abort(403)
+    current_app.logger.info(f"[PDF ACCESS GRANTED] filename={filename}, claim_email={claim_email}, user_email={user_email}, username={username}, role={getattr(current_user, 'role', None)}")
         abort(403)
     if current_user.role == 'user' and claim_email not in [user_email, user_username]:
         current_app.logger.error(f"[PDF ACCESS DENIED] User does not own PDF. claim_email={claim_email}, user_email={user_email}, user_username={user_username}")
