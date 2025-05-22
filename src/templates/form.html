@@ -33,11 +33,15 @@
     </style>
     <div class="user-info-topright d-flex align-items-center" style="gap: 0.75em; position: fixed; top: 18px; right: 60px; z-index: 999; font-size: 0.97em; color: #bbb; background: rgba(30,30,30,0.92); padding: 4px 14px; border-radius: 16px; pointer-events: none; box-shadow: 0 2px 8px rgba(0,0,0,0.07); margin-right: 18px;">
         <span>{{ current_user.username }}</span>
-        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary btn-sm ms-2" style="pointer-events:auto;">Log Out</a>
     </div>
     {% endif %}
     <div class="container-fluid">
       <!-- Show login/admin buttons below form if not logged in or if admin -->
+{% if current_user.is_authenticated %}
+  <div class="d-flex justify-content-center align-items-center mt-4" style="gap: 1em; flex-wrap: wrap;">
+    <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">Log Out</a>
+  </div>
+{% endif %}
       {% if not current_user.is_authenticated %}
         <div class="d-flex justify-content-center align-items-center mt-4" style="gap: 1em; flex-wrap: wrap;">
           <a href="{{ url_for('login') }}" class="btn btn-primary">Log In</a>
