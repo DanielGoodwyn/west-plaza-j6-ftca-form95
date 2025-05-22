@@ -1786,34 +1786,44 @@ def login():
     current_app.logger.info(f"LOGIN ROUTE: Method={request.method}, Form data={request.form}")
     form = LoginForm()
     if request.method == 'POST':
+        current_app.logger.info(f"LOGIN POST: form.username={form.username.data}, form.password={'*' * len(form.password.data) if form.password.data else ''}")
         email = form.username.data.lower().strip()
         password = form.password.data
         # Validate email format
         import re
         email_regex = r'^\S+@\S+\.\S+$'
         if not re.match(email_regex, email):
+            current_app.logger.warning(f"LOGIN: Invalid email format: {email}")
             flash('Please enter a valid email address.', 'danger')
         else:
+            current_app.logger.info(f"LOGIN: Checking for existing user: {email}")
             user = User.get_by_username(email)
             if user:
+                current_app.logger.info(f"LOGIN: User found for {email}, attempting password check.")
                 # Normal login flow
                 if user.check_password(password):
+                    current_app.logger.info(f"LOGIN: Password correct for {email}, logging in.")
                     login_user(user)
                     flash('Login successful!', 'success')
                     next_page = request.args.get('next')
                     return redirect(next_page or url_for('admin_view'))
                 else:
+                    current_app.logger.warning(f"LOGIN: Incorrect password for {email}.")
                     flash('Login Unsuccessful. Please check email and password.', 'danger')
             else:
+                current_app.logger.info(f"LOGIN: No user found for {email}, attempting user creation.")
                 # No user exists: create account and redirect to set password
                 import secrets
                 temp_password = secrets.token_urlsafe(10)
                 created = User.create_user(email, temp_password, role='user')
+                current_app.logger.info(f"LOGIN: User.create_user returned: {created}")
                 if created:
                     new_user = User.get_by_username(email)
+                    current_app.logger.info(f"LOGIN: Successfully created user {email}, id={new_user.id if new_user else None}")
                     flash('Account created! Please set your password.', 'success')
                     return redirect(url_for('set_password', user_id=new_user.id))
                 else:
+                    current_app.logger.error(f"LOGIN: Failed to create user for {email}")
                     flash('Account creation failed. Please try again or contact support.', 'danger')
     return render_template('login.html', title='Login', form=form)
 
