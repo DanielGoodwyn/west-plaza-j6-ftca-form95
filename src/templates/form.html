@@ -35,11 +35,20 @@
     <div class="user-info-topright d-flex align-items-center" style="gap: 0.75em; position: fixed; top: 18px; right: 60px; z-index: 999; font-size: 0.97em; color: #bbb; background: rgba(30,30,30,0.92); padding: 4px 14px; border-radius: 16px; pointer-events: none; box-shadow: 0 2px 8px rgba(0,0,0,0.07);">
         <span>{{ current_user.username }}</span>
     </div>
-    <div class="d-flex justify-content-center align-items-center" style="margin-top: 1.5em; gap: 1em;">
-        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary btn-sm">Log Out</a>
-    </div>
+
     {% endif %}
     <div class="container-fluid">
+      <!-- Show login/admin buttons below form if not logged in or if admin -->
+      {% if not current_user.is_authenticated %}
+        <div class="d-flex justify-content-center mt-4">
+          <a href="{{ url_for('login') }}" class="btn btn-primary">Log In</a>
+        </div>
+      {% elif current_user.is_authenticated and current_user.is_admin and current_user.is_admin() %}
+        <div class="d-flex justify-content-center mt-4">
+          <a href="{{ url_for('admin_view') }}" class="btn btn-secondary">Go to Admin Page</a>
+        </div>
+      {% endif %}
+
       <div class="row">
         <div class="col-12">
           <div class="d-flex flex-wrap justify-content-end align-items-center gap-2 mb-4" style="margin-top:2em;">
