@@ -131,7 +131,7 @@
 </style>
 <input type="email"
     class="form-control {% if validation_errors and validation_errors.get('user_email_address') %}is-invalid{% endif %}{% if current_user.is_authenticated and current_user.role != 'admin' and current_user.role != 'superadmin' %} locked-email-field{% endif %}"
-    id="user_email_address" name="user_email_address" value="{{ current_user.username }}" placeholder="you@example.com" required
+    id="user_email_address" name="user_email_address" value="{% if editing %}{{ form_data.get('user_email_address', '') }}{% else %}{{ current_user.username }}{% endif %}" placeholder="you@example.com" required
     {% if current_user.is_authenticated and current_user.role != 'admin' and current_user.role != 'superadmin' %}readonly disabled{% endif %} >
                             {% if validation_errors and validation_errors.get('user_email_address') %}
                                 <div class="invalid-feedback">{{ validation_errors['user_email_address'] }}</div>
