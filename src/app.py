@@ -1496,19 +1496,42 @@ def submit_form():
         session['claimant_name_for_signature'] = claimant_name_from_step1
         return redirect(url_for('signature_review'))
 
-@app.route('/success/<submission_id>')
+@app.route('/success/<int:submission_id>')
 def success_page(submission_id):
     db = get_db()
     cursor = db.cursor()
-    cursor.execute("SELECT filled_pdf_filename FROM claims WHERE id = ?", (submission_id,))
-    claim_record = cursor.fetchone()
-    pdf_filename = None
-    if claim_record and claim_record['filled_pdf_filename']:
-        pdf_filename = claim_record['filled_pdf_filename']
-        current_app.logger.info(f"--- success_page --- Fetched PDF filename: {pdf_filename} for submission ID: {submission_id}")
-    else:
-        current_app.logger.warning(f"--- success_page --- Could not find PDF filename for submission ID: {submission_id}")
+    claim = cursor.execute('SELECT * FROM claims WHERE id = ?', (submission_id,)).fetchone()
+    pdf_filename = claim['filled_pdf_filename'] if claim else None
+    # Find user by email if available in claim
+    user_id = None
+    if claim and 'user_email_address' in claim.keys():
+        user_row = cursor.execute('SELECT id FROM users WHERE username = ?', (claim['user_email_address'],)).fetchone()
+        if user_row:
+            user_id = user_row['id']
+    return render_template('success.html', submission_id=submission_id, pdf_filename=pdf_filename, user_id=user_id)
 
+@app.route('/set_password/<int:user_id>', methods=['GET', 'POST'])
+def set_password(user_id):
+    db = get_db()
+    cursor = db.cursor()
+    user_row = cursor.execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
+    if not user_row:
+        return "User not found", 404
+    error = None
+    if request.method == 'POST':
+        password = request.form.get('password', '')
+        confirm_password = request.form.get('confirm_password', '')
+        if len(password) < 6:
+            error = "Password must be at least 6 characters."
+        elif password != confirm_password:
+            error = "Passwords do not match."
+        else:
+            from werkzeug.security import generate_password_hash
+            cursor.execute('UPDATE users SET password_hash = ? WHERE id = ?', (generate_password_hash(password), user_id))
+            db.commit()
+            flash('Password set successfully! You can now log in.', 'success')
+            return redirect(url_for('login'))
+    return render_template('set_password.html', user_id=user_id, error=error)
     return render_template('success.html', submission_id=submission_id, pdf_filename=pdf_filename)
 
 from flask_login import login_required, current_user
