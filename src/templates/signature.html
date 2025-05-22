@@ -10,6 +10,33 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 </head>
 <body>
+    {% if current_user.is_authenticated %}
+    <style>
+        .user-info-topright {
+            position: fixed;
+            top: 18px;
+            right: 60px;
+            z-index: 999;
+            font-size: 0.97em;
+            color: #bbb;
+            background: rgba(30,30,30,0.92);
+            padding: 4px 14px;
+            border-radius: 16px;
+            pointer-events: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        }
+        @media (max-width: 600px) {
+            .user-info-topright {
+                font-size: 0.85em;
+                padding: 3px 7px;
+                right: 44px;
+            }
+        }
+    </style>
+    <div class="user-info-topright" style="margin-right: 18px;">
+        {{ current_user.email or current_user.username }}
+    </div>
+    {% endif %}
     <div class="container">
         <h1 class="mt-4 mb-3">SF-95 Claim - Step 2: Signature</h1>
 
