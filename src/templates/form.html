@@ -31,9 +31,9 @@
             }
         }
     </style>
-    <div class="user-info-topright d-flex align-items-center" style="gap: 0.75em;">
+    <div class="d-flex justify-content-center align-items-center" style="margin-top: 1.5em; gap: 1em;">
         <span>{{ current_user.username }}</span>
-        <!-- Emoji icon remains here -->
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary btn-sm">Log Out</a>
     </div>
     <div class="container-fluid">
       <div class="row">
