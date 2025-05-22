@@ -1760,7 +1760,7 @@ def init_db_command():
     print('Initialized the database defined in app.config[DATABASE].')
 
 print('APP.PY: Registering /login route')
-current_app.logger.info('APP.PY: Registering /login route')
+app.logger.info('APP.PY: Registering /login route')
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     current_app.logger.info(f"LOGIN ROUTE: Method={request.method}, Form data={request.form}")
