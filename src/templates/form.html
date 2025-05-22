@@ -41,7 +41,7 @@
       {% if not current_user.is_authenticated %}
         <div class="d-flex justify-content-center align-items-center mt-4" style="gap: 1em; flex-wrap: wrap;">
           <a href="{{ url_for('login') }}" class="btn btn-primary">Log In</a>
-          <span style="color: #ffc107; font-size: 0.97em; max-width: 340px; background: rgba(30,30,30,0.85); padding: 5px 14px; border-radius: 14px; margin-left: 8px;">Note: Only clicking "Submit" will save your responses. Logging in is optional, but if you wish to log in, please do so before starting the form. If you leave or log in after entering information, your responses will be lost.</span>
+          <span style="color: #ffc107; font-size: 0.97em; max-width: 340px; background: rgba(30,30,30,0.85); padding: 5px 14px; border-radius: 14px; margin-left: 8px;">Note: Only clicking <a href="#submit-btn" id="scroll-to-submit" style="color: #fff200; text-decoration: underline; cursor: pointer;">"Submit"</a> will save your responses. Logging in is optional, but if you wish to log in, please do so before starting the form. If you leave or log in after entering information, your responses will be lost.</span>
         </div>
       {% elif current_user.is_authenticated and current_user.is_admin and current_user.is_admin() %}
         <div class="d-flex justify-content-center mt-4">
@@ -312,7 +312,7 @@
                     <hr class="my-4">
 
                     <div class="text-center mt-4 mb-4">
-                        <button type="submit" class="btn btn-primary btn-lg">Submit Claim Data</button>
+                        <a href="#submit-btn" class="btn btn-primary btn-lg">Submit</a> Claim Data
                     </div>
                 </div>
             </div>
@@ -336,5 +336,19 @@
         });
     </script>
     <script src="/west-plaza-lawsuit/static/js/theme-toggle.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var scrollLink = document.getElementById('scroll-to-submit');
+    if (scrollLink) {
+      scrollLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        var submitBtn = document.getElementById('submit-btn');
+        if (submitBtn) {
+          submitBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
+    }
+  });
+</script>
 </body>
 </html>
