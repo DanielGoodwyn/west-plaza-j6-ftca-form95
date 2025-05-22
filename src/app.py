@@ -729,6 +729,9 @@ def form():
         # Ensure all expected keys from defaults are in form_data
         for key, value in html_form_defaults.items():
             form_data.setdefault(key, value)
+        # Prefill user_email_address for logged-in users (not admin/superadmin)
+        if current_user.is_authenticated and getattr(current_user, 'role', None) not in ['admin', 'superadmin']:
+            form_data['user_email_address'] = current_user.email or current_user.username
         session['form_data'] = form_data  # Always persist
         current_app.logger.info(f"FORM PAGE: Loaded form_data from session: {form_data}")
 

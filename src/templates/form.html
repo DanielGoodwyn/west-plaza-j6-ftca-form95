@@ -68,7 +68,7 @@
                         <div class="col-md-6">
                             <label for="user_email_address" class="form-label">Your Email Address</label>
                             <input type="email" class="form-control {% if validation_errors and validation_errors.get('user_email_address') %}is-invalid{% endif %} {% if current_user.is_authenticated and current_user.role != 'admin' and current_user.role != 'superadmin' %}bg-light text-muted{% endif %}"
-    id="user_email_address" name="user_email_address" value="{{ form_data.get('user_email_address', current_user.email or current_user.username if current_user.is_authenticated else '') }}" placeholder="you@example.com" required
+    id="user_email_address" name="user_email_address" value="{{ form_data.get('user_email_address', '') }}" placeholder="you@example.com" required
     {% if current_user.is_authenticated and current_user.role != 'admin' and current_user.role != 'superadmin' %}readonly disabled{% endif %} >
                             {% if validation_errors and validation_errors.get('user_email_address') %}
                                 <div class="invalid-feedback">{{ validation_errors['user_email_address'] }}</div>
