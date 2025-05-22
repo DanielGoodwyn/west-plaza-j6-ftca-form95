@@ -31,10 +31,14 @@
             }
         }
     </style>
-    <div class="d-flex justify-content-center align-items-center" style="margin-top: 1.5em; gap: 1em;">
+    {% if current_user.is_authenticated %}
+    <div class="user-info-topright d-flex align-items-center" style="gap: 0.75em; position: fixed; top: 18px; right: 60px; z-index: 999; font-size: 0.97em; color: #bbb; background: rgba(30,30,30,0.92); padding: 4px 14px; border-radius: 16px; pointer-events: none; box-shadow: 0 2px 8px rgba(0,0,0,0.07);">
         <span>{{ current_user.username }}</span>
+    </div>
+    <div class="d-flex justify-content-center align-items-center" style="margin-top: 1.5em; gap: 1em;">
         <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary btn-sm">Log Out</a>
     </div>
+    {% endif %}
     <div class="container-fluid">
       <div class="row">
         <div class="col-12">
