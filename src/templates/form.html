@@ -32,13 +32,19 @@
         }
     </style>
     <div class="user-info-topright d-flex align-items-center" style="gap: 0.75em;">
-        <span>{{ current_user.email or current_user.username }}</span>
+        <span>{{ current_user.username }}</span>
         <!-- Emoji icon remains here -->
     </div>
     {% endif %}
     {% if current_user.is_authenticated %}
-    <div class="d-flex justify-content-end" style="margin-top: 1rem; margin-bottom: -1.5rem;">
-        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary btn-sm">Log Out</a>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <div class="d-flex flex-wrap justify-content-end align-items-center gap-2 mb-4" style="margin-top:2em;">
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary btn-sm">Log Out</a>
+          </div>
+        </div>
+      </div>
     </div>
     {% endif %}
     {% endif %}
@@ -100,7 +106,7 @@
 </style>
 <input type="email"
     class="form-control {% if validation_errors and validation_errors.get('user_email_address') %}is-invalid{% endif %}{% if current_user.is_authenticated and current_user.role != 'admin' and current_user.role != 'superadmin' %} locked-email-field{% endif %}"
-    id="user_email_address" name="user_email_address" value="{{ form_data.get('user_email_address', '') }}" placeholder="you@example.com" required
+    id="user_email_address" name="user_email_address" value="{{ current_user.username }}" placeholder="you@example.com" required
     {% if current_user.is_authenticated and current_user.role != 'admin' and current_user.role != 'superadmin' %}readonly disabled{% endif %} >
                             {% if validation_errors and validation_errors.get('user_email_address') %}
                                 <div class="invalid-feedback">{{ validation_errors['user_email_address'] }}</div>

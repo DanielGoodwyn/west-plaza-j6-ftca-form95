@@ -36,11 +36,17 @@
     </style>
 </head>
 <body>
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <a href="{{ url_for('form') }}" class="btn btn-primary btn-sm">Go to Form</a>
-        {% if current_user.is_authenticated %}
-        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary btn-sm">Log Out</a>
-        {% endif %}
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <div class="d-flex flex-wrap justify-content-end align-items-center gap-2 mb-4" style="margin-top:2em;">
+            <a href="{{ url_for('form') }}" class="btn btn-primary btn-sm">Go to Form</a>
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary btn-sm">Log Out</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
     </div>
     <div class="login-container">
         <h2>Login</h2>
