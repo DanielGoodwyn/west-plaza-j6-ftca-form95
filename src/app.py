@@ -307,8 +307,16 @@ class User(UserMixin):
     def create_user(username, password, role='user'):
         db = get_db()
         cursor = db.cursor()
-        cursor.execute('INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)', (username, generate_password_hash(password), role))
-        db.commit()
+        try:
+            cursor.execute('INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)', (username, generate_password_hash(password), role))
+            db.commit()
+            return True
+        except sqlite3.IntegrityError as e:
+            current_app.logger.error(f"User creation failed for {username}: {e}")
+            return None
+        except Exception as e:
+            current_app.logger.error(f"Unexpected error during user creation for {username}: {e}")
+            return None
 
 # --- Flask-Login Setup ---
 login_manager = LoginManager()
@@ -1800,10 +1808,13 @@ def login():
                 # No user exists: create account and redirect to set password
                 import secrets
                 temp_password = secrets.token_urlsafe(10)
-                User.create_user(email, temp_password, role='user')
-                new_user = User.get_by_username(email)
-                flash('Account created! Please set your password.', 'success')
-                return redirect(url_for('set_password', user_id=new_user.id))
+                created = User.create_user(email, temp_password, role='user')
+                if created:
+                    new_user = User.get_by_username(email)
+                    flash('Account created! Please set your password.', 'success')
+                    return redirect(url_for('set_password', user_id=new_user.id))
+                else:
+                    flash('Account creation failed. Please try again or contact support.', 'danger')
     return render_template('login.html', title='Login', form=form)
 
 @app.route('/logout')
