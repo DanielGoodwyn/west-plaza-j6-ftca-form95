@@ -73,13 +73,8 @@
                 {% endif %}
             </div>
             <div class="d-grid">
-                {{ form.submit(class="btn btn-primary btn-lg") }}
+                <button type="submit" class="btn btn-primary btn-lg w-100">Login or Sign Up</button>
             </div>
-            {% if signup_mode %}
-            <div class="d-grid gap-2 mt-2">
-                <button type="submit" name="signup" value="1" class="btn btn-success btn-lg">Sign Up</button>
-            </div>
-            {% endif %}
         </form>
         <div class="text-center mt-3">
             <a href="{{ url_for('reset_password') }}">Forgot or need to set your password?</a>
