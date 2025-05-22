@@ -1567,8 +1567,10 @@ def download_filled_pdf(filename):
     claim = cursor.execute('SELECT user_email_address FROM claims WHERE filled_pdf_filename = ?', (filename,)).fetchone()
     # Only allow download if current user is the owner, or is admin/superadmin
     # Use current_user.email if available, else current_user.username
-    user_identifier = getattr(current_user, 'email', None) or current_user.username
-    if not claim or (current_user.role == 'user' and claim['user_email_address'] != user_identifier):
+    user_email = (getattr(current_user, 'email', None) or '').strip().lower()
+    user_username = (getattr(current_user, 'username', None) or '').strip().lower()
+    claim_email = (claim['user_email_address'] or '').strip().lower() if claim else ''
+    if not claim or (current_user.role == 'user' and claim_email not in [user_email, user_username]):
         abort(403)
     try:
         return send_from_directory(current_app.config['FILLED_FORMS_DIR'], filename, as_attachment=True)
