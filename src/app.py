@@ -1777,22 +1777,40 @@ def init_db_command():
 def login():
     current_app.logger.info(f"LOGIN ROUTE: Method={request.method}, Form data={request.form}")
     form = LoginForm()
-    if form.validate_on_submit():
-        current_app.logger.info(f"LOGIN ATTEMPT: Username={form.username.data}")
-        user = User.get_by_username(form.username.data.lower())
-        if user and user.check_password(form.password.data):
-            current_app.logger.info(f"LOGIN SUCCESS: Username={form.username.data}")
-            login_user(user)
-            flash('Login successful!', 'success')
-            next_page = request.args.get('next')
-            return redirect(next_page or url_for('admin_view'))
+    signup_mode = False
+    if request.method == 'POST':
+        email = form.username.data.lower().strip()
+        password = form.password.data
+        # Validate email format
+        import re
+        email_regex = r'^\S+@\S+\.\S+$'
+        if not re.match(email_regex, email):
+            flash('Please enter a valid email address.', 'danger')
         else:
-            current_app.logger.warning(f"LOGIN FAILURE: Username={form.username.data}")
-            flash('Login Unsuccessful. Please check username and password', 'danger')
-    else:
-        if request.method == 'POST':
-            current_app.logger.warning(f"LOGIN INVALID FORM: Errors={form.errors}")
-    return render_template('login.html', title='Admin Login', form=form)
+            user = User.get_by_username(email)
+            if user:
+                # Normal login flow
+                if user.check_password(password):
+                    login_user(user)
+                    flash('Login successful!', 'success')
+                    next_page = request.args.get('next')
+                    return redirect(next_page or url_for('admin_view'))
+                else:
+                    flash('Login Unsuccessful. Please check email and password.', 'danger')
+            else:
+                # No user exists: show Sign Up button or auto sign up
+                signup_mode = True
+                if 'signup' in request.form:
+                    # Create new user with temp password and redirect to set password
+                    import secrets
+                    temp_password = secrets.token_urlsafe(10)
+                    User.create_user(email, temp_password, role='user')
+                    new_user = User.get_by_username(email)
+                    flash('Account created! Please set your password.', 'success')
+                    return redirect(url_for('set_password', user_id=new_user.id))
+                else:
+                    flash('No account found for this email. Click Sign Up to create a new account.', 'info')
+    return render_template('login.html', title='Login', form=form, signup_mode=signup_mode)
 
 @app.route('/logout')
 @login_required
