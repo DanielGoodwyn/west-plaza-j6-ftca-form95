@@ -67,7 +67,22 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="user_email_address" class="form-label">Your Email Address</label>
-                            <input type="email" class="form-control {% if validation_errors and validation_errors.get('user_email_address') %}is-invalid{% endif %} {% if current_user.is_authenticated and current_user.role != 'admin' and current_user.role != 'superadmin' %}bg-light text-muted{% endif %}"
+                            <style>
+    /* Locked (readonly/disabled) email field styling for both light and dark mode */
+    .locked-email-field {
+        background-color: #e0e0e0 !important; /* fallback for light mode */
+        color: #888 !important;
+        opacity: 1 !important;
+        cursor: not-allowed;
+    }
+    body[data-bs-theme="dark"] .locked-email-field {
+        background-color: #23272b !important;
+        color: #aaa !important;
+        border-color: #444 !important;
+    }
+</style>
+<input type="email"
+    class="form-control {% if validation_errors and validation_errors.get('user_email_address') %}is-invalid{% endif %}{% if current_user.is_authenticated and current_user.role != 'admin' and current_user.role != 'superadmin' %} locked-email-field{% endif %}"
     id="user_email_address" name="user_email_address" value="{{ form_data.get('user_email_address', '') }}" placeholder="you@example.com" required
     {% if current_user.is_authenticated and current_user.role != 'admin' and current_user.role != 'superadmin' %}readonly disabled{% endif %} >
                             {% if validation_errors and validation_errors.get('user_email_address') %}
